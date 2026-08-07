@@ -381,6 +381,15 @@
   <section class="view active" id="v-map">
     <svg id="mapSvg" viewBox="0 0 400 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa de hospitais próximos">
       <g id="regionLayer">
+        <!-- MAPA CONTÍNUO: o chão cobre TODA a área alcançável. Fora do desenho
+             central, um padrão sutil de quarteirões dá textura de cidade — sem
+             ele, o sul da metrópole era um vazio escuro que parecia mapa
+             quebrado (pego pelo Raphael no celular, 06/08). -->
+        <defs><pattern id="quarteiroes" width="64" height="64" patternUnits="userSpaceOnUse">
+          <rect width="64" height="64" fill="var(--map-ground)"/>
+          <path d="M0 32 H64 M32 0 V64" stroke="var(--map-road)" stroke-width="3" opacity=".5"/>
+        </pattern></defs>
+        <rect x="-500" y="-500" width="1800" height="2100" fill="url(#quarteiroes)"/>
         <rect x="-200" y="-200" width="800" height="960" fill="var(--map-ground)"/>
         <rect x="18" y="420" width="120" height="95" rx="34" fill="var(--map-park)"/>
         <rect x="300" y="70" width="110" height="80" rx="30" fill="var(--map-park)"/>
@@ -2939,8 +2948,13 @@ function centerOnUser(){
   const la = gps ? gps.lat : (REG().geo||{}).lat, lo = gps ? gps.lon : (REG().geo||{}).lon;
   const p = (mapFit && la!==undefined) ? geoXY(la,lo) : {x:REG().youX, y:REG().youY};
   const cx = p.x, cy = p.y*1.22 + 30;
-  vb = {x: cx-140, y: cy-196, w:280, h:392};
+  /* CENTRALIZA sem afastar: o botão fixava w=280 e, se a pessoa já estava mais
+     perto, dava um zoom PARA TRÁS do nada (pego pelo Raphael no celular).
+     Agora só aproxima ou mantém — nunca afasta. */
+  const nw = Math.min(vb.w, 160);
+  vb = {x: cx-nw/2, y: cy-nw*0.7, w:nw, h:nw*1.4};
   clampVB(); applyVB();
+  agendarRedesenho();
   if(!gps) requestGPS(true); /* sem GPS ainda: centraliza no padrão e pede permissão */
 }
 document.getElementById("zHome").addEventListener("click",centerOnUser);
@@ -3596,10 +3610,6 @@ function renderProfile(){
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
       <button class="logout" id="btnLogout">Sair da conta</button>`;
     document.getElementById("btnEditPlans").addEventListener("click",showPlanSetup);
-    document.getElementById("btnLegal").addEventListener("click",()=>{
-      document.getElementById("backdrop").classList.add("open");
-      document.getElementById("legalSheet").classList.add("open");
-    });
     document.getElementById("btnLogout").addEventListener("click",()=>{
       /* Sair da conta tem que limpar os convênios também. Sem isto a tela de
          entrada reaparecia com as opções já marcadas e o botão já liberado —
@@ -3616,9 +3626,23 @@ function renderProfile(){
       renderRankView(); renderProfile(); renderChips();
     });
   } else {
-    ap.innerHTML = '<div class="meta">Nenhuma conta neste aparelho.</div>';
+    /* visitante não tinha botão NENHUM aqui — nem para criar conta nem para
+       voltar à tela de entrada (pergunta do Raphael, 06/08) */
+    ap.innerHTML = `<div class="meta">Nenhuma conta neste aparelho.</div>
+      <button class="logout" id="btnCriarConta" style="color:var(--brand)">Criar conta ou entrar</button>`;
+    document.getElementById("btnCriarConta").addEventListener("click",()=>{
+      document.getElementById("login").classList.add("show");
+    });
   }
 }
+/* "Ler os termos" é um botão FIXO da tela de perfil, então o ouvinte é ligado
+   UMA vez, aqui fora — antes ele era ligado dentro do renderProfile e só no
+   ramo de quem tem conta: visitante clicava e nada acontecia (e cada
+   redesenho empilhava mais um ouvinte para quem tinha). */
+document.getElementById("btnLegal").addEventListener("click",()=>{
+  document.getElementById("backdrop").classList.add("open");
+  document.getElementById("legalSheet").classList.add("open");
+});
 
 /* ================= NAV / UI ================= */
 function showView(v){
