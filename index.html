@@ -4695,10 +4695,13 @@ function oferecerInstalar(){
   if(document.getElementById("instalarBar")) return;
   const bar = document.createElement("div");
   bar.id = "instalarBar";
-  bar.style.cssText = "position:fixed;left:12px;right:12px;bottom:86px;z-index:60;background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px";
+  /* fora da zona morta do iPhone: perto da borda de baixo, o primeiro toque é
+     engolido pelo Safari (só revela a barra dele) — por isso o convite sobe
+     acima da nav + área segura, e os botões têm os 44px mínimos da Apple */
+  bar.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(100px + env(safe-area-inset-bottom, 0px));z-index:65;background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px";
   bar.innerHTML = `<span style="flex:1;font-size:13px;font-weight:700">Quer botar o Ondiva na tela inicial?</span>
-    <button id="instSim" class="minbtn sel" style="font-size:12.5px;flex:none">${promptInstalar ? "Botar" : "Ver como"}</button>
-    <button id="instNao" class="minbtn" style="font-size:12.5px;flex:none">Agora não</button>`;
+    <button id="instSim" class="minbtn sel" style="font-size:12.5px;flex:none;min-height:44px;min-width:76px;padding:8px 14px">${promptInstalar ? "Botar" : "Ver como"}</button>
+    <button id="instNao" class="minbtn" style="font-size:12.5px;flex:none;min-height:44px;padding:8px 12px">Agora não</button>`;
   document.body.appendChild(bar);
   document.getElementById("instNao").onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
   document.getElementById("instSim").onclick = ()=>{
