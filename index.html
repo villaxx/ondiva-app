@@ -532,6 +532,11 @@
       <div class="row"><span class="k">Dados coletados</span><span class="v">Nome, usuário, e-mail</span></div>
       <div class="row"><span class="k">Localização</span><span class="v">Só com sua permissão</span></div>
       <button class="logout" id="btnLegal" style="color:var(--brand)">Ler os termos de uso e a privacidade</button>
+      <!-- lar PERMANENTE da instalação: o convite passageiro pode ser dispensado
+           (e foi, sem querer, no toque do Raphael) — mas a opção tem que existir
+           sempre. Só aparece no endereço próprio e enquanto não instalado. -->
+      <button class="logout" id="btnInstalar" style="color:var(--brand);display:none">Botar o Ondiva na tela inicial</button>
+      <div class="login-note" id="instComoBox" style="display:none;text-align:left"></div>
     </div>
     <button class="themebtn" id="painelBtn">Abrir o painel de operação</button>
     <br>
@@ -4714,6 +4719,22 @@ function oferecerInstalar(){
     }
   };
 }
+
+/* o botão do Perfil ignora o silêncio de 14 dias: quem foi até lá QUER instalar */
+(function(){
+  const b = document.getElementById("btnInstalar");
+  if(!b) return;
+  if(!NO_ENDERECO_PROPRIO || JA_INSTALADO) return;   /* segue escondido */
+  b.style.display = "";
+  b.addEventListener("click", ()=>{
+    if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; return }
+    const cx = document.getElementById("instComoBox");
+    cx.innerHTML = APARELHO_IOS
+      ? 'No iPhone: toque em <b>Compartilhar</b> (o quadrado com a seta, na barra de baixo do Safari) e depois em <b>"Adicionar à Tela de Início"</b>. O ícone verde do Ondiva aparece na sua tela.'
+      : 'No menu do navegador (⋮, no canto), toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar aplicativo"</b>.';
+    cx.style.display = "";
+  });
+})();
 
 /* init */
 state.visitas = (state.visitas||0) + 1;   /* uma por abertura da página */
