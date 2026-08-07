@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#007A43">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Ondiva">
 <title>Ondiva — não perca a viagem</title>
 </head>
 <body>
@@ -4663,7 +4667,53 @@ setInterval(()=>{
   if(document.getElementById("v-list").classList.contains("active")) renderList();
 }, 30000);
 
+/* ===== "BOTAR NA TELA INICIAL" — passo 4 do fluxo de entrada =====
+   Valor primeiro: o convite NUNCA aparece na entrada — só a partir da segunda
+   visita, num aviso discreto que dá para dispensar. Android: um toque (o
+   navegador mostra o "Instalar?" do sistema). iPhone: a Apple não permite
+   instalar por botão — mostramos o caminho (Compartilhar → Adicionar à Tela).
+   Só funciona no endereço próprio (github.io / ondiva.com.br): nos links do
+   claude.ai não há manifest e o bloco inteiro vira um não-faz-nada. */
+const NO_ENDERECO_PROPRIO = /github\.io$|ondiva\.com\.br$/.test(location.hostname);
+let promptInstalar = null;
+if(NO_ENDERECO_PROPRIO && "serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault(); promptInstalar = e; oferecerInstalar();
+});
+const APARELHO_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const JA_INSTALADO = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function podeOferecerInstalar(){
+  if(!NO_ENDERECO_PROPRIO || JA_INSTALADO) return false;
+  if((state.visitas||0) < 2) return false;                 /* valor primeiro */
+  if(state.instalarDepois && Date.now()-state.instalarDepois < 14*24*3600e3) return false;
+  return !!promptInstalar || APARELHO_IOS;
+}
+function oferecerInstalar(){
+  if(!podeOferecerInstalar()) return;
+  if(document.getElementById("instalarBar")) return;
+  const bar = document.createElement("div");
+  bar.id = "instalarBar";
+  bar.style.cssText = "position:fixed;left:12px;right:12px;bottom:86px;z-index:60;background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px";
+  bar.innerHTML = `<span style="flex:1;font-size:13px;font-weight:700">Quer botar o Ondiva na tela inicial?</span>
+    <button id="instSim" class="minbtn sel" style="font-size:12.5px;flex:none">${promptInstalar ? "Botar" : "Ver como"}</button>
+    <button id="instNao" class="minbtn" style="font-size:12.5px;flex:none">Agora não</button>`;
+  document.body.appendChild(bar);
+  document.getElementById("instNao").onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
+  document.getElementById("instSim").onclick = ()=>{
+    if(promptInstalar){ bar.remove(); promptInstalar.prompt(); promptInstalar = null; }
+    else {
+      bar.querySelector("span").innerHTML = 'No iPhone: toque em <b>Compartilhar</b> (o quadrado com a seta, embaixo) e depois em <b>"Adicionar à Tela de Início"</b>.';
+      document.getElementById("instSim").remove();
+      const n = document.getElementById("instNao"); n.textContent = "Entendi";
+      n.onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
+    }
+  };
+}
+
 /* init */
+state.visitas = (state.visitas||0) + 1;   /* uma por abertura da página */
 showLoginIfNeeded();
 applyRegionTexts();
 applyDemoTexts();
@@ -4680,6 +4730,8 @@ renderMap();
 renderReport();
 renderRankView();
 renderProfile();
+store.save(state);                        /* grava a contagem de visitas */
+setTimeout(oferecerInstalar, 8000);       /* o convite espera a pessoa usar */
 </script>
 
 </body>
