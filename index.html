@@ -1,4 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#007A43">
 <title>Ondiva — não perca a viagem</title>
+</head>
+<body>
+
 <style>
   /* ============ TOKENS — verde farmácia europeia ============ */
   :root{
@@ -860,7 +869,10 @@
         <div class="err">Senha muito curta (mínimo 6 caracteres).</div>
       </div>
       <button class="cta" id="btnSignup">Continuar</button>
-      <div class="login-note" id="consentNote" style="margin-top:8px;color:#143D28">Ao criar sua conta, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:#0B7E80;font-weight:800;text-decoration:underline;cursor:pointer">Termos de Uso e a Política de Privacidade</span>.</div>
+      <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
+           e sobrava só o link, torto — pego pelo Raphael no celular. A classe
+           login-note já resolve a cor nos dois temas. -->
+      <div class="login-note" id="consentNote" style="margin-top:8px">Ao criar sua conta, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:var(--brand-vivid);font-weight:800;text-decoration:underline;cursor:pointer">Termos de Uso e a Política de Privacidade</span>.</div>
       <!-- O BOTÃO DE US$ 300 MILHÕES (Spool). Uma loja tirou o cadastro
            obrigatório do caixa, trocou por "continuar sem conta", e as compras
            subiram 45%. Aqui era pior: a pessoa pode estar na rua com criança
@@ -4645,3 +4657,6 @@ renderReport();
 renderRankView();
 renderProfile();
 </script>
+
+</body>
+</html>
