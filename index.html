@@ -1836,6 +1836,20 @@ function abertoAgora(h){
   const hora = new Date().getHours();
   return h.h24 || (hora >= h.ab && hora < h.fe);
 }
+/* ===== ABERTO NA CHEGADA (lição do DISCO da Uber — ESTUDO-UBER §2) =====
+   A pessoa chega DEPOIS de agora. Recomendar pelo estado de agora causava a
+   viagem perdida que o app promete evitar: unidade aberta agora mas fechada
+   quando ela chega. E escondia a melhor opção: a que abre daqui a pouco.
+   Margem de 30 min antes de fechar — chegar 5 min antes da porta fechar é
+   viagem perdida na prática. Sem tempo de trajeto, cai no estado de agora. */
+function abertoNaChegada(h){
+  if(h.h24) return true;
+  const t = travelMin(h);
+  if(t===null) return abertoAgora(h);
+  const chega = new Date(Date.now() + t*60000);
+  const hc = chega.getHours() + chega.getMinutes()/60;
+  return hc >= h.ab && hc <= h.fe - 0.5;
+}
 const JANELA_RELATO = 3*3600e3; /* um relato vale por 3 horas */
 function relatosValidos(h){
   return state.reports.filter(r => r.hid===h.id && (Date.now()-r.ts) < JANELA_RELATO);
@@ -2298,7 +2312,10 @@ const LIST_CAP=40, MAP_CAP=25;
    Usa a mesma ordem da lista (trânsito + fila) e explica o porquê em uma linha. */
 function recomendacao(hs){
   if(!hs.length) return null;
-  let abertos = hs.filter(h=>!currentWait(h).closed);
+  /* ABERTO NA CHEGADA (DISCO): vale quem estará aberto QUANDO A PESSOA CHEGAR.
+     Sai quem fecha antes de ela chegar (mesmo aberta agora); entra quem abre
+     até a chegada (mesmo fechada agora). */
+  let abertos = hs.filter(abertoNaChegada);
   if(!abertos.length) return null;
   /* nunca recomendar hospital especializado (olhos, otorrino, psiquiatria...)
      como opção geral — só se não houver mais nada aberto */
@@ -2327,7 +2344,11 @@ function recomendacao(hs){
   const conjunto = (equivalentes.length > 1 ? embaralharPorAparelho(equivalentes) : [escolhido]).slice(0,3);
   escolhido = conjunto[0];
 
-  const temRelato = !currentWait(escolhido).semDados;
+  const wEsc = currentWait(escolhido);
+  const temRelato = !wEsc.closed && !wEsc.semDados;
+  /* fechada agora mas aberta na chegada: o cartão precisa DIZER isso, senão a
+     recomendação de uma unidade "fechada" parece erro */
+  const abreNaChegada = !abertoAgora(escolhido);
   const outras = abertos.filter(h=>!conjunto.some(c=>c.id===h.id)).slice(0,2);
   /* ===== NÃO DEIXAR A VELOCIDADE SER O ÚNICO EIXO =====
      Roberts & Fishbach mediram que gente com pressa prefere aparelho pior e
@@ -2340,7 +2361,7 @@ function recomendacao(hs){
     ? REG().hospitals.filter(h=>h.ps && !currentWait(h).closed)
         .sort((a,b)=>distOf(a)-distOf(b))[0]
     : null;
-  return {h:escolhido, temRelato, outras, pulados, conjunto, psPerto};
+  return {h:escolhido, temRelato, abreNaChegada, outras, pulados, conjunto, psPerto};
 }
 /* A ordem varia entre pessoas, mas é ESTÁVEL para a mesma pessoa: sem isso a
    lista dançaria a cada toque e o app pareceria quebrado. */
@@ -2358,7 +2379,9 @@ function htmlRec(rec){
      número grande; quando há relato, ele entra como uma linha secundária e
      datada, nunca como o eixo da decisão. */
   const tempo = `${distOf(h).toFixed(1).replace(".",",")} km de você`;
-  const porque = "Aberta agora e atende o que você precisa — e é a mais próxima sem aviso de falta.";
+  const porque = rec.abreNaChegada
+    ? `Abre até você chegar (~${travelMin(h)||"?"} min de trajeto) e atende o que você precisa — a mais próxima sem aviso de falta.`
+    : "Aberta agora e atende o que você precisa — e é a mais próxima sem aviso de falta.";
   const filaLinha = (rec.temRelato && w.min!=null)
     ? `<div class="rwhy" style="margin-top:6px">Fila relatada: cerca de <b>${w.min} min</b> · ${confLabel(h)}</div>`
     : "";
@@ -2985,7 +3008,7 @@ function renderRail(hs){
       <div>
         <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--brand);text-transform:uppercase">Recomendado</div>
         <div class="rname">${dispName(rh)}</div>
-        <div class="rmeta">${rec.temRelato ? distOf(rh).toFixed(1).replace(".",",")+" km de você" : "sem relato ainda · a mais próxima"}</div>
+        <div class="rmeta">${rec.abreNaChegada ? "abre até você chegar" : (rec.temRelato ? distOf(rh).toFixed(1).replace(".",",")+" km de você" : "sem relato ainda · a mais próxima")}</div>
       </div>
     </button>`;
   }
