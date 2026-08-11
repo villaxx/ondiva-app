@@ -866,34 +866,35 @@
     <div class="login-tag">Não perca a viagem</div>
     <div class="login-sub">Saiba se tem vacina, exame ou atendimento antes de sair de casa.</div>
     <div class="login-card" id="signupCard">
-      <h2>Criar sua conta</h2>
-      <!-- "Nome completo" SAIU (10/08, decisão do Raphael): LGPD manda coletar o
-           mínimo, e o nome civil não servia para NADA no app — o relato é
-           assinado pelo nome de usuário. Menos dado guardado = menos dano
-           possível num vazamento. (O CPF já tinha saído em jul/2026.) -->
+      <h2>Escolha seu apelido</h2>
+      <!-- ===== CADASTRO DE ZERO DADO PESSOAL (11/08) =====
+           Saíram, nesta ordem: CPF (jul), nome completo (10/08), e agora
+           E-MAIL e SENHA. Motivos, um por um:
+           · E-mail não tinha FINALIDADE nenhuma — não recuperava senha, não
+             enviava nada, nem subia para a nuvem. Dado guardado à toa é
+             exatamente o que a LGPD manda não coletar. Volta no app real,
+             quando servir para entrar em outro aparelho.
+           · Senha era TEATRO: nunca foi guardada nem conferida (o próprio
+             código admitia). Segurança de fachada fere a regra do "nada
+             inventado" tanto quanto fila inventada. Volta com autenticação
+             de verdade (Supabase/Firebase Auth).
+           · "Nome de usuário" virou "APELIDO": o rótulo com a palavra "nome"
+             convidava a pessoa a escrever o nome verdadeiro — que apareceria
+             público em cada relato, desfazendo toda a blindagem. Fogg: não
+             confie no aviso, desenhe para o erro não acontecer.
+           Resultado: o piloto roda com ZERO dado pessoal no aparelho e na
+           nuvem. Só um apelido inventado assinando os relatos. -->
       <div class="field" id="f-user">
-        <label for="inUser">Nome de usuário</label>
-        <input id="inUser" autocapitalize="none" placeholder="ex.: raphael_sp">
-        <div class="err">Mínimo de 3 caracteres, sem espaços.</div>
+        <label for="inUser">Apelido no app</label>
+        <input id="inUser" autocapitalize="none" autocomplete="off" placeholder="ex.: canario10">
+        <div class="err">Use 3 a 20 letras ou números, sem espaços.</div>
       </div>
-      <div class="field" id="f-email">
-        <label for="inEmail">E-mail</label>
-        <input id="inEmail" type="email" autocapitalize="none" placeholder="voce@email.com">
-        <div class="err">E-mail inválido.</div>
-      </div>
-      <div class="field" id="f-senha">
-        <label for="inSenha">Senha</label>
-        <div class="pwrow">
-          <input id="inSenha" type="password" placeholder="mínimo 6 caracteres">
-          <button type="button" id="pwToggle">mostrar</button>
-        </div>
-        <div class="err">Senha muito curta (mínimo 6 caracteres).</div>
-      </div>
+      <div class="login-note" style="text-align:left;margin:-4px 0 12px">Aparece nos seus relatos, para os outros. <b>Invente um — não use seu nome verdadeiro.</b></div>
       <button class="cta" id="btnSignup">Continuar</button>
       <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
            e sobrava só o link, torto — pego pelo Raphael no celular. A classe
            login-note já resolve a cor nos dois temas. -->
-      <div class="login-note" id="consentNote" style="margin-top:8px">Ao criar sua conta, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:var(--good);font-weight:800;text-decoration:underline;cursor:pointer">Termos de Uso e a Política de Privacidade</span>.</div>
+      <div class="login-note" id="consentNote" style="margin-top:8px">Ao continuar, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:var(--good);font-weight:800;text-decoration:underline;cursor:pointer">Termos de Uso e a Política de Privacidade</span>.</div>
       <!-- O BOTÃO DE US$ 300 MILHÕES (Spool). Uma loja tirou o cadastro
            obrigatório do caixa, trocou por "continuar sem conta", e as compras
            subiram 45%. Aqui era pior: a pessoa pode estar na rua com criança
@@ -905,7 +906,7 @@
       <!-- o fundo desta caixa é branco fixo, então a cor do texto também é fixa:
      var(--brand-ink) é claro no tema claro e dava contraste 1 (invisível) -->
 <div class="login-note" id="loginMotivo" style="display:none;font-weight:800;color:#143D28;background:rgba(255,255,255,.92);border-radius:12px;padding:10px 12px;margin-top:12px"></div>
-      <div class="login-note" id="loginNote">Você entra uma vez só — o app lembra de você neste aparelho.<br><b>Sua senha não é guardada.</b> Neste protótipo nada sai do seu celular, e a senha não fica salva nem aqui. Coletamos só o necessário (LGPD).<br><b>Em risco de vida, ligue 192 (SAMU)</b> — este app não substitui atendimento de emergência.</div>
+      <div class="login-note" id="loginNote"><b>Não pedimos nome, e-mail nem senha.</b> Só o apelido, que o app guarda neste aparelho. Dos seus relatos, sai apenas o apelido e a unidade — nada que identifique você.<br><b>Em risco de vida, ligue 192 (SAMU)</b> — este app não substitui atendimento de emergência.</div>
     </div>
 
     <div class="login-card" id="planCard" style="display:none">
@@ -3337,7 +3338,7 @@ function bloqueioDeRepeticao(hid){
   return falta>0 ? Math.ceil(falta/60000) : 0;
 }
 function submitReport(){
-  if(!pedirConta("Para enviar um relato, crie sua conta. Assim a informação tem dono e dá para conferir depois.")) return;
+  if(!pedirConta("Para enviar um relato, escolha um apelido. Assim a informação tem dono e dá para conferir depois.")) return;
   if(rep.min===null){ toast("Escolha quanto tempo você esperou."); return }
   const faltam = bloqueioDeRepeticao(rep.hosp);
   if(faltam){ toast("Você já relatou esta unidade agora há pouco. Pode relatar de novo em "+faltam+" min."); return }
@@ -3647,8 +3648,7 @@ function renderProfile(){
   if(state.user){
     const u=state.user;
     ap.innerHTML = `
-      <div class="row"><span class="k">Usuário</span><span class="v">@${esc(u.usuario)}</span></div>
-      <div class="row"><span class="k">E-mail</span><span class="v">${esc(u.email)}</span></div>
+      <div class="row"><span class="k">Apelido</span><span class="v">@${esc(u.usuario)}</span></div>
       <div class="row"><span class="k">Convênios</span><span class="v">${state.plans.length?esc(state.plans.join(", ")):"não informado"}</span></div>
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
       <button class="logout" id="btnLogout">Sair da conta</button>`;
@@ -3672,7 +3672,7 @@ function renderProfile(){
     /* visitante não tinha botão NENHUM aqui — nem para criar conta nem para
        voltar à tela de entrada (pergunta do Raphael, 06/08) */
     ap.innerHTML = `<div class="meta">Nenhuma conta neste aparelho.</div>
-      <button class="logout" id="btnCriarConta" style="color:var(--brand)">Criar conta ou entrar</button>`;
+      <button class="logout" id="btnCriarConta" style="color:var(--brand)">Escolher um apelido para relatar</button>`;
     document.getElementById("btnCriarConta").addEventListener("click",()=>{
       document.getElementById("login").classList.add("show");
     });
@@ -4029,7 +4029,7 @@ document.getElementById("repFalta").addEventListener("click",()=>{
   abrirAvisos();
 });
 function submitAlert(type, vac, escrito){
-  if(!pedirConta("Para publicar um aviso, crie sua conta. Aviso aparece para todo mundo, então precisa ter dono.")) return;
+  if(!pedirConta("Para publicar um aviso, escolha um apelido. Aviso aparece para todo mundo, então precisa ter dono.")) return;
   const hid = currentDetail.id;
   /* aceita um item OU uma lista (multi-seleção). Sem detalhe, vira [undefined],
      que é o aviso simples do tipo — igual antes. */
@@ -4586,7 +4586,7 @@ function abrirMeAvise(){
 /* "Me avise" fica SÓ no chip do mapa e da lista. Estava nos dois lugares e o
    perfil continuava com a mesma cara de antes — parecia que nada tinha mudado. */
 document.getElementById("avisoOk").addEventListener("click",()=>{
-  if(!pedirConta("Para receber aviso, crie sua conta — é nela que o pedido fica guardado.")) return;
+  if(!pedirConta("Para receber aviso, escolha um apelido — é com ele que o pedido fica guardado.")) return;
   if(!avisoTmp.tipo){ toast("Escolha do que você precisa."); return }
   if(!avisoTmp.prazo){ toast("Escolha por quanto tempo devo avisar."); return }
   if(!avisoTmp.onde){ toast("Escolha onde devo avisar."); return }
@@ -4660,13 +4660,8 @@ function toastComDesfazer(msg, aoDesfazer){
 }
 
 /* ================= CONTA ================= */
-/* CPF removido de propósito (decisão jul/2026): LGPD — coletar só o necessário. */
-document.getElementById("pwToggle").addEventListener("click",()=>{
-  const i=document.getElementById("inSenha");
-  const show = i.type==="password";
-  i.type = show? "text":"password";
-  document.getElementById("pwToggle").textContent = show? "ocultar":"mostrar";
-});
+/* Coleta mínima, em três podas: CPF (jul/2026), nome completo (10/08),
+   e-mail e senha (11/08). O piloto roda com ZERO dado pessoal. */
 function setBad(id, bad){ document.getElementById(id).classList.toggle("bad", bad); return bad }
 document.getElementById("btnVisitante").addEventListener("click",()=>{
   state.visitante = true;
@@ -4680,22 +4675,20 @@ document.getElementById("btnVisitante").addEventListener("click",()=>{
   toast("Pronto. Para avisar ou relatar, aí sim precisa de conta.");
 });
 document.getElementById("btnSignup").addEventListener("click",()=>{
-  /* "nome completo" saiu (10/08): coleta mínima — a conta é usuário + e-mail */
+  /* ZERO DADO PESSOAL (11/08): a conta do piloto é só um apelido inventado */
   const usuario=document.getElementById("inUser").value.trim();
-  const email=document.getElementById("inEmail").value.trim();
-  const senha=document.getElementById("inSenha").value;
   let bad=false;
   bad = setBad("f-user", usuario.length<3 || usuario.length>20 || !/^[A-Za-z0-9._-]+$/.test(usuario)) || bad;
-  bad = setBad("f-email", !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) || bad;
-  bad = setBad("f-senha", senha.length<6) || bad;
-  if(bad){ toast("Confira os campos destacados."); return }
-  /* A SENHA NÃO É GUARDADA. Ela era gravada em texto puro no aparelho e nunca
-     era lida por nada — o protótipo não tem tela de login que a verifique.
-     Guardar um segredo que não se usa é só risco: muita gente repete senha, e
-     um vazamento aqui machucaria a pessoa em outros serviços, não neste.
-     No app real quem cuida disso é o Firebase Authentication, que faz o hash
-     do lado do Google e nunca entrega a senha ao nosso código. */
-  state.user = {usuario, email};
+  if(bad){ toast("Escolha um apelido de 3 a 20 letras ou números, sem espaços."); return }
+  /* rede de segurança do desenho: se mesmo assim a pessoa escrever algo com
+     cara de nome e sobrenome (com ponto, hífen ou underline separando duas
+     palavras longas), avisa uma vez — mas não impede, para não travar quem
+     escolheu um apelido legítimo assim */
+  if(/^[A-Za-z]{3,}[._-][A-Za-z]{3,}$/.test(usuario) && !state.avisouApelido){
+    state.avisouApelido = true; store.save(state);
+    toast("Dica: o apelido aparece para outras pessoas — se esse for seu nome verdadeiro, dá para trocar.");
+  }
+  state.user = {usuario};
   state.visitante = false;
   const nm = document.getElementById("loginMotivo"); if(nm) nm.style.display = "none";
   store.save(state);
