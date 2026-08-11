@@ -2190,7 +2190,14 @@ function passaNosFiltros(h){
        escondia 44 hospitais e 19 UPAs que fazem exame de laboratório. */
     if(filters.cat==="lab" && !h.lab) return false;
     if(filters.cat==="img" && !h.img) return false;
-    if(!filters.cat && isExam(h)) return false;
+    /* ===== O PADRÃO É MOSTRAR TUDO (11/08) =====
+       Aqui estava `if(!filters.cat && isExam(h)) return false`: sem categoria
+       escolhida, o app escondia postos de saúde E laboratórios — 659 das 746
+       unidades. A pessoa abria o mapa, não achava o posto do próprio bairro e
+       concluía que o app "só tem umas poucas unidades" (pego pelo Raphael).
+       Agora sem categoria = TODAS; quem quer só hospital/UPA escolhe
+       "Atendimento médico", que virou uma opção explícita (cat="medico"). */
+    if(filters.cat==="medico" && isExam(h)) return false;
     /* O QUE VOCÊ PRECISA: tira quem acabou de avisar que falta justamente isso.
        É o que transforma o catálogo de faltas em decisão. */
     /* filters.item é LISTA (multi-seleção 06/08): quem precisa de gripe E tétano
@@ -2203,7 +2210,7 @@ function passaNosFiltros(h){
       if(a.type==="Sem coleta hoje" && filters.item.includes("Exame de sangue")) return true;
       return false;
     })) return false;
-    if(!filters.cat){
+    if(!filters.cat || filters.cat==="medico"){
       const nv = nivelOf(h);
       if(filters.need==="grave" && !h.ps) return false;
       if(filters.need==="leve" && nv==="grave") return false;
@@ -2217,9 +2224,9 @@ function visibleHospitals(){
 /* Rótulos dos chips agrupados. Antes eram 11 chips somando quase três telas de
    rolagem lateral, e oito deles eram só três perguntas repartidas em vários
    botões — o que fazia o filtro importante ficar escondido depois da rolagem. */
-const NOME_CAT = {basica:"Vacina", lab:"Laboratório", img:"Imagem"};
+const NOME_CAT = {medico:"Atendimento médico", basica:"Vacina", lab:"Laboratório", img:"Imagem"};
 function rotuloNecessidade(){
-  if(!filters.cat) return "Atendimento médico";
+  if(!filters.cat) return "Todas as unidades";
   if(!filters.item || !filters.item.length) return NOME_CAT[filters.cat];
   const r = filters.item.length<=2 ? filters.item.join(" + ") : filters.item.length+" itens";
   return NOME_CAT[filters.cat] + " · " + r;
@@ -3117,7 +3124,19 @@ function openDetail(id){
   const tria = (h.profile==="upa" || h.ps)
     ? `<div class="walert" style="background:var(--surface2);color:var(--ink2)">Aqui o atendimento <b>não é por ordem de chegada</b>: uma triagem avalia a gravidade, e casos graves passam na frente. Por isso alguém que chegou depois de você pode ser atendido antes.</div>`
     : "";
-  document.getElementById("dAlerts").innerHTML = tria + activeAlerts(h)
+  /* ===== FECHADA É O FATO MAIS IMPORTANTE (11/08, achado do Raphael) =====
+     A unidade fechada dizia "Fechada" em cinza discreto, depois do texto sobre
+     o que ela faz. Se está fechada, nada mais importa: o aviso vem PRIMEIRO,
+     em destaque. E quando ela ABRE até a pessoa chegar, isso também é notícia
+     boa que precisa aparecer (lição do "aberto na chegada"). */
+  const fechadaAgora = !abertoAgora(h);
+  const abreAteChegar = fechadaAgora && abertoNaChegada(h);
+  const avisoFechada = fechadaAgora
+    ? (abreAteChegar
+        ? `<div class="walert" style="background:var(--good-bg);color:var(--good);font-weight:800">FECHADA AGORA — mas abre às ${h.ab}h, e você chega depois disso (~${travelMin(h)||"?"} min de trajeto).</div>`
+        : `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800">FECHADA AGORA. Abre às ${h.ab}h — ${esc(h.turno.toLowerCase())}.</div>`)
+    : "";
+  document.getElementById("dAlerts").innerHTML = avisoFechada + tria + activeAlerts(h)
     .sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0))
     .map(a=>{
       const quando = "há " + (a.ago>=60 ? Math.floor(a.ago/60)+"h"+String(a.ago%60).padStart(2,"0") : a.ago+" min");
@@ -3922,7 +3941,7 @@ function abrirNecessidade(){
   const fechar = ()=>{ fecharFolhas(); document.getElementById("backdrop").classList.remove("open"); renderChips(); renderList(); renderMap(); };
   document.getElementById("needTitle").textContent = "O que você precisa?";
   g.style.gridTemplateColumns = "repeat(2,1fr)";
-  const cats = [["","Atendimento médico"],["basica","Vacina"],["lab","Exame de laboratório"],["img","Exame de imagem"]];
+  const cats = [["","Todas as unidades"],["medico","Atendimento médico"],["basica","Vacina"],["lab","Exame de laboratório"],["img","Exame de imagem"]];
   g.innerHTML = cats.map(c=>`<button class="minbtn ${filters.cat===c[0]?'sel':''}" data-c="${c[0]}" style="font-size:12.5px">${c[1]}</button>`).join("");
   const btnAny = document.getElementById("needAny");
   btnAny.textContent = "Tanto faz — mostrar todas";
