@@ -4275,12 +4275,16 @@ function enableSwipeClose(id){
    4. O envio espera a janela do DESFAZER (8s) passar — o que subiu, subiu;
       com a chave pública não há como apagar, e é assim que deve ser. */
 const NUVEM = {
-  url: "",    /* ex.: "https://abcdefgh.supabase.co" */
-  anon: ""    /* Supabase: Settings → API → chave "anon public" */
+  url: "https://dpxuqqwseolpkxxfycwp.supabase.co",     /* projeto "ondiva" (criado 10/08/2026) */
+  anon: "sb_publishable_kdl5RgzpP50wYUZ9tGERpQ_I1zvUhuz" /* chave PUBLICÁVEL por desenho; RLS protege */
 };
 let nuvemSeq = 0;
 function novoCid(){ return "c"+Date.now().toString(36)+"-"+(nuvemSeq++)+"-"+Math.floor(Math.random()*1e6).toString(36) }
-function nuvemLigada(){ return !!(NUVEM.url && NUVEM.anon) }
+/* no claude.ai a rede externa é bloqueada pela plataforma: lá a nuvem fica
+   desligada por domínio, sem tentar, sem encher fila — o endereço próprio
+   (github.io / ondiva.com.br) é quem vive na nuvem */
+const NUVEM_BLOQUEADA = /claude\.(ai|com)$/.test(location.hostname) || location.hostname.endsWith(".claudeusercontent.com");
+function nuvemLigada(){ return !NUVEM_BLOQUEADA && !!(NUVEM.url && NUVEM.anon) }
 function nuvemISO(ms){ return new Date(ms).toISOString() }
 function nuvemEnviar(tabela, linha){
   if(!nuvemLigada()) return;
