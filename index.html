@@ -2427,12 +2427,17 @@ function htmlRec(rec){
     : "";
   /* As equivalentes aparecem como OPÇÕES, não como sobra. É o que impede o app
      de despejar todo mundo na mesma unidade e criar a fila que ele informa. */
+  /* os nomes viram BOTÕES (11/08, ideia do Raphael): antes eram texto morto —
+     a pessoa lia "Equivalente: I9med", queria ver, e não tinha onde tocar.
+     Agora abre a unidade direto. Também é o que dá dente à distribuição: só
+     espalha de verdade quem consegue escolher a outra com um toque. */
+  const linkUnid = o => `<button data-abrir="${esc(o.id)}" style="background:none;border:none;padding:0;font:inherit;color:var(--brand);font-weight:800;text-decoration:underline;cursor:pointer">${esc(dispName(o))}</button>`;
   const iguais = (rec.conjunto||[]).filter(o=>o.id!==h.id);
   const empatadas = iguais.length
-    ? `<div class="rwhy" style="margin-top:8px"><b>Equivalente${iguais.length>1?"s":""}, se preferir:</b> ${iguais.map(o=>esc(dispName(o))).join(" · ")}</div>`
+    ? `<div class="rwhy" style="margin-top:8px"><b>Igualmente perto${iguais.length>1?"s":""}, se preferir:</b> ${iguais.map(linkUnid).join(" · ")}</div>`
     : "";
   const alt = rec.outras.length
-    ? `<div class="rwhy" style="margin-top:8px">Outras opções perto: ${rec.outras.map(o=>esc(dispName(o))).join(" · ")}</div>`
+    ? `<div class="rwhy" style="margin-top:8px">Outras opções perto: ${rec.outras.map(linkUnid).join(" · ")}</div>`
     : "";
   /* o que a unidade FAZ, sempre visível ao lado do tempo — para o tempo nunca
      ser a única informação em cima da qual a pessoa decide */
@@ -2690,6 +2695,10 @@ function renderList(){
   el.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openDetail(c.dataset.id)));
   const rb = el.querySelector("[data-rec]");
   if(rb) rb.addEventListener("click",()=>openDetail(rb.dataset.rec));
+  /* nomes das equivalentes e das outras opções: cada um abre a sua unidade */
+  el.querySelectorAll("[data-abrir]").forEach(b=>b.addEventListener("click",ev=>{
+    ev.stopPropagation(); openDetail(b.dataset.abrir);
+  }));
   ligarBFalta();
   if(conf) ligarConferir(el, conf);
   if(pRel) ligarPromptRelato(el, pRel);
