@@ -2439,6 +2439,9 @@ function registrarProcura(item, forca, regiao){
   if(!item) return;
   state.procuras = state.procuras || [];
   state.procuras.push({item, forca, reg: regiao || state.region, ts: Date.now()});
+  /* nuvem: SEM uid, de propósito — o que a pessoa procura é o dado mais
+     sensível do app (LGPD); só o agregado interessa, nunca o indivíduo */
+  nuvemEnviar("procuras", {cid:novoCid(), item, forca, reg: regiao || state.region, ts:nuvemISO(Date.now())});
   /* a procura é sinal de volume, não histórico: 90 dias bastam e evita
      que o armazenamento cresça sem fim */
   const corte = Date.now() - 90*24*3600e3;
@@ -3339,9 +3342,13 @@ function submitReport(){
      só para comparar estimativa com real — mecânica do app "menor fila". O app
      não estima, então não há o que comparar. Fica `est:null` para a estrutura do
      relato não mudar de formato (decisão 6.4), mas ninguém mais lê esse campo. */
-  const dados = {hid:rep.hosp, cnes:cnesDe(rep.hosp), min:rep.min, est:null, ts:Date.now()};
+  const dados = {hid:rep.hosp, cnes:cnesDe(rep.hosp), min:rep.min, est:null, ts:Date.now(),
+                 cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
+  const paraNuvem = ()=>nuvemEnviar("relatos", {cid:dados.cid, hid:dados.hid, cnes:dados.cnes,
+                                                min:dados.min, uid:dados.uid, ts:nuvemISO(dados.ts)});
   if(!online()){
     guardarOffline({tipo:"relato", dados});
+    paraNuvem();   /* sem rede o envio falha e cai na fila da nuvem sozinho */
     state.pts += 50; store.save(state);
     toast("Sem internet — seu relato foi guardado e será enviado sozinho quando a conexão voltar. +50 pontos");
     rep.min=null; renderReport(); renderProfile(); voltarOuMapa();
@@ -3351,6 +3358,8 @@ function submitReport(){
   state.pts += 50;
   checkMedals();
   store.save(state);
+  /* sobe para a nuvem DEPOIS da janela do Desfazer — só se a pessoa não desfez */
+  enviarAposDesfazer(()=>{ if(state.reports.includes(dados)) paraNuvem(); });
   /* Aqui havia `60 + Math.random()*220` — um número sorteado apresentado à
      pessoa como se fosse medição de quanta gente veria o relato dela. Era a
      alavanca central do app, e era inventada. O dia em que alguém percebesse,
@@ -4028,8 +4037,14 @@ function submitAlert(type, vac, escrito){
   /* carimba o autor: é o que permite contar relatores DISTINTOS e impedir que um
      relato confirme a si mesmo (ver activeAlerts / ESTUDO-INTEGRIDADE §1.4) */
   const agora = Date.now(), uid = (state.user&&state.user.usuario)||null;
-  const meus = vacs.map((v,i)=>({hid, cnes:cnesDe(hid), type, vac:v, uid, escrito:!!escrito, revisar:!!escrito, ts:agora+i}));
+  const meus = vacs.map((v,i)=>({hid, cnes:cnesDe(hid), type, vac:v, uid, escrito:!!escrito, revisar:!!escrito, ts:agora+i, cid:novoCid()}));
   meus.forEach(a=>state.alerts.push(a));
+  /* nuvem: sobe depois da janela do Desfazer, só o que não foi desfeito */
+  enviarAposDesfazer(()=>{
+    meus.filter(a=>state.alerts.includes(a)).forEach(a=>
+      nuvemEnviar("avisos", {cid:a.cid, hid:a.hid, cnes:a.cnes, type:a.type, vac:a.vac||null,
+                             uid:a.uid, escrito:!!a.escrito, revisar:!!a.revisar, ts:nuvemISO(a.ts)}));
+  });
   /* uma ida, uma contribuição, um crédito: relatar 3 faltas de uma vez não
      rende 90 pontos — senão o ponto compra spam */
   state.pts += 30;
@@ -4075,7 +4090,11 @@ document.getElementById("repGiveup").addEventListener("click",()=>{
 document.getElementById("guSend").addEventListener("click",()=>{
   if(guState.min===null){ toast("Escolha quanto tempo você esperou."); return }
   if(!guState.why){ toast("Escolha o motivo."); return }
-  state.giveups.push({hid:rep.hosp, cnes:cnesDe(rep.hosp), min:guState.min, motivo:guState.why, ts:Date.now()});
+  const gDados = {hid:rep.hosp, cnes:cnesDe(rep.hosp), min:guState.min, motivo:guState.why, ts:Date.now(),
+                  cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
+  state.giveups.push(gDados);
+  nuvemEnviar("desistencias", {cid:gDados.cid, hid:gDados.hid, cnes:gDados.cnes, min:gDados.min,
+                               motivo:gDados.motivo, uid:gDados.uid, ts:nuvemISO(gDados.ts)});
   state.pts += 20;
   checkMedals();
   store.save(state);
@@ -4241,6 +4260,79 @@ function enableSwipeClose(id){
 }
 ["sheet","locSheet","sosSheet","alertSheet","needSheet","legalSheet","fixSheet","goSheet","giveupSheet","saidaSheet","motivoSheet","avisoSheet","shareSheet","avisarSheet"].forEach(enableSwipeClose);
 
+/* ===== NUVEM (Supabase) — os relatos de todo mundo num lugar só =====
+   Até aqui cada celular era uma ilha: o relato de um não aparecia para o outro.
+   Esta camada liga o app a um banco gratuito na internet (Supabase). Regras:
+   1. VAZIO = DESLIGADO. Sem url/chave abaixo, o app funciona exatamente como
+      antes, só local. (No link do claude.ai a rede externa é bloqueada de
+      qualquer jeito; quem usa a nuvem é o endereço próprio.)
+   2. A chave "anon" NÃO é segredo — ela é feita para ser publicada, como um
+      endereço. Quem protege o banco são as regras NO SERVIDOR (RLS,
+      supabase-esquema.sql): com esta chave só se INSERE e se LÊ o público.
+      Nunca apagar, nunca editar, nunca ler as procuras (Camada 5, o ativo).
+      [A regra da skill "chave nunca entra no HTML" vale para chave SECRETA.]
+   3. Envio que falha vai para a fila e sai sozinho depois (nuvemFlush).
+   4. O envio espera a janela do DESFAZER (8s) passar — o que subiu, subiu;
+      com a chave pública não há como apagar, e é assim que deve ser. */
+const NUVEM = {
+  url: "",    /* ex.: "https://abcdefgh.supabase.co" */
+  anon: ""    /* Supabase: Settings → API → chave "anon public" */
+};
+let nuvemSeq = 0;
+function novoCid(){ return "c"+Date.now().toString(36)+"-"+(nuvemSeq++)+"-"+Math.floor(Math.random()*1e6).toString(36) }
+function nuvemLigada(){ return !!(NUVEM.url && NUVEM.anon) }
+function nuvemISO(ms){ return new Date(ms).toISOString() }
+function nuvemEnviar(tabela, linha){
+  if(!nuvemLigada()) return;
+  /* on_conflict=cid + ignore-duplicates: reenvio da fila nunca duplica */
+  fetch(NUVEM.url+"/rest/v1/"+tabela+"?on_conflict=cid", {
+    method:"POST",
+    headers:{"apikey":NUVEM.anon, "Authorization":"Bearer "+NUVEM.anon,
+             "Content-Type":"application/json",
+             "Prefer":"resolution=ignore-duplicates,return=minimal"},
+    body: JSON.stringify(linha)
+  }).then(r=>{ if(!r.ok) throw 0; })
+    .catch(()=>{ state.nuvemFila=(state.nuvemFila||[]); state.nuvemFila.push({tabela, linha}); store.save(state); });
+}
+function nuvemFlush(){
+  if(!nuvemLigada()) return;
+  const fila = state.nuvemFila||[];
+  if(!fila.length) return;
+  state.nuvemFila=[]; store.save(state);
+  fila.forEach(it=>nuvemEnviar(it.tabela, it.linha));
+}
+/* espera a janela do Desfazer: só sobe o que a pessoa NÃO desfez */
+function enviarAposDesfazer(fn){ setTimeout(fn, 8600) }
+/* baixa as últimas 24h de todo mundo e junta com o local (dedup por cid;
+   o que é só local — histórico antigo, semeadura — fica intacto) */
+let nuvemPuxando=false;
+function nuvemPuxar(){
+  if(!nuvemLigada() || nuvemPuxando) return;
+  nuvemPuxando=true;
+  const corte = new Date(Date.now()-24*3600e3).toISOString();
+  const pega = t => fetch(NUVEM.url+"/rest/v1/"+t+"?select=*&ts=gte."+corte+"&order=ts.desc&limit=2000",
+      {headers:{"apikey":NUVEM.anon,"Authorization":"Bearer "+NUVEM.anon}}).then(r=>r.ok?r.json():null).catch(()=>null);
+  Promise.all([pega("relatos"), pega("avisos"), pega("desistencias")]).then(([rel,av,des])=>{
+    if(Array.isArray(rel)){
+      const servo = rel.map(x=>({hid:x.hid, cnes:x.cnes, min:x.min, est:null, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
+      const cids = new Set(servo.map(x=>x.cid));
+      state.reports = servo.concat(state.reports.filter(r=>!r.cid || !cids.has(r.cid)));
+    }
+    if(Array.isArray(av)){
+      const servo = av.map(x=>({hid:x.hid, cnes:x.cnes, type:x.type, vac:x.vac||undefined, uid:x.uid, escrito:!!x.escrito, revisar:!!x.revisar, ts:Date.parse(x.ts), cid:x.cid}));
+      const cids = new Set(servo.map(x=>x.cid));
+      state.alerts = servo.concat(state.alerts.filter(a=>!a.cid || !cids.has(a.cid)));
+    }
+    if(Array.isArray(des)){
+      const servo = des.map(x=>({hid:x.hid, cnes:x.cnes, min:(x.min==null?undefined:x.min), motivo:x.motivo, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
+      const cids = new Set(servo.map(x=>x.cid));
+      state.giveups = servo.concat(state.giveups.filter(g=>!g.cid || !cids.has(g.cid)));
+    }
+    store.save(state);
+    renderList(); renderMap(); renderRankView();
+  }).catch(()=>{}).finally(()=>{ nuvemPuxando=false; });
+}
+
 /* ===== sem internet: o relato fica guardado e sai sozinho quando a conexão voltar ===== */
 function online(){ return navigator.onLine !== false }
 function guardarOffline(item){
@@ -4266,7 +4358,7 @@ function enviarPendentes(){
   renderPend(); renderList(); renderMap(); renderRankView(); renderProfile();
   toast(n===1 ? "Conexão de volta: seu relato foi enviado." : "Conexão de volta: "+n+" relatos enviados.");
 }
-window.addEventListener("online", enviarPendentes);
+window.addEventListener("online", ()=>{ enviarPendentes(); nuvemFlush(); nuvemPuxar(); });
 window.addEventListener("offline", ()=>toast("Sem internet. O que você registrar fica guardado e sai sozinho depois."));
 
 /* ===== 7b: relato ao sair (a notificação abre esta tela) ===== */
@@ -4297,7 +4389,11 @@ document.getElementById("saidaNao").addEventListener("click",()=>{
   el.innerHTML = MOTIVOS.map(m=>`<button class="cta sec" data-m="${m}" style="margin-top:8px">${m}</button>`).join("");
   el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
     const hid = saidaHosp.id;
-    state.giveups.push({hid, cnes:cnesDe(hid), motivo:b.dataset.m, ts:Date.now()});
+    const gD = {hid, cnes:cnesDe(hid), motivo:b.dataset.m, ts:Date.now(),
+                cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
+    state.giveups.push(gD);
+    nuvemEnviar("desistencias", {cid:gD.cid, hid:gD.hid, cnes:gD.cnes, motivo:gD.motivo,
+                                 uid:gD.uid, ts:nuvemISO(gD.ts)});
     state.pts+=20; checkMedals(); store.save(state);
     fecharFolhas();
     toast("+20 pontos! Isso avisa quem está indo que a fila está pesada.");
@@ -4770,6 +4866,11 @@ renderPend();
 carregarCampanhas();
 setInterval(carregarCampanhas, 6*3600e3);
 enviarPendentes();
+/* nuvem: baixa o que todo mundo relatou e reenvia o que ficou na fila.
+   A cada 60 s puxa de novo — é o "tempo real" do piloto. */
+nuvemFlush();
+nuvemPuxar();
+setInterval(()=>{ nuvemFlush(); nuvemPuxar(); }, 60000);
 requestGPS(false); /* tenta a localização real; sem permissão, segue no ponto padrão */
 renderChips();
 renderList();
