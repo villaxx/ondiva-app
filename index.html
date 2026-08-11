@@ -403,6 +403,13 @@
 
   <!-- ============ MAPA (tela inicial) ============ -->
   <section class="view active" id="v-map">
+    <!-- MAPA DE RUAS DE VERDADE (11/08): o mapa desenhado à mão dava zoom
+         travado, área vazia e "preso num quadrante" (pego pelo Raphael). Aqui
+         entra o OpenStreetMap com Leaflet — grátis, sem chave de API, com
+         arrasto e zoom nativos do celular. Só carrega no endereço próprio;
+         onde a rede externa é bloqueada (claude.ai) ele não aparece e o mapa
+         desenhado continua valendo como reserva. -->
+    <div id="mapReal" style="position:absolute;inset:0;z-index:1;display:none"></div>
     <svg id="mapSvg" viewBox="0 0 400 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa de hospitais próximos">
       <g id="regionLayer">
         <!-- MAPA CONTÍNUO: o chão cobre TODA a área alcançável. Fora do desenho
@@ -598,9 +605,15 @@
     <button class="cta" id="dReport">Estou aqui — informar tempo de espera</button>
     <button class="cta sec" id="dAlert">Avisar sobre esta unidade · +30 pts</button>
     <button class="cta sec" id="dRoute">Como chegar</button>
-    <button class="themebtn" id="dSaida" style="margin-top:14px;color:var(--brand)">Ver como será o aviso ao sair daqui</button>
-    <br>
-    <button class="themebtn" id="dFix" style="margin-top:10px">Alguma informação aqui está errada?</button>
+    <!-- "Ver como será o aviso" era demonstração de recurso, e estava no fim de
+         uma folha de 940px: só aparecia depois de rolar tudo (medido: y=1428
+         numa janela de 598). Como não é ação que a pessoa PRECISA, virou um
+         link discreto ao lado do "informação errada" — sai do caminho de quem
+         está com pressa e continua alcançável para quem quer ver. -->
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px">
+      <button class="themebtn" id="dFix">Alguma informação aqui está errada?</button>
+      <button class="themebtn" id="dSaida" style="color:var(--brand)">Ver o aviso de saída</button>
+    </div>
   </div>
 </div>
 
@@ -4894,6 +4907,89 @@ function oferecerInstalar(){
   });
 })();
 
+/* ===================== MAPA DE RUAS (OpenStreetMap + Leaflet) =====================
+   Substitui o mapa desenhado onde a rede externa existe. Motivo: o desenho
+   dava zoom travado no palco de 400x560, área vazia ao arrastar e a sensação
+   de "preso num quadrante". O Leaflet traz arrasto e pinça nativos, o mundo
+   inteiro, e ruas de verdade — de graça e sem chave de API.
+   Se o Leaflet não carregar (offline, ou rede externa bloqueada como no
+   claude.ai), nada acontece: o SVG desenhado continua no lugar. */
+let mapaReal = null, camadaPinos = null, leafletTentado = false;
+
+function carregarLeaflet(){
+  if(leafletTentado) return; leafletTentado = true;
+  if(!NO_ENDERECO_PROPRIO && location.protocol !== "file:") return;  /* claude.ai: nem tenta */
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  document.head.appendChild(css);
+  const js = document.createElement("script");
+  js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  js.onload = iniciarMapaReal;
+  js.onerror = ()=>{ /* sem rede: segue com o mapa desenhado */ };
+  document.head.appendChild(js);
+}
+function iniciarMapaReal(){
+  if(typeof L === "undefined") return;
+  const div = document.getElementById("mapReal");
+  if(!div) return;
+  div.style.display = "";
+  document.getElementById("mapSvg").style.display = "none";
+  const centro = gps ? [gps.lat, gps.lon] : (REG().geo ? [REG().geo.lat, REG().geo.lon] : [-19.92, -43.94]);
+  mapaReal = L.map(div, {zoomControl:false, attributionControl:true}).setView(centro, 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, minZoom: 9,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(mapaReal);
+  camadaPinos = L.layerGroup().addTo(mapaReal);
+  mapaReal.on("moveend zoomend", desenharPinosReais);
+  desenharPinosReais();
+}
+/* desenha só o que está na vista — com centenas de unidades, desenhar tudo
+   trava o celular */
+function desenharPinosReais(){
+  if(!mapaReal || !camadaPinos) return;
+  camadaPinos.clearLayers();
+  const vista = mapaReal.getBounds();
+  const hs = unidadesMetropolitanas().filter(h=>h.lat!==undefined && vista.contains([h.lat,h.lon]));
+  const zoom = mapaReal.getZoom();
+  const mostraNome = zoom >= 15;
+  hs.slice(0, 300).forEach(h=>{
+    const w = currentWait(h);
+    const alarme = faltasConfirmadas(h).length > 0;
+    const fechada = !abertoAgora(h);
+    const cor = fechada ? "#6E8A7B" : (w.semDados ? "#4E6E59" : (totalMin(h)===null ? filaStatus(w.min).color : statusOf(totalMin(h)).color));
+    const rot = fechada ? "fechada" : (w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h)));
+    const html = `<div style="transform:translate(-50%,-100%);text-align:center;white-space:nowrap">
+        <div style="display:inline-block;background:${cor};color:#fff;font:800 11px system-ui;padding:2px 7px;border-radius:9px;border:2px solid ${alarme?"#E0A040":"#fff"};box-shadow:0 1px 4px rgba(0,0,0,.4)">${rot || "•"}${alarme?" !":""}</div>
+        ${mostraNome?`<div style="font:700 10px system-ui;color:#0E241A;background:rgba(255,255,255,.85);border-radius:4px;padding:0 3px;margin-top:1px">${esc(dispName(h).slice(0,24))}</div>`:""}
+      </div>`;
+    L.marker([h.lat,h.lon], {icon: L.divIcon({html, className:"", iconSize:null})})
+      .addTo(camadaPinos)
+      .on("click", ()=>openDetail(h.id));
+  });
+  /* onde a pessoa está */
+  const la = gps ? gps.lat : (REG().geo||{}).lat, lo = gps ? gps.lon : (REG().geo||{}).lon;
+  if(la!==undefined){
+    L.marker([la,lo], {icon: L.divIcon({className:"", iconSize:null,
+      html:`<div style="transform:translate(-50%,-50%)"><div style="width:18px;height:18px;border-radius:50%;background:#1D6FE0;border:3px solid #fff;box-shadow:0 0 0 2px rgba(29,111,224,.4)"></div></div>`})}).addTo(camadaPinos);
+  }
+}
+/* o app pede redesenho em vários pontos; se o mapa real está ativo, ele manda */
+const renderMapDesenhado = renderMap;
+renderMap = function(){
+  if(mapaReal){ desenharPinosReais(); renderRail(unidadesMetropolitanas().slice(0,MAP_CAP)); return }
+  return renderMapDesenhado.apply(this, arguments);
+};
+/* os botões de zoom e o "minha localização" passam a falar com o mapa real */
+document.getElementById("zIn").addEventListener("click", ()=>{ if(mapaReal) mapaReal.zoomIn() });
+document.getElementById("zOut").addEventListener("click", ()=>{ if(mapaReal) mapaReal.zoomOut() });
+document.getElementById("zHome").addEventListener("click", ()=>{
+  if(!mapaReal) return;
+  const la = gps ? gps.lat : (REG().geo||{}).lat, lo = gps ? gps.lon : (REG().geo||{}).lon;
+  if(la!==undefined) mapaReal.setView([la,lo], 15);
+});
+
 /* init */
 state.visitas = (state.visitas||0) + 1;   /* uma por abertura da página */
 showLoginIfNeeded();
@@ -4919,6 +5015,7 @@ renderRankView();
 renderProfile();
 store.save(state);                        /* grava a contagem de visitas */
 setTimeout(oferecerInstalar, 8000);       /* o convite espera a pessoa usar */
+carregarLeaflet();                        /* mapa de ruas onde houver rede externa */
 </script>
 
 </body>
