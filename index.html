@@ -3650,6 +3650,15 @@ function renderProfile(){
     ap.innerHTML = `
       <div class="row"><span class="k">Apelido</span><span class="v">@${esc(u.usuario)}</span></div>
       <div class="row"><span class="k">Convênios</span><span class="v">${state.plans.length?esc(state.plans.join(", ")):"não informado"}</span></div>
+      <!-- HONESTIDADE SOBRE ONDE AS COISAS MORAM (11/08). Sem login de verdade,
+           tudo que é SEU vive neste aparelho: pontos, medalhas, avisos ligados,
+           histórico. O que você RELATA vai para o servidor e ajuda todo mundo —
+           essa parte não se perde. Dizer isso antes evita a decepção de trocar
+           de celular e achar que o app apagou o esforço da pessoa. -->
+      <div class="login-note" style="text-align:left;margin-top:10px">
+        <b>Tudo isto fica neste celular:</b> seus pontos, medalhas, avisos ligados e histórico. Trocou de aparelho ou limpou o navegador, começa do zero.<br>
+        <b>O que você relata vai para o servidor</b> e continua ajudando o bairro, aconteça o que acontecer com o seu celular.
+      </div>
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
       <button class="logout" id="btnLogout">Sair da conta</button>`;
     document.getElementById("btnEditPlans").addEventListener("click",showPlanSetup);
