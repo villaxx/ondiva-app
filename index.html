@@ -798,6 +798,8 @@
       <p class="vtitle" id="avisoItemTitulo">Qual?</p>
       <div class="grid-min" id="avisoItem" style="grid-template-columns:repeat(3,1fr)"></div>
     </div>
+    <p class="vtitle" style="margin-top:14px">Como você vai?</p>
+    <div class="grid-min" id="avisoModo" style="grid-template-columns:repeat(2,1fr)"></div>
     <div class="walert" id="avisoRaio" style="display:none;margin:10px 0 0"></div>
     <p class="vtitle">Avisar perto de onde?</p>
     <div class="grid-min" id="avisoOnde" style="grid-template-columns:repeat(2,1fr)"></div>
@@ -807,7 +809,7 @@
     <p class="vtitle">Por quanto tempo devo avisar?</p>
     <div class="grid-min" id="avisoPrazo" style="grid-template-columns:repeat(3,1fr)"></div>
     <button class="cta" id="avisoOk" style="margin-top:14px">Criar aviso</button>
-    <div class="login-note" style="text-align:left">No app instalado, o aviso chega mesmo com o celular no bolso. No máximo 2 por dia por aviso, e só de unidades que você alcança em até 15 minutos — mais longe, a fila muda antes de você chegar.</div>
+    <div class="login-note" style="text-align:left">No app instalado, o aviso chega mesmo com o celular no bolso. No máximo 2 por dia por aviso, e só de unidades que você alcança em <b>15 minutos de carro</b> ou <b>800 metros a pé</b> — mais longe, a fila muda antes de você chegar.</div>
   </div>
 </div>
 
@@ -4525,10 +4527,18 @@ function textoPedido(p){
    Ônibus fica de fora: o tempo é imprevisível e o app ainda nem calcula
    ônibus de verdade (usa o tempo de carro). */
 const AVISO_MAX_MIN = 15;
+/* A PÉ: 800 m, não 1,2 km (11/08). Oitocentos metros é o raio padrão de
+   alcance de pedestre no planejamento urbano brasileiro — e é o que a
+   literatura usa como área de influência de posto de saúde. O 1,2 km que
+   estava aqui era chute meu, e chute otimista: quem vai a um posto pode
+   estar doente, com criança no colo ou idoso, e BH é cheia de ladeira.
+   Custo da mudança, medido daqui: 54 unidades no raio antigo, 20 no novo —
+   menos opções, porém todas de fato alcançáveis a pé. */
+const AVISO_MAX_KM_APE = 0.8;
 function alcancavelParaAviso(h){
   if(state.modo==="onibus") return false;
   const t = travelMin(h);
-  if(t===null) return distOf(h) <= 1.2;  /* a pé: ~15 min de caminhada */
+  if(t===null) return distOf(h) <= AVISO_MAX_KM_APE;
   return t <= AVISO_MAX_MIN;
 }
 function unidadesNoRaio(perfil, itens){
@@ -4628,18 +4638,34 @@ function renderAviso(){
   const p=document.getElementById("avisoPrazo");
   p.innerHTML = AVISO_PRAZOS.map(([k,l])=>`<button class="minbtn ${avisoTmp.prazo===k?'sel':''}" data-p="${k}" style="font-size:13px">${l}</button>`).join("");
   p.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{avisoTmp.prazo=b.dataset.p; renderAviso()}));
+  /* ===== COMO VOCÊ VAI (11/08) =====
+     O modo (carro/a pé) só existia num chip lá no mapa — quem vai a pé nunca
+     achava, e o aviso vinha calculado para carro, cobrindo unidades longe
+     demais para caminhar. A pergunta agora está AQUI, onde ela muda a
+     resposta. Ônibus fica de fora: sem os dados da BHTrans o tempo é chute,
+     e chute manda a pessoa para o lugar errado. */
+  const md=document.getElementById("avisoModo");
+  if(md){
+    md.innerHTML = [["carro","De carro"],["ape","A pé"]].map(([k,l])=>
+      `<button class="minbtn ${state.modo===k?'sel':''}" data-md="${k}" style="font-size:12.5px">${l}</button>`).join("");
+    md.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
+      state.modo=b.dataset.md; store.save(state); applyModoTexts(); renderChips(); renderAviso();
+    }));
+  }
   /* deixa claro o alcance, com o número real de unidades que se encaixam */
   const r=document.getElementById("avisoRaio");
   if(r){
     if(state.modo==="onibus"){
-      r.innerHTML = `<b>De ônibus o aviso não funciona.</b> O tempo até chegar é imprevisível e a fila muda antes. Troque para a pé ou de carro no filtro do mapa.`;
+      r.innerHTML = `<b>De ônibus o aviso ainda não funciona.</b> Sem os horários oficiais da BHTrans, o tempo até chegar é chute — e chute manda você para o lugar errado. Escolha <b>de carro</b> ou <b>a pé</b> acima.`;
       r.style.display="";
     } else if(avisoTmp.tipo){
       const n = unidadesNoRaio(avisoTmp.tipo, avisoTmp.itens);
-      const modo = state.modo==="carro" ? "de carro" : "a pé";
+      const aPe = state.modo==="ape";
+      const alcance = aPe ? `<b>${(AVISO_MAX_KM_APE*1000).toFixed(0)} metros a pé</b> (uns 10 minutos de caminhada)`
+                          : `<b>${AVISO_MAX_MIN} minutos de carro</b>`;
       r.innerHTML = n
-        ? `Só aviso de unidades que você alcança em até <b>${AVISO_MAX_MIN} minutos ${modo}</b> — hoje são <b>${n}</b> perto de você. Mais longe que isso, a fila muda antes de você chegar.`
-        : `Nenhuma unidade desse tipo a até ${AVISO_MAX_MIN} minutos ${modo} de você. O aviso não teria como ajudar.`;
+        ? `Só aviso de unidades a até ${alcance} — hoje são <b>${n}</b> perto de você. Mais longe que isso, a fila muda antes de você chegar.`
+        : `Nenhuma unidade desse tipo a ${alcance} de você.${aPe ? " Se puder ir de carro, troque acima e o raio aumenta." : ""}`;
       r.style.display="";
     } else r.style.display="none";
   }
