@@ -59,7 +59,11 @@
   }
 
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
+  /* overscroll-behavior: desliga o "puxar para baixo = recarregar a página" do
+     navegador do celular, que brigava com as folhas de arrastar do app (pego
+     pelo Raphael no iPhone). Recarregar nunca perdia dado (tudo é salvo a cada
+     toque), mas derrubava a tela no meio do uso. */
+  html,body{margin:0;padding:0;overscroll-behavior-y:none}
   body{
     background:var(--bg); color:var(--ink);
     font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
