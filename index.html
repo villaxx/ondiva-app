@@ -867,11 +867,10 @@
     <div class="login-sub">Saiba se tem vacina, exame ou atendimento antes de sair de casa.</div>
     <div class="login-card" id="signupCard">
       <h2>Criar sua conta</h2>
-      <div class="field" id="f-nome">
-        <label for="inNome">Nome completo</label>
-        <input id="inNome" autocomplete="name" placeholder="Seu nome">
-        <div class="err">Informe seu nome completo.</div>
-      </div>
+      <!-- "Nome completo" SAIU (10/08, decisão do Raphael): LGPD manda coletar o
+           mínimo, e o nome civil não servia para NADA no app — o relato é
+           assinado pelo nome de usuário. Menos dado guardado = menos dano
+           possível num vazamento. (O CPF já tinha saído em jul/2026.) -->
       <div class="field" id="f-user">
         <label for="inUser">Nome de usuário</label>
         <input id="inUser" autocapitalize="none" placeholder="ex.: raphael_sp">
@@ -3648,7 +3647,6 @@ function renderProfile(){
   if(state.user){
     const u=state.user;
     ap.innerHTML = `
-      <div class="row"><span class="k">Nome</span><span class="v">${esc(u.nome)}</span></div>
       <div class="row"><span class="k">Usuário</span><span class="v">@${esc(u.usuario)}</span></div>
       <div class="row"><span class="k">E-mail</span><span class="v">${esc(u.email)}</span></div>
       <div class="row"><span class="k">Convênios</span><span class="v">${state.plans.length?esc(state.plans.join(", ")):"não informado"}</span></div>
@@ -4682,15 +4680,11 @@ document.getElementById("btnVisitante").addEventListener("click",()=>{
   toast("Pronto. Para avisar ou relatar, aí sim precisa de conta.");
 });
 document.getElementById("btnSignup").addEventListener("click",()=>{
-  const nome=document.getElementById("inNome").value.trim();
+  /* "nome completo" saiu (10/08): coleta mínima — a conta é usuário + e-mail */
   const usuario=document.getElementById("inUser").value.trim();
   const email=document.getElementById("inEmail").value.trim();
   const senha=document.getElementById("inSenha").value;
   let bad=false;
-  /* nome de gente e apelido não têm sinal de maior, menor, aspas nem barra.
-     A escapagem em esc() já basta para o app não quebrar; isto é só para o
-     apelido de ninguém virar algo estranho no ranking dos outros. */
-  bad = setBad("f-nome", nome.length<3 || nome.length>60 || /[<>"'\\]/.test(nome)) || bad;
   bad = setBad("f-user", usuario.length<3 || usuario.length>20 || !/^[A-Za-z0-9._-]+$/.test(usuario)) || bad;
   bad = setBad("f-email", !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) || bad;
   bad = setBad("f-senha", senha.length<6) || bad;
@@ -4701,7 +4695,7 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
      um vazamento aqui machucaria a pessoa em outros serviços, não neste.
      No app real quem cuida disso é o Firebase Authentication, que faz o hash
      do lado do Google e nunca entrega a senha ao nosso código. */
-  state.user = {nome, usuario, email};
+  state.user = {usuario, email};
   state.visitante = false;
   const nm = document.getElementById("loginMotivo"); if(nm) nm.style.display = "none";
   store.save(state);
