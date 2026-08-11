@@ -124,7 +124,9 @@
   .mapzoom{position:absolute;right:12px;bottom:216px;display:flex;flex-direction:column;gap:8px;z-index:5}
   .mapzoom button{width:44px;height:44px;border-radius:50%;background:var(--surface);color:var(--ink);font-size:22px;font-weight:800;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;line-height:1}
   .mapzoom button:active{transform:scale(.93)}
-  .mapui{position:absolute;left:0;right:0;top:0;padding:14px 14px 0;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+  /* z-index 6: acima do mapa de ruas (que fica em 1). Sem isto o mapa cobria
+     os chips e o SOS — pareciam ter sumido (pego pelo Raphael, 11/08) */
+  .mapui{position:absolute;left:0;right:0;top:0;padding:14px 14px 0;display:flex;flex-direction:column;gap:9px;pointer-events:none;z-index:6}
   .mapui > *{pointer-events:auto}
   .toprow{display:flex;gap:8px;align-items:center}
   .brandpill{display:flex;align-items:center;gap:7px;background:var(--surface);border-radius:999px;padding:9px 14px;box-shadow:var(--shadow-sm);font-weight:800;font-size:16.5px;letter-spacing:-.01em}
@@ -162,7 +164,9 @@
   :root[data-theme="light"] .cta.warnbtn{background:linear-gradient(135deg,#8A5200,#6B3F00);color:#fff}
 
   /* trilho de cartões sobre o mapa */
-  .rail{position:absolute;left:0;right:0;bottom:104px;display:flex;gap:10px;overflow-x:auto;padding:6px 14px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  /* z-index 6, mesmo motivo dos chips: o trilho de recomendação fica ACIMA do
+     mapa de ruas, senão some atrás dele */
+  .rail{position:absolute;left:0;right:0;bottom:104px;display:flex;gap:10px;overflow-x:auto;padding:6px 14px;scroll-snap-type:x mandatory;scrollbar-width:none;z-index:6}
   .rail::-webkit-scrollbar{display:none}
   .rcard{flex:none;scroll-snap-align:start;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:12px 16px 12px 12px;box-shadow:var(--shadow);min-width:236px;text-align:left}
   .rwait{flex:none;min-width:58px;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:17px;line-height:1;color:#fff;font-variant-numeric:tabular-nums;padding:0 6px}
