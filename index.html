@@ -693,7 +693,7 @@
       <div id="outroBox" style="display:none;margin-top:12px">
         <div class="field"><input id="outroTxt" type="text" maxlength="40" placeholder="Escreva o que está faltando"></div>
         <button class="cta" id="outroOk">Enviar aviso · +30 pontos</button>
-        <div class="login-note" style="text-align:left">Avisos escritos passam por revisão antes de aparecer para os outros.</div>
+        <div class="login-note" style="text-align:left">Aparece na hora na página da unidade, como "não confirmado". Quando outra pessoa confirmar, ganha força.</div>
       </div>
     </div>
   </div>
@@ -1015,6 +1015,18 @@ const CONVENIOS_REDE = [
   {re:/instituto de olhos de belo/i, data:"06/08/2026",
    lista:["Amil","Cassi","Gama Saúde","Notre Dame Intermédica","Saúde Caixa","SulAmérica"],
    excecao:"o site diz 'entre outros' — pode aceitar mais"},
+  /* hospitais que entraram na base em 11/08 — só os com fonte confirmada.
+     Doctoralia e afins listavam convênios pré-2018 para o São Camilo (antes
+     da compra pela Unimed); lista velha é pior que nenhuma. */
+  {re:/infantil s[ãa]o camilo/i, data:"11/08/2026",
+   lista:["Unimed-BH"],
+   excecao:"hospital da rede própria da Unimed-BH — o site oficial diz que é só para quem tem Unimed-BH"},
+  {re:/hospital unimed|maternidade unimed/i, data:"11/08/2026",
+   lista:["Unimed-BH"],
+   excecao:"unidade da rede própria da Unimed-BH"},
+  {re:/notre dame interm[ée]dica/i, data:"11/08/2026",
+   lista:["Notre Dame Intermédica","Hapvida"],
+   excecao:"hospital da própria operadora (grupo Hapvida NotreDame)"},
   {re:/imunologica vacinas/i, data:"06/08/2026",
    lista:[], /* vazio = não trabalha com convênio */
    excecao:null}
@@ -2155,8 +2167,7 @@ const JANELA_FALTA   = 3*3600e3;   /* uma falta vale por 3 horas (régua inicial
 function activeAlerts(h){
   const now=Date.now();
   const agg={};
-  /* aviso escrito pelo usuário só aparece depois de revisado */
-  state.alerts.filter(a=>a.hid===h.id && !a.revisar && now-a.ts<JANELA_FALTA).forEach(a=>{
+  state.alerts.filter(a=>a.hid===h.id && now-a.ts<JANELA_FALTA).forEach(a=>{
     const k=a.type+(a.vac||"");
     const ago=Math.max(1,Math.round((now-a.ts)/60000));
     const autor = a.uid || ("t"+a.ts);   /* sem autor conhecido: cada relato conta como um */
@@ -4185,9 +4196,11 @@ function abrirAvisos(){
         if(v==="Outro" || v==="Outra"){
           cx.style.display = "";
           const inp = document.getElementById("outroTxt");
+          inp.value = "";
           inp.value = ""; inp.focus();
           document.getElementById("outroOk").onclick = ()=>{
-            const t = inp.value.trim();
+            const t = limparTextoAviso(inp.value);
+            if(t===null){ toast("Escreva só o que está faltando — sem link, telefone ou palavrão."); return }
             if(t.length < 3){ toast("Escreva o que está faltando."); return }
             submitAlert(tipo, t, true);
           };
@@ -4214,18 +4227,32 @@ document.getElementById("repFalta").addEventListener("click",()=>{
   voltarPara = null;
   abrirAvisos();
 });
+/* crivo do aviso escrito: ele agora entra no ar NA HORA, então o texto não
+   pode carregar link, telefone nem baixaria. Devolve o texto limpo, ou null
+   quando é caso de recusar (a pessoa reescreve, não perde o aviso). */
+function limparTextoAviso(bruto){
+  let t = (bruto||"").replace(/\s+/g," ").trim();
+  if(/https?:\/\/|www\.|\.com|\.br\b/i.test(t)) return null;   /* link */
+  if(/\d{8,}/.test(t.replace(/\D/g,""))) return null;          /* telefone */
+  const baixo = t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+  if(/\b(caralh|porra|merda|bucet|fdp|viad|puta|arrombad|desgraç|desgrac)/.test(baixo)) return null;
+  return t;
+}
 function submitAlert(type, vac, escrito){
   if(!pedirConta("Para publicar um aviso, escolha um apelido. Aviso aparece para todo mundo, então precisa ter dono.")) return;
   const hid = currentDetail.id;
   /* aceita um item OU uma lista (multi-seleção). Sem detalhe, vira [undefined],
      que é o aviso simples do tipo — igual antes. */
   const vacs = Array.isArray(vac) ? vac : [vac];
-  /* escrito pelo usuário entra marcado para revisão: no app real ele só
-     aparece para os outros depois que a moderação liberar */
+  /* aviso escrito aparece NA HORA, igual aos demais (pedido do Raphael 11/08:
+     "a pessoa escreve e já aparece no local"). A defesa contra abuso não é
+     fila de moderação, é a mesma dos outros avisos: entra como "não
+     confirmado" até uma segunda pessoa confirmar, expira em 3h, e o texto
+     passa pelo crivo de limparTextoAviso() antes de entrar. */
   /* carimba o autor: é o que permite contar relatores DISTINTOS e impedir que um
      relato confirme a si mesmo (ver activeAlerts / ESTUDO-INTEGRIDADE §1.4) */
   const agora = Date.now(), uid = (state.user&&state.user.usuario)||null;
-  const meus = vacs.map((v,i)=>({hid, cnes:cnesDe(hid), type, vac:v, uid, escrito:!!escrito, revisar:!!escrito, ts:agora+i, cid:novoCid()}));
+  const meus = vacs.map((v,i)=>({hid, cnes:cnesDe(hid), type, vac:v, uid, escrito:!!escrito, revisar:false, ts:agora+i, cid:novoCid()}));
   meus.forEach(a=>state.alerts.push(a));
   /* nuvem: sobe depois da janela do Desfazer, só o que não foi desfeito */
   enviarAposDesfazer(()=>{
@@ -4239,9 +4266,7 @@ function submitAlert(type, vac, escrito){
   store.save(state);
   fecharFolhas();
   let msg;
-  if(escrito){
-    msg = "+30 pontos! Enviado para revisão — aparece para os outros depois da moderação.";
-  } else {
+  {
     const conf = vacs.some(v=>activeAlerts(currentDetail).some(x=>x.type===type && (x.vac||"")===(v||"") && x.confirmado));
     msg = conf
       ? "+30 pontos! Falta confirmada — agora aparece para todo mundo."
