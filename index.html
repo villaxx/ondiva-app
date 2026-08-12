@@ -1142,10 +1142,10 @@ const REGIONS = [
    09/2025: turnos manhã/tarde/noite, ambulatorial SUS SIM); coordenada e
    número do imóvel do dado municipal (PBH, Rede de Assistência Saúde, CSV de
    07/2026, ID_EQ_SAUDE 417, UTM 23S convertido — a lat/lon do CNES aponta
-   -19.73, região Norte, errada). vac:false porque o serviço 174-IMUNIZAÇÃO
-   não foi confirmado para este CNES — conferir na próxima recarga da base
-   completa antes de ligar o filtro Vacina para ele. */
-{id:"u3128989", cnes:3128989, lat:-19.934672, lon:-43.902422, name:"Centro de Saúde São Miguel Arcanjo", type:"Público", plans:["SUS"], profile:"basica", region:"Nossa Senhora de Fátima", addr:"Rua Nossa Senhora de Fátima, 2640", dist:4.2, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132776412", sus:true, vac:false},
+   -19.73, região Norte, errada). vac:true CONFIRMADO em 12/08/2026 na base
+   mensal completa (rlEstabServClass 06/2026): serviço 174-IMUNIZAÇÃO presente,
+   mesma fonte e critério das demais unidades. */
+{id:"u3128989", cnes:3128989, lat:-19.934672, lon:-43.902422, name:"Centro de Saúde São Miguel Arcanjo", type:"Público", plans:["SUS"], profile:"basica", region:"Nossa Senhora de Fátima", addr:"Rua Nossa Senhora de Fátima, 2640", dist:4.2, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132776412", sus:true, vac:true},
     {id:"u2695421", cnes:2695421, lat:-19.839562, lon:-43.934612, name:"Centro de Saúde Floramar", type:"Público", plans:["SUS"], profile:"basica", region:"Floramar", addr:"Rua Igaraunas, 15", dist:10.8, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132776768", sus:true, vac:true},
     {id:"u2695448", cnes:2695448, lat:-19.927538, lon:-44.003786, name:"Centro de Saúde João Pinheiro", type:"Público", plans:["SUS"], profile:"basica", region:"João Pinheiro", addr:"Rua Barao de Airuoca, 621", dist:7.3, ab:7, fe:18, turno:"Manhã e tarde", sus:true, vac:true},
     {id:"u2695456", cnes:2695456, lat:-19.833559, lon:-43.912133, name:"Centro de Saúde Lajedo", type:"Público", plans:["SUS"], profile:"basica", region:"Tupi", addr:"Rua Julio Ribeiro, 681", dist:11.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132771324", sus:true, vac:true},
