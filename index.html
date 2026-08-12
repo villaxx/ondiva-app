@@ -265,11 +265,6 @@
   .cta.sec{background:var(--surface2);color:var(--ink);box-shadow:none}
   .besthour{background:var(--brand-soft);color:var(--brand);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;font-weight:700;margin:12px 0}
 
-  /* gráfico */
-  .chart h4{margin:14px 0 8px;font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-  .chart svg{width:100%;height:auto;display:block}
-  .ctip{position:fixed;z-index:60;background:var(--ink);color:var(--bg);font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;pointer-events:none;display:none;white-space:nowrap;font-variant-numeric:tabular-nums}
-
   /* ============ INFORMAR ============ */
   .panel{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
   .panel label{display:block;font-size:13px;font-weight:800;color:var(--ink2);margin-bottom:9px}
@@ -309,19 +304,6 @@
   .medal.locked{opacity:.45}
   .medal .st{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
   .medal .st.on{color:var(--good)} .medal .st.off{color:var(--muted)}
-  .rank{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
-  .rrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:14px}
-  .rrow:first-child{border-top:none}
-  .rrow .pos{width:26px;font-weight:800;color:var(--ink2);font-variant-numeric:tabular-nums}
-  .rrow .nm{flex:1;font-weight:700}
-  .rrow .rp{font-variant-numeric:tabular-nums;font-weight:800;color:var(--ink2)}
-  .rrow.me{background:var(--brand-soft)}
-  .rrow.me .nm,.rrow.me .rp{color:var(--brand)}
-  /* no escuro o verde da marca sobre o verde suave da linha "você" fechava em
-     4,03 — o vivo resolve sem mudar a leitura da tela */
-  @media (prefers-color-scheme: dark){ .rrow.me .nm,.rrow.me .rp{color:var(--brand-vivid)} }
-  :root[data-theme="dark"] .rrow.me .nm,:root[data-theme="dark"] .rrow.me .rp{color:var(--brand-vivid)}
-  :root[data-theme="light"] .rrow.me .nm,:root[data-theme="light"] .rrow.me .rp{color:var(--brand)}
   .impactline{background:var(--surface);border-radius:var(--r);padding:15px 16px;margin-top:12px;font-size:14px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow-sm)}
   .impactline b{color:var(--good);font-variant-numeric:tabular-nums}
   .themebtn{display:inline-block;margin-top:8px;padding:12px 0;font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:underline}
@@ -534,8 +516,6 @@
     <div class="pagehead"><h2 id="rankTitle">Seu bairro</h2></div>
     <div id="cobertura"></div>
     <div class="impactline" id="pImpact"></div>
-    <p class="vtitle" id="rankLabel">Ranking do mês</p>
-    <div class="rank" id="rank"></div>
   </section>
 
   <!-- ============ PAINEL (operação) ============ -->
@@ -604,10 +584,6 @@
     <div class="herosub" id="dSub"></div>
     <div class="walert" id="dTotal" style="background:var(--surface2);color:var(--ink)"></div>
     <div class="besthour" id="dBest"></div>
-    <div class="chart">
-      <h4>Espera relatada por horário</h4>
-      <svg id="dChart" viewBox="0 0 360 130"></svg>
-    </div>
     <p class="vtitle">Convênios aceitos</p>
     <div class="kv" id="dPlans"></div>
     <div class="addr" id="dAddr"></div>
@@ -715,13 +691,14 @@
     <div class="herosub" style="margin:0 0 12px">
       Nome, endereço, localização, natureza pública ou privada e atendimento pelo SUS de cada unidade vêm do
       <b>CNES — Cadastro Nacional de Estabelecimentos de Saúde, do Ministério da Saúde</b>. Os tempos de fila são
-      <b>estimativas</b> a partir de relatos de outros usuários — podem estar desatualizados ou errados, e o tempo real
-      depende da triagem feita pela unidade.
+      <b>relatos de outros usuários</b>, cada um com a hora em que foi feito — o app não calcula nem estima fila.
+      Relatos podem estar desatualizados ou errados, e o tempo real depende da triagem feita pela unidade.
     </div>
 
     <p class="vtitle">O que guardamos sobre você</p>
     <div class="herosub" style="margin:0 0 12px">
-      Nome, nome de usuário e e-mail. <b>A senha não é guardada neste protótipo</b>, e no app final ela fica sob o sistema de autenticação do Google, sem passar pelo nosso código. <b>Não pedimos CPF, documento, dados bancários,
+      Só um <b>apelido inventado</b>, escolhido por você. <b>Não pedimos nome, e-mail nem senha</b> — no app final, se
+      houver conta, a senha ficará sob o sistema de autenticação do Google, sem passar pelo nosso código. <b>Não pedimos CPF, documento, dados bancários,
       carteirinha de plano, sintomas ou diagnóstico.</b> A localização é usada enquanto você usa o app, só com a sua
       permissão, e pode ser desativada a qualquer momento.
     </div>
@@ -868,7 +845,6 @@
   </div>
 </div>
 
-<div class="ctip" id="ctip"></div>
 <!-- HEURÍSTICA 1 DE NIELSEN (visibilidade do estado do sistema): o aviso
      aparecia só na tela. Quem usa leitor de tela enviava um relato e não ouvia
      nada — para essa pessoa o app ficava mudo justamente no momento em que
@@ -1849,13 +1825,21 @@ let filters = {plan:"meus", ped:false, open:false, need:"todos", cat:"", falta:f
    quem acabou de avisar que está faltando exatamente isso. Sem isso, o app
    sabia que a Unidade X estava sem a vacina da gripe e mostrava ela mesmo
    assim para quem queria a da gripe. */
+/* FONTE ÚNICA DOS NOMES. O "esconde a unidade que está sem o seu item"
+   compara filters.item com alert.vac LETRA POR LETRA — se a lista do filtro e
+   o catálogo de faltas divergirem num nome, o app volta a mandar a pessoa
+   exatamente para onde o item falta. Por isso as listas do filtro DERIVAM do
+   catálogo (VACCINES/EQUIPAMENTOS), nunca são digitadas de novo. */
+const VACCINES=["Gripe","COVID-19","Dengue","Febre amarela","Tétano","Hepatite B","Tríplice viral","HPV","BCG","Antirrábica","Outra"];
+const EQUIPAMENTOS = ["Raio-X","Tomografia","Ultrassom","Ressonância","Eletrocardiograma","Outro"];
 const ITENS = {
   basica: {rotulo:"Qualquer vacina", titulo:"Qual vacina você precisa?", cols:3,
-           lista:["Gripe","COVID-19","Dengue","Febre amarela","Tétano","Hepatite B","Tríplice viral","HPV","BCG","Antirrábica"]},
+           lista:VACCINES.filter(v=>v!=="Outra")},
   lab:    {rotulo:"Qualquer exame",  titulo:"Qual exame você precisa?",  cols:2,
            lista:["Exame de sangue","Exame de urina","Eletrocardiograma"]},
   img:    {rotulo:"Qualquer imagem", titulo:"Qual imagem você precisa?", cols:2,
-           lista:["Raio-X","Tomografia","Ultrassom","Ressonância"]}
+           /* Eletrocardiograma não é imagem; "Outro" é texto livre, não filtro */
+           lista:EQUIPAMENTOS.filter(e=>e!=="Eletrocardiograma" && e!=="Outro")}
 };
 let rep = {hosp:null, min:null};
 let currentDetail = null;
@@ -1958,7 +1942,6 @@ function applyGPS(lat,lon){
 }
 
 /* ================= MOTOR DE FILA ================= */
-function dayKey(){ const d=new Date(); return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate() }
 
 /* Aberto ou fechado vem do turno declarado no CNES. A fila vem SÓ de relatos
    de quem esteve na unidade — se ninguém relatou, o app diz que não sabe. */
@@ -1981,11 +1964,34 @@ function abertoNaChegada(h){
   return hc >= h.ab && hc <= h.fe - 0.5;
 }
 const JANELA_RELATO = 3*3600e3; /* um relato vale por 3 horas */
+/* ÍNDICE POR UNIDADE, montado no máximo uma vez por passada de render.
+   Cada cartão da lista e cada pino do mapa perguntavam "quais relatos/avisos
+   desta unidade?" varrendo os arrays INTEIROS — com a nuvem cheia (até 2000
+   linhas por tabela), 759 unidades × 2 varreduras × 2000 linhas por quadro de
+   zoom trava celular fraco. O índice vive só até o fim da tarefa atual
+   (microtask): toda mudança de estado acontece antes do render seguinte, que
+   o reconstrói do zero — não há cache velho para invalidar. */
+let _idxHid = null, _idxRefR = null, _idxRefA = null, _idxNR = -1, _idxNA = -1;
+function idxPorHid(){
+  /* o índice só agrupa por hid (as janelas de tempo são aplicadas na consulta),
+     então ele vale enquanto os arrays não mudarem. Mudança é detectada por
+     identidade + tamanho: push muda o tamanho, reatribuição (filter, nuvem)
+     muda a referência. Nada de expirar por tempo — cache velho nunca sobrevive
+     a uma mutação. */
+  if(_idxHid && _idxRefR===state.reports && _idxRefA===state.alerts
+     && _idxNR===state.reports.length && _idxNA===state.alerts.length) return _idxHid;
+  const m = {reports:new Map(), alerts:new Map()};
+  state.reports.forEach(r=>{ const l=m.reports.get(r.hid); if(l) l.push(r); else m.reports.set(r.hid,[r]) });
+  state.alerts.forEach(a=>{ const l=m.alerts.get(a.hid); if(l) l.push(a); else m.alerts.set(a.hid,[a]) });
+  _idxHid = m; _idxRefR = state.reports; _idxRefA = state.alerts;
+  _idxNR = state.reports.length; _idxNA = state.alerts.length;
+  return m;
+}
 function relatosValidos(h){
-  return state.reports.filter(r => r.hid===h.id && (Date.now()-r.ts) < JANELA_RELATO);
+  return (idxPorHid().reports.get(h.id)||[]).filter(r => (Date.now()-r.ts) < JANELA_RELATO);
 }
 function ultimoRelato(h){
-  const todos = state.reports.filter(r=>r.hid===h.id);
+  const todos = idxPorHid().reports.get(h.id)||[];
   if(!todos.length) return null;
   const u = todos.reduce((a,b)=> a.ts>b.ts ? a : b);
   const min = Math.round((Date.now()-u.ts)/60000);
@@ -2058,7 +2064,6 @@ const CAMPANHAS = [
 /* O app busca a lista oficial sozinho a cada abertura. Enquanto o endereço não
    estiver publicado, nada é exibido — nunca uma campanha escrita de memória. */
 const CAMPANHAS_URL = "https://ondiva.com.br/dados/campanhas.json";
-let campanhasOk = false;
 async function carregarCampanhas(){
   try{
     const ctrl = new AbortController();
@@ -2070,7 +2075,6 @@ async function carregarCampanhas(){
     if(Array.isArray(j)){
       CAMPANHAS.length = 0;
       j.forEach(c=>{ if(c && c.nome && c.inicio && c.fim) CAMPANHAS.push(c) });
-      campanhasOk = true;
       renderList();
     }
   }catch(e){ /* sem rede ou endereço ainda não publicado: segue sem campanha */ }
@@ -2084,7 +2088,8 @@ function campanhaVigente(){
   const hoje = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   return CAMPANHAS.find(c => c.inicio <= hoje && hoje <= c.fim) || null;
 }
-const VACCINES=["Gripe","COVID-19","Dengue","Febre amarela","Tétano","Hepatite B","Tríplice viral","HPV","BCG","Antirrábica","Outra"];
+/* VACCINES e EQUIPAMENTOS moradia nova: declarados junto do ITENS (fonte
+   única dos nomes), lá em cima — o catálogo de faltas usa os mesmos. */
 /* ===== CATÁLOGO DE FALTAS =====
    O app se apresenta como "não perca a viagem", então este catálogo é o núcleo
    dele, não um acessório. Cada item é um motivo real de alguém atravessar a
@@ -2097,8 +2102,6 @@ const ESPECIALIDADES = {
   basica:   ["Clínico (adulto)","Pediatra","Ginecologista","Dentista"],
   exames:   []
 };
-const EQUIPAMENTOS = ["Raio-X","Tomografia","Ultrassom","Ressonância","Eletrocardiograma","Outro"];
-
 function alertTypes(h){
   const fim = ["Atendimento suspenso","Fechado (imprevisto)"];
   let t;
@@ -2167,10 +2170,13 @@ const JANELA_FALTA   = 3*3600e3;   /* uma falta vale por 3 horas (régua inicial
 function activeAlerts(h){
   const now=Date.now();
   const agg={};
-  state.alerts.filter(a=>a.hid===h.id && now-a.ts<JANELA_FALTA).forEach(a=>{
+  (idxPorHid().alerts.get(h.id)||[]).filter(a=>now-a.ts<JANELA_FALTA).forEach(a=>{
     const k=a.type+(a.vac||"");
     const ago=Math.max(1,Math.round((now-a.ts)/60000));
-    const autor = a.uid || ("t"+a.ts);   /* sem autor conhecido: cada relato conta como um */
+    /* sem autor conhecido, TODOS caem no mesmo balde "anon": aviso anônimo
+       nunca confirma outro aviso anônimo (antes cada um ganhava um autor
+       sintético único, e dois POSTs sem uid se confirmavam sozinhos) */
+    const autor = a.uid || "anon";
     if(agg[k]){ agg[k].count++; agg[k].ago=Math.min(agg[k].ago,ago); agg[k].autores.add(autor) }
     else agg[k]={type:a.type,vac:a.vac,count:1,ago,autores:new Set([autor])};
   });
@@ -2182,33 +2188,39 @@ function activeAlerts(h){
 }
 /* só as faltas CONFIRMADAS viram consequência (esconder/rebaixar/alarme) */
 function faltasConfirmadas(h){ return activeAlerts(h).filter(a=>a.confirmado) }
-function alertLabel(a){
-  /* esc() no detalhe: o "Outra/Outro" é texto livre do usuário e o rótulo vai
-     para innerHTML — sem escapar seria injeção de HTML vinda da nuvem. */
+/* TEXTO PURO do aviso, sem escape — para compartilhar no WhatsApp e guardar
+   em idas.dizia/quaseFoi (os pontos de tela escapam na hora de renderizar;
+   guardar já escapado gerava "&amp;amp;" duplo na conferência e entidade HTML
+   crua na mensagem compartilhada). */
+function alertLabelTxt(a){
   if(!a.vac) return a.type;
-  if(a.type==="Sem médico hoje")      return "Sem " + esc(a.vac.toLowerCase()) + " hoje";
-  if(a.type==="Equipamento quebrado") return esc(a.vac) + " indisponível";
-  return a.type + ": " + esc(a.vac);
+  if(a.type==="Sem médico hoje")      return "Sem " + a.vac.toLowerCase() + " hoje";
+  if(a.type==="Equipamento quebrado") return a.vac + " indisponível";
+  return a.type + ": " + a.vac;
 }
+/* Versão para innerHTML: escapa o rótulo INTEIRO. O "Outra/Outro" é texto
+   livre do usuário, e o `type` chega literal da nuvem (qualquer um escreve na
+   tabela com a chave publicável) — os dois têm que passar pelo esc(). */
+function alertLabel(a){ return esc(alertLabelTxt(a)) }
 /* Nos CARTÕES (lista e trilho do mapa) cabe uma linha só — mas "Vacina em
    falta · +2 avisos" esconde justamente O QUE falta (pedido do Raphael,
    11/08). Junta os avisos do MESMO tipo e mesma força do primeiro numa linha
    ("Vacina em falta: Gripe, COVID-19, BCG"); os de outro tipo ou outra força
    continuam no contador "+N aviso(s)". A lista chega ordenada com os
-   confirmados na frente. */
+   confirmados na frente. Devolve HTML já escapado, como o alertLabel. */
 function alertLine(als){
   const a0 = als[0];
   let grupo = [a0], rot;
   if(a0.vac){
     grupo = als.filter(a=>a.type===a0.type && a.confirmado===a0.confirmado && a.vac);
-    const nomes = grupo.map(a=>esc(a.vac));
+    const nomes = grupo.map(a=>a.vac);
     if(a0.type==="Sem médico hoje")           rot = "Sem " + nomes.map(n=>n.toLowerCase()).join(", ") + " hoje";
     else if(a0.type==="Equipamento quebrado") rot = nomes.join(", ") + (nomes.length>1 ? " indisponíveis" : " indisponível");
     else                                      rot = a0.type + ": " + nomes.join(", ");
-  } else rot = alertLabel(a0);
+  } else rot = alertLabelTxt(a0);
   const resto = als.length - grupo.length;
-  return rot + (a0.confirmado ? "" : " · não confirmado")
-             + (resto>0 ? " · +" + resto + " aviso" + (resto>1?"s":"") : "");
+  return esc(rot) + (a0.confirmado ? "" : " · não confirmado")
+                  + (resto>0 ? " · +" + resto + " aviso" + (resto>1?"s":"") : "");
 }
 
 /* o que levar — só itens práticos, nada clínico */
@@ -2255,14 +2267,6 @@ function serveText(h){
   if(h.inf) p.push("Unidade infantil.");
   p.push("Cadastro oficial CNES nº " + h.cnes + " (Ministério da Saúde).");
   return p.join(" ");
-}
-function reportsToday(h){
-  const hoje = new Date().toDateString();
-  return state.reports.filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hoje).length;
-}
-
-function recentReports(h){
-  return state.reports.filter(r=>r.hid===h.id && Date.now()-r.ts<3600e3).length;
 }
 /* modo demonstração: nomes fictícios para divulgação pública (evita associar dados simulados a hospitais reais) */
 function dispName(h){
@@ -2693,9 +2697,15 @@ function ligarPromptRelato(el, i){
     if(b.dataset.relm === "nao"){ store.save(state); renderList(); return }
     const faltam = bloqueioDeRepeticao(i.hid);
     if(faltam){ toast("Você já relatou esta unidade agora há pouco."); store.save(state); renderList(); return }
-    state.reports.push({hid:i.hid, cnes:i.cnes, min:+b.dataset.relm, est:null, ts:Date.now()});
-    const meu = state.reports[state.reports.length-1];
+    /* mesmo contrato do submitReport: cid (idempotência), uid (dono) e envio
+       à nuvem depois do Desfazer — sem isso o relato ficava preso no aparelho
+       e o toast prometia aos outros um relato que ninguém recebia */
+    const meu = {hid:i.hid, cnes:i.cnes, min:+b.dataset.relm, est:null, ts:Date.now(),
+                 cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
+    state.reports.push(meu);
     state.pts += 50; checkMedals(); store.save(state);
+    enviarAposDesfazer(()=>{ if(state.reports.includes(meu))
+      nuvemEnviar("relatos", {cid:meu.cid, hid:meu.hid, cnes:meu.cnes, min:meu.min, uid:meu.uid, ts:nuvemISO(meu.ts)}) });
     toastComDesfazer("+50 pontos! Seu relato aparece para quem abrir esta unidade nas próximas 3 horas.", ()=>{
       state.reports = state.reports.filter(r=>r!==meu);
       state.pts -= 50; i.prompt = null; store.save(state);
@@ -2852,7 +2862,10 @@ function cityBest(c){
     const r=REGIONS.find(x=>x.id===rid);
     const meds = r.hospitals.filter(h=>!isExam(h));
     total += meds.length;
-    meds.forEach(h=>{ const w=currentWait(h); if(!w.closed && (best===null || w.min<best)) best=w.min });
+    /* w.real: unidade aberta SEM relato não entra na conta — sem isso o
+       primeiro `min` undefined virava "menor fila undefined" e engolia os
+       mínimos reais (number < undefined é sempre false) */
+    meds.forEach(h=>{ const w=currentWait(h); if(!w.closed && w.real && (best===null || w.min<best)) best=w.min });
   });
   return {best, total};
 }
@@ -3154,15 +3167,21 @@ mapEl.addEventListener("wheel",e=>{
   e.preventDefault();
   zoomAt(e.clientX,e.clientY, e.deltaY>0?1.15:0.87);
 },{passive:false});
+/* Com o mapa real (Leaflet) ativo estes botões ganham OUTROS listeners lá no
+   fim do arquivo — os daqui precisam se calar, senão cada clique mexe também
+   no SVG escondido e o zHome dispara pedido de GPS pelo caminho morto. */
 document.getElementById("zIn").addEventListener("click",()=>{
+  if(mapaReal) return;
   const r=mapEl.getBoundingClientRect();
   zoomAt(r.left+r.width/2, r.top+r.height/2, 0.72);
 });
 document.getElementById("zOut").addEventListener("click",()=>{
+  if(mapaReal) return;
   const r=mapEl.getBoundingClientRect();
   zoomAt(r.left+r.width/2, r.top+r.height/2, 1.38);
 });
 function centerOnUser(){
+  if(mapaReal) return;
   if(mapMode==="brasil"){ enterRegion(state.region) }
   const la = gps ? gps.lat : (REG().geo||{}).lat, lo = gps ? gps.lon : (REG().geo||{}).lon;
   const p = (mapFit && la!==undefined) ? geoXY(la,lo) : {x:REG().youX, y:REG().youY};
@@ -3177,7 +3196,7 @@ function centerOnUser(){
   if(!gps) requestGPS(true); /* sem GPS ainda: centraliza no padrão e pede permissão */
 }
 document.getElementById("zHome").addEventListener("click",centerOnUser);
-document.getElementById("zBr").addEventListener("click",enterBrazil);
+document.getElementById("zBr").addEventListener("click",()=>{ if(!mapaReal) enterBrazil() });
 function renderRail(hs){
   /* A RECOMENDAÇÃO TAMBÉM NO MAPA. Ela só existia na lista, mas o mapa é a
      tela que abre primeiro — quem nunca ia à lista nunca via o app concluir
@@ -3247,7 +3266,7 @@ function marcarQuaseFoi(h){
   /* só falta CONFIRMADA: dizer "você evitou" com base num relato solitário seria
      inventar. O quase-aconteceu tem que ser um fato, não um boato. */
   const av = faltasConfirmadas(h);
-  if(av.length) quaseFoi = {nome:dispName(h), oque:alertLabel(av[0]), ts:Date.now()};
+  if(av.length) quaseFoi = {nome:dispName(h), oque:alertLabelTxt(av[0]), ts:Date.now()};
 }
 function quaseFoiVale(hAtual){
   if(!quaseFoi) return null;
@@ -3348,7 +3367,7 @@ function openDetail(id){
     dT.style.display="";
     const t=travelMin(h), tot=totalMin(h);
     if(t===null){
-      dT.innerHTML = `Fila estimada de <b>${w.min} min</b>. Distância: <b>${distOf(h).toFixed(1).replace(".",",")} km</b>. O tempo ${state.modo==="ape"?"a pé":"de ônibus"} aparece ao tocar em "Como chegar" — no app final ele virá dos dados oficiais da BHTrans e entrará nesta conta.`;
+      dT.innerHTML = `Fila relatada: cerca de <b>${w.min} min</b>. Distância: <b>${distOf(h).toFixed(1).replace(".",",")} km</b>. O tempo ${state.modo==="ape"?"a pé":"de ônibus"} aparece ao tocar em "Como chegar" — no app final ele virá dos dados oficiais da BHTrans e entrará nesta conta.`;
     } else {
       const chega=new Date(Date.now()+tot*60000);
       dT.innerHTML = `Saindo agora: <b>cerca de ${t} min</b> de carro + <b>${w.min} min</b> de fila = <b style="color:${statusOf(tot).color}">${fmtWait(tot)}</b> até ser atendido (por volta das ${String(chega.getHours()).padStart(2,"0")}h${String(chega.getMinutes()).padStart(2,"0")})`;
@@ -3401,38 +3420,22 @@ function openDetail(id){
     call.style.display=""; call.href = "tel:+55" + h.fone;
     call.textContent = "Ligar: (" + h.fone.slice(0,2) + ") " + h.fone.slice(2,-4) + "-" + h.fone.slice(-4);
   } else { call.style.display="none" }
-  /* GRÁFICO DE FILA POR HORÁRIO — REMOVIDO na faxina de 05/08 (item 1a).
-     Era resquício do app "menor fila": desenhava uma curva de espera por hora
-     como se o Ondiva medisse fila. Contradiz os Termos ("o app não estima
-     fila") e imprime uma régua de tempo na cabeça da pessoa (Ariely). O que fica
-     sobre fila é o relato datado de quem esteve lá e a tendência ("os relatos
-     indicam que caiu"), nunca um cálculo do app. */
-  document.getElementById("dChart").parentElement.style.display = "none";
+  /* O gráfico de fila por horário saiu na faxina de 05/08 (contradizia os
+     Termos); em 12/08 o esqueleto dele (HTML, CSS, tooltip) saiu do arquivo. */
   document.getElementById("backdrop").classList.add("open");
   document.getElementById("sheet").classList.add("open");
   document.getElementById("dClose").focus();
 }
 function closeDetail(){
+  /* genérico de propósito: as três listas de folhas mantidas à mão (aqui, no
+     fecharFolhas e no swipe) já tinham divergido — a needSheet ficava presa
+     aberta ao tocar no fundo escurecido. Folha nova entra sozinha. */
   document.getElementById("backdrop").classList.remove("open");
-  document.getElementById("sheet").classList.remove("open");
-  document.getElementById("locSheet").classList.remove("open");
-  document.getElementById("legalSheet").classList.remove("open");
-  document.getElementById("fixSheet").classList.remove("open");
-  document.getElementById("goSheet").classList.remove("open");
-  document.getElementById("giveupSheet").classList.remove("open");
-  document.getElementById("saidaSheet").classList.remove("open");
-  document.getElementById("motivoSheet").classList.remove("open");
-  document.getElementById("avisoSheet").classList.remove("open");
-  document.getElementById("shareSheet").classList.remove("open");
-  document.getElementById("avisarSheet").classList.remove("open");
-  document.getElementById("sosSheet").classList.remove("open");
-  document.getElementById("alertSheet").classList.remove("open");
-  hideTip();
+  document.querySelectorAll(".sheet.open").forEach(s=>s.classList.remove("open"));
 }
 
 /* drawChart REMOVIDA na faxina de 05/08 (item 1a): desenhava a curva de fila por
    hora, que fazia o app parecer que media fila. Contradizia os Termos. */
-function hideTip(){ document.getElementById("ctip").style.display="none" }
 
 /* ================= REGIÃO ================= */
 function joinWaitlist(rid){
@@ -3479,9 +3482,7 @@ function applyRegionTexts(){
   document.getElementById("locTxt").textContent = loc;
   document.getElementById("locTxt2").textContent = loc;
   document.getElementById("gpsTxt").textContent = gps ? ("Perto de "+loc.split(",")[0]+" (GPS)") : "Toque para usar sua localização";
-  const MES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
   document.getElementById("rankTitle").textContent = "Seu bairro · "+REG().rankArea;
-  /* rankLabel ("Ranking de mês") não é mais preenchido: o placar saiu (item 2). */
 }
 function setRegion(id){
   const r=REGIONS.find(x=>x.id===id);
@@ -3537,8 +3538,20 @@ function renderReport(){
    aparelho e só atrapalha o desatento; quem quiser burlar limpa a memória do
    navegador. A trava que vale é a do servidor, e ela ainda não existe. */
 const ESPERA_ENTRE_RELATOS = 3600e3;
+/* DE QUEM é o registro. Depois que a nuvem passou a puxar as últimas 24h de
+   TODO MUNDO para dentro de state.reports/alerts/giveups, "state.reports" não
+   é mais "meus relatos". Regra: linha sem cid nasceu neste aparelho e nunca
+   veio do servidor (é minha); linha com cid é minha só se o uid bate com o meu
+   apelido. (Apelido repetido entre duas pessoas pode contar a mais — limitação
+   aceita do piloto, o servidor não tem conta de verdade.) */
+function ehMeu(x){
+  const eu = state.user && state.user.usuario;
+  return !x.cid || (!!eu && x.uid===eu);
+}
 function bloqueioDeRepeticao(hid){
-  const ultimo = state.reports.filter(r=>r.hid===hid).reduce((m,r)=>Math.max(m,r.ts),0);
+  /* só MEU relato me trava: o relato de outra pessoa na mesma unidade não pode
+     bloquear o meu (antes bloqueava, justamente nas unidades movimentadas) */
+  const ultimo = state.reports.filter(r=>r.hid===hid && ehMeu(r)).reduce((m,r)=>Math.max(m,r.ts),0);
   if(!ultimo) return 0;
   const falta = ESPERA_ENTRE_RELATOS - (Date.now()-ultimo);
   return falta>0 ? Math.ceil(falta/60000) : 0;
@@ -3656,15 +3669,18 @@ function novidades24h(){
 }
 
 /* ================= GAMIFICAÇÃO ================= */
+/* Medalha conta só o que É MEU (ehMeu): depois da nuvem, state.reports carrega
+   os relatos de todo mundo — sem o filtro, um usuário novo desbloqueava
+   "Primeiro Relato" e "Colaborador Ativo" com o trabalho dos outros. */
 const MEDAL_DEFS=[
-  {id:"first", nm:"Primeiro Relato", ds:"Enviou a primeira informação de fila", test:s=>s.reports.length>=1},
-  {id:"five", nm:"Colaborador Ativo", ds:"5 relatos enviados", test:s=>s.reports.length>=5},
-  {id:"ten", nm:"Voluntário Dedicado", ds:"10 relatos enviados", test:s=>s.reports.length>=10},
-  {id:"guard", nm:"Guardião da Fila", ds:"25 relatos enviados", test:s=>s.reports.length>=25},
-  {id:"multi", nm:"Explorador", ds:"Relatos em 3 unidades diferentes", test:s=>new Set(s.reports.map(r=>r.hid)).size>=3},
-  {id:"night", nm:"Coruja", ds:"Relato entre meia-noite e 5h", test:s=>s.reports.some(r=>{const h=new Date(r.ts).getHours(); return h>=0&&h<5})},
-  {id:"dawn", nm:"Madrugador", ds:"Relato de vacina antes das 8h", test:s=>s.reports.some(r=>new Date(r.ts).getHours()<8)},
-  {id:"alert", nm:"Vigilante", ds:"Publicou um aviso sobre uma unidade", test:s=>(s.alerts||[]).length>=1},
+  {id:"first", nm:"Primeiro Relato", ds:"Enviou a primeira informação de fila", test:s=>s.reports.filter(ehMeu).length>=1},
+  {id:"five", nm:"Colaborador Ativo", ds:"5 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=5},
+  {id:"ten", nm:"Voluntário Dedicado", ds:"10 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=10},
+  {id:"guard", nm:"Guardião da Fila", ds:"25 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=25},
+  {id:"multi", nm:"Explorador", ds:"Relatos em 3 unidades diferentes", test:s=>new Set(s.reports.filter(ehMeu).map(r=>r.hid)).size>=3},
+  {id:"night", nm:"Coruja", ds:"Relato entre meia-noite e 5h", test:s=>s.reports.filter(ehMeu).some(r=>{const h=new Date(r.ts).getHours(); return h>=0&&h<5})},
+  {id:"dawn", nm:"Madrugador", ds:"Relato de vacina antes das 8h", test:s=>s.reports.filter(ehMeu).some(r=>new Date(r.ts).getHours()<8)},
+  {id:"alert", nm:"Vigilante", ds:"Publicou um aviso sobre uma unidade", test:s=>(s.alerts||[]).filter(ehMeu).length>=1},
   {id:"fix", nm:"Revisor", ds:"Ajudou a corrigir o cadastro de uma unidade", test:s=>(s.fixes||[]).length>=1},
 ];
 function checkMedals(){
@@ -3677,26 +3693,17 @@ function levelOf(pts){
   for(const l of LEVELS){ if(pts>=l[0]) cur=l; else { next=l; break } }
   return {cur,next};
 }
-/* RANKING MENSAL. Sem zerar, quem chegou primeiro fica no topo para sempre e
-   quem entra em março não tem chance nenhuma — o ranking morre como motivação.
-   Os pontos totais continuam contando para nível e medalha; só a disputa é
-   mensal. Não guardo um contador separado: dá para somar pelos registros do
-   mês, que já têm data. */
-function pontosDoMes(){
-  const d = new Date(), m = d.getMonth(), a = d.getFullYear();
-  const noMes = r => { const x = new Date(r.ts); return x.getMonth()===m && x.getFullYear()===a };
-  return state.reports.filter(noMes).length*50
-       + state.giveups.filter(noMes).length*20
-       + state.alerts.filter(noMes).length*30
-       + (state.fixes||[]).filter(noMes).length*10;
-}
+/* O ranking mensal saiu junto com o placar (a cobertura do bairro é quem
+   protagoniza); em 12/08 saíram também a função de pontos do mês, o HTML e o
+   CSS dele, que ficaram órfãos no arquivo. */
 function renderRankView(){
   /* Aqui havia `relatos * 140` — outro número inventado, apresentado como
      "pessoas ajudadas". Trocado pelo que o aparelho realmente sabe: quantas
      contribuições a pessoa fez e por quanto tempo cada uma vale. O alcance
      real só o servidor pode contar. */
   renderCobertura();
-  const nR = state.reports.length, nA = state.alerts.length;
+  /* "Você: N relatos" — só os meus, não os puxados da nuvem */
+  const nR = state.reports.filter(ehMeu).length, nA = state.alerts.filter(ehMeu).length;
   const nEv = state.evitadas || 0;
   const nCf = (state.idas||[]).filter(i=>i.conf==="sim"||i.conf==="nao").length;
   /* PERFIL POR COMPETÊNCIA, não por pontuação (Dichter).
@@ -3720,8 +3727,6 @@ function renderRankView(){
      parte que dá cara de joguinho num app de saúde. A cobertura do bairro (Epic
      Meaning) fica como protagonista da tela; os pontos e medalhas continuam por
      baixo, quietos (o "+50" ao contribuir), só sem placar. */
-  const rl = document.getElementById("rankLabel"); if(rl) rl.style.display = "none";
-  const rk = document.getElementById("rank"); if(rk) rk.innerHTML = "";
 }
 /* ===== painel de operação: consolidado do que foi coletado ===== */
 function nomeUnid(id){
@@ -3915,7 +3920,10 @@ function showView(v){
   if(v==="painel") renderPainel();
   window.scrollTo({top:0});
 }
-document.querySelectorAll("nav .tab").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.v)));
+/* trocar de aba pela navegação abandona o fluxo em andamento: zera o
+   voltarPara, senão um relato futuro em OUTRA unidade reabria a folha da
+   unidade antiga (o "voltar" apontava para um caminho que a pessoa desistiu) */
+document.querySelectorAll("nav .tab").forEach(b=>b.addEventListener("click",()=>{ voltarPara=null; showView(b.dataset.v) }));
 document.getElementById("fabReport").addEventListener("click",()=>showView("report"));
 
 document.getElementById("dClose").addEventListener("click",closeDetail);
@@ -3947,7 +3955,7 @@ document.getElementById("dRoute").addEventListener("click",()=>{
   /* Registra a ida. É o que permite perguntar depois "a informação estava
      certa?" — a confirmação factual, que cria reputação do DADO e não nota do
      hospital. Guarda o que o app dizia na hora, senão não há o que conferir. */
-  const av = faltasConfirmadas(h).map(a=>alertLabel(a));
+  const av = faltasConfirmadas(h).map(a=>alertLabelTxt(a));
   const wIda = currentWait(h);
   state.idas = state.idas || [];
   state.idas.push({hid:h.id, cnes:h.cnes, ts:Date.now(), conf:null,
@@ -4328,8 +4336,10 @@ document.getElementById("guSend").addEventListener("click",()=>{
   const gDados = {hid:rep.hosp, cnes:cnesDe(rep.hosp), min:guState.min, motivo:guState.why, ts:Date.now(),
                   cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
   state.giveups.push(gDados);
-  nuvemEnviar("desistencias", {cid:gDados.cid, hid:gDados.hid, cnes:gDados.cnes, min:gDados.min,
-                               motivo:gDados.motivo, uid:gDados.uid, ts:nuvemISO(gDados.ts)});
+  /* como todo envio: espera a janela do Desfazer — o que subiu não desce */
+  enviarAposDesfazer(()=>{ if(state.giveups.includes(gDados))
+    nuvemEnviar("desistencias", {cid:gDados.cid, hid:gDados.hid, cnes:gDados.cnes, min:gDados.min,
+                                 motivo:gDados.motivo, uid:gDados.uid, ts:nuvemISO(gDados.ts)}) });
   state.pts += 20;
   checkMedals();
   store.save(state);
@@ -4351,9 +4361,9 @@ function voltarParaUnidade(){
   else closeDetail();
 }
 function fecharFolhas(){
-  ["goSheet","alertSheet","needSheet","fixSheet","saidaSheet","motivoSheet","avisoSheet","giveupSheet","locSheet","sosSheet","legalSheet"]
-    .concat(["shareSheet","avisarSheet"])
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("open") });
+  /* fecha toda folha aberta MENOS a da unidade (#sheet): é o "volta para a
+     unidade". Genérico pela mesma razão do closeDetail. */
+  document.querySelectorAll(".sheet.open").forEach(s=>{ if(s.id!=="sheet") s.classList.remove("open") });
 }
 document.addEventListener("click", e=>{
   const b = e.target.closest("[data-back]");
@@ -4515,11 +4525,14 @@ const NUVEM = {
 };
 let nuvemSeq = 0;
 function novoCid(){ return "c"+Date.now().toString(36)+"-"+(nuvemSeq++)+"-"+Math.floor(Math.random()*1e6).toString(36) }
-/* no claude.ai a rede externa é bloqueada pela plataforma: lá a nuvem fica
-   desligada por domínio, sem tentar, sem encher fila — o endereço próprio
-   (github.io / ondiva.com.br) é quem vive na nuvem */
-const NUVEM_BLOQUEADA = /claude\.(ai|com)$/.test(location.hostname) || location.hostname.endsWith(".claudeusercontent.com");
-function nuvemLigada(){ return !NUVEM_BLOQUEADA && !!(NUVEM.url && NUVEM.anon) }
+/* LISTA DO QUE PODE, não do que não pode: a nuvem só vive no endereço próprio
+   (github.io / ondiva.com.br) e no file:// dos testes. Antes era uma lista de
+   bloqueio (só claude.ai), e qualquer espelho ou servidor local de teste
+   escrevia relato falso direto nas tabelas de produção. */
+const NUVEM_PERMITIDA = location.protocol==="file:"
+  || location.hostname==="villaxx.github.io"
+  || /(^|\.)ondiva\.com\.br$/.test(location.hostname);
+function nuvemLigada(){ return NUVEM_PERMITIDA && !!(NUVEM.url && NUVEM.anon) }
 function nuvemISO(ms){ return new Date(ms).toISOString() }
 function nuvemEnviar(tabela, linha){
   if(!nuvemLigada()) return;
@@ -4610,8 +4623,13 @@ function abrirSaida(h){
   g.innerHTML = SAIDA_MIN.map(m=>`<button class="minbtn" data-m="${m}">${m>=120?(m/60)+"h+":m+" min"}</button>`).join("");
   g.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
     const min=+b.dataset.m;
-    state.reports.push({hid:h.id, cnes:h.cnes, min, est:null, ts:Date.now()});
+    /* mesmo contrato do submitReport: cid + uid + nuvem após o Desfazer */
+    const dSaida = {hid:h.id, cnes:h.cnes, min, est:null, ts:Date.now(),
+                    cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
+    state.reports.push(dSaida);
     state.pts+=50; checkMedals(); store.save(state);
+    enviarAposDesfazer(()=>{ if(state.reports.includes(dSaida))
+      nuvemEnviar("relatos", {cid:dSaida.cid, hid:dSaida.hid, cnes:dSaida.cnes, min:dSaida.min, uid:dSaida.uid, ts:nuvemISO(dSaida.ts)}) });
     fecharFolhas();
     toast("+50 pontos! Obrigado — sua informação já está ajudando.");
     renderList(); renderMap(); renderRankView(); renderProfile();
@@ -4639,8 +4657,10 @@ document.getElementById("saidaNao").addEventListener("click",()=>{
     const gD = {hid, cnes:cnesDe(hid), motivo:b.dataset.m, ts:Date.now(),
                 cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
     state.giveups.push(gD);
-    nuvemEnviar("desistencias", {cid:gD.cid, hid:gD.hid, cnes:gD.cnes, motivo:gD.motivo,
-                                 uid:gD.uid, ts:nuvemISO(gD.ts)});
+    /* como todo envio: espera a janela do Desfazer */
+    enviarAposDesfazer(()=>{ if(state.giveups.includes(gD))
+      nuvemEnviar("desistencias", {cid:gD.cid, hid:gD.hid, cnes:gD.cnes, motivo:gD.motivo,
+                                   uid:gD.uid, ts:nuvemISO(gD.ts)}) });
     state.pts+=20; checkMedals(); store.save(state);
     fecharFolhas();
     toast("+20 pontos! Isso avisa quem está indo que a fila está pesada.");
@@ -4871,8 +4891,9 @@ document.getElementById("avisoOk").addEventListener("click",()=>{
   const onde = avisoTmp.onde==="fixo"
     ? "em " + nomeRegiao(regAviso)
     : "perto de você";
-  toast(novo.quem
-    ? `Pronto. Aviso de ${nome} para ${novo.quem}, ${onde}.`
+  /* `novo` morre dentro do forEach acima — aqui só avisoTmp existe */
+  toast(avisoTmp.quem
+    ? `Pronto. Aviso de ${nome} para ${avisoTmp.quem}, ${onde}.`
     : `Pronto. Vou te avisar quando houver ${nome} ${onde}.`);
 });
 
@@ -5027,8 +5048,10 @@ function pedirConta(motivo){
   return false;
 }
 
-/* "tempo real": revisa estimativas a cada 30 s */
+/* "tempo real": revisa os relatos na tela a cada 30 s — mas NÃO em segundo
+   plano: aba escondida não desenha para ninguém, só gasta bateria */
 setInterval(()=>{
+  if(document.hidden) return;
   if(document.getElementById("v-map").classList.contains("active")) renderMap();
   if(document.getElementById("v-list").classList.contains("active")) renderList();
 }, 30000);
@@ -5202,7 +5225,9 @@ enviarPendentes();
    A cada 60 s puxa de novo — é o "tempo real" do piloto. */
 nuvemFlush();
 nuvemPuxar();
-setInterval(()=>{ nuvemFlush(); nuvemPuxar(); }, 60000);
+/* em segundo plano não puxa (bateria e dados); ao voltar, atualiza na hora */
+setInterval(()=>{ if(document.hidden) return; nuvemFlush(); nuvemPuxar(); }, 60000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ nuvemFlush(); nuvemPuxar(); } });
 requestGPS(false); /* tenta a localização real; sem permissão, segue no ponto padrão */
 renderChips();
 renderList();
