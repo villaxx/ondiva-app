@@ -591,6 +591,13 @@
     <div class="herosub" id="dServe" style="margin:8px 0 0"></div>
     <div id="dAlerts"></div>
     <div class="hero"><span class="big" id="dWait"></span><span class="statuspill" id="dPill"></span></div>
+    <!-- AS DUAS AÇÕES QUE IMPORTAM, ANTES DE ROLAR (11/08, achado do Raphael).
+         A folha tinha 1002px de conteúdo numa área de 526px e TODOS os 8
+         botões ficavam abaixo da dobra: a pessoa abria a unidade, via texto,
+         gráfico e endereço, e não achava onde tocar. Ir e informar agora vêm
+         no topo; o resto continua embaixo, para quem quiser ler. -->
+    <button class="cta" id="dRoute">Como chegar</button>
+    <button class="cta sec" id="dReport">Estou aqui — informar tempo de espera</button>
     <div class="herosub" id="dSub"></div>
     <div class="walert" id="dTotal" style="background:var(--surface2);color:var(--ink)"></div>
     <div class="besthour" id="dBest"></div>
@@ -606,9 +613,7 @@
       <a class="cta sec" id="dCall" href="#">Ligar</a>
       <button class="cta sec" id="dShare">Avisar alguém</button>
     </div>
-    <button class="cta" id="dReport">Estou aqui — informar tempo de espera</button>
     <button class="cta sec" id="dAlert">Avisar sobre esta unidade · +30 pts</button>
-    <button class="cta sec" id="dRoute">Como chegar</button>
     <!-- "Ver como será o aviso" era demonstração de recurso, e estava no fim de
          uma folha de 940px: só aparecia depois de rolar tudo (medido: y=1428
          numa janela de 598). Como não é ação que a pessoa PRECISA, virou um
@@ -765,7 +770,13 @@
     <p class="vtitle">Quanto tempo esperou para ser atendido?</p>
     <div class="grid-min" id="saidaMin"></div>
     <button class="cta sec" id="saidaNao" style="margin-top:10px">Não fui atendido</button>
-    <div class="login-note" style="text-align:left">No app instalado, esta tela abre sozinha ao tocar na notificação — sem precisar procurar nada.</div>
+    <!-- A TELA DE SAÍDA FICOU PARA TRÁS (11/08, achado do Raphael): ela nasceu
+         quando o app era sobre fila e só perguntava minutos. Depois da faxina
+         o eixo virou FALTA — e quem acabou de sair da unidade é justamente
+         quem sabe o que faltou lá dentro. É a informação mais valiosa do app,
+         e ninguém estava pedindo. -->
+    <button class="cta" id="saidaFalta" style="margin-top:14px">Faltou alguma coisa lá? Avise · +30 pts</button>
+    <div class="login-note" style="text-align:left">Vacina em falta, sem pediatra, fichas acabaram, equipamento quebrado — é o que evita a viagem perdida de quem vem depois.<br>No app instalado, esta tela abre sozinha ao tocar na notificação.</div>
   </div>
 </div>
 
@@ -2249,6 +2260,11 @@ function passaNosFiltros(h){
     if(filters.plan==="meus"){
       if(state.plans.length && !h.plans.some(p=>state.plans.includes(p))) return false;
     } else if(filters.plan!=="Todos" && !h.plans.includes(filters.plan)) return false;
+    /* "Infantil" some quase tudo, e é honesto que some: a marca `inf` só existe
+       quando o NOME oficial da unidade diz "infantil" — 5 das 746. É o que o
+       CNES prova; inventar "atende criança" seria adivinhar. Mas o filtro
+       ficava indistinguível de um app quebrado, então ele avisa (ver o texto
+       em renderList) em vez de só devolver uma lista vazia. */
     if(filters.ped && !h.inf) return false;
     if(filters.open && currentWait(h).closed) return false;
     if(filters.falta && !activeAlerts(h).length) return false; /* "Faltando agora" */
@@ -2687,7 +2703,16 @@ function renderList(){
       <span style="font-weight:600;opacity:.9">Informação que ontem não existia — e que já está valendo na lista abaixo.</span>
     </div>` : "";
   if(!hs.length){
-    el.innerHTML = bConf + bFalta + bNov + `<div class="empty">${filters.falta ? "Nenhuma unidade com aviso ativo agora." : "Nenhuma unidade com esses filtros.<br>Tente outro convênio."}</div>`;
+    /* lista vazia tem que dizer POR QUE está vazia — senão parece app quebrado.
+       O caso do "Infantil" é o mais traiçoeiro: só 5 das 746 unidades têm a
+       marca, porque ela vem do nome oficial dizer "infantil" (é o que o CNES
+       prova). Sem esta explicação, o filtro parecia um bug. */
+    const motivo = filters.falta
+      ? "Nenhuma unidade com aviso ativo agora."
+      : filters.ped
+        ? "<b>Só 5 unidades em BH têm 'infantil' no nome oficial</b> — e é só isso que o cadastro do Ministério da Saúde prova.<br>Mas posto e UPA atendem criança normalmente: desligue o filtro <b>Infantil</b> para ver todas."
+        : "Nenhuma unidade com esses filtros.<br>Tente tirar um deles.";
+    el.innerHTML = bConf + bFalta + bNov + `<div class="empty">${motivo}</div>`;
     ligarBFalta(); if(conf) ligarConferir(el, conf); if(pRel) ligarPromptRelato(el, pRel); return;
   }
   /* GATILHO (Berger): a campanha é o lembrete que existe no mundo lá fora — é
@@ -2748,7 +2773,10 @@ function renderList(){
       <div class="waitbox"><div class="wait">${kmTxt}</div><span class="statuspill">${pill}</span></div>
     </button>`;
   }).join("")
-  + (todas.length>hs.length ? `<div class="empty">Mostrando as ${hs.length} mais próximas, de ${todas.length} unidades na região.</div>` : "");
+  + (todas.length>hs.length ? `<div class="empty">Mostrando as ${hs.length} mais próximas, de ${todas.length} unidades na região.</div>` : "")
+  /* o filtro Infantil sempre se explica, mesmo achando alguma coisa: mostrar
+     5 de 746 sem dizer por quê faz a pessoa achar que o app perdeu o resto */
+  + (filters.ped ? `<div class="empty" style="text-align:left">Filtro <b>Infantil</b> ligado: só aparecem as unidades cujo nome oficial diz "infantil" — são 5 em BH, e é só isso que o cadastro do Ministério da Saúde prova.<br><b>Posto e UPA atendem criança normalmente.</b> Desligue o filtro para ver todas.</div>` : "");
   el.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openDetail(c.dataset.id)));
   const rb = el.querySelector("[data-rec]");
   if(rb) rb.addEventListener("click",()=>openDetail(rb.dataset.rec));
@@ -4531,6 +4559,14 @@ function abrirSaida(h){
 
 /* ===== 7a: motivos pré-programados, sem digitar ===== */
 const MOTIVOS=["A fila estava muito demorada","Desisti e fui embora","Fui encaminhado a outra unidade","A unidade estava fechada","Outro motivo"];
+/* de quem acabou de sair para o aviso de falta, sem procurar a unidade de novo */
+document.getElementById("saidaFalta").addEventListener("click",()=>{
+  if(!saidaHosp) return;
+  currentDetail = saidaHosp;
+  voltarPara = null;
+  document.getElementById("saidaSheet").classList.remove("open");
+  abrirAvisos();
+});
 document.getElementById("saidaNao").addEventListener("click",()=>{
   const el=document.getElementById("motivoOpts");
   el.innerHTML = MOTIVOS.map(m=>`<button class="cta sec" data-m="${m}" style="margin-top:8px">${m}</button>`).join("");
@@ -4961,23 +4997,30 @@ function oferecerInstalar(){
   if(document.getElementById("instalarBar")) return;
   const bar = document.createElement("div");
   bar.id = "instalarBar";
-  /* fora da zona morta do iPhone: perto da borda de baixo, o primeiro toque é
-     engolido pelo Safari (só revela a barra dele) — por isso o convite sobe
-     acima da nav + área segura, e os botões têm os 44px mínimos da Apple */
-  bar.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(100px + env(safe-area-inset-bottom, 0px));z-index:65;background:var(--surface);border:2px solid var(--brand);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px";
-  bar.innerHTML = `<span style="flex:1;font-size:13px;font-weight:700">Quer botar o Ondiva na tela inicial?</span>
-    <button id="instSim" class="minbtn sel" style="font-size:12.5px;flex:none;min-height:44px;min-width:76px;padding:8px 14px">${promptInstalar ? "Botar" : "Ver como"}</button>
-    <button id="instNao" class="minbtn" style="font-size:12.5px;flex:none;min-height:44px;padding:8px 12px">Agora não</button>`;
+  /* POPUP DE VERDADE (11/08, pedido do Raphael): a barrinha discreta no rodapé
+     caía na zona morta do Safari e passava despercebida. Agora é uma caixa no
+     centro, com o ícone do app — impossível de não ver, e ainda dá para
+     dispensar. Continua só a partir da 2ª visita: valor primeiro. */
+  bar.style.cssText = "position:fixed;inset:0;z-index:90;background:rgba(4,16,10,.62);display:flex;align-items:center;justify-content:center;padding:24px";
+  bar.innerHTML = `
+    <div style="background:var(--surface);border-radius:22px;padding:22px 20px;max-width:330px;width:100%;box-shadow:var(--shadow);text-align:center">
+      <div style="width:66px;height:66px;border-radius:16px;background:var(--brand);margin:0 auto 14px;display:flex;align-items:center;justify-content:center">
+        <svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1a8 8 0 0 0-8 8c0 5.5 8 14 8 14s8-8.5 8-14a8 8 0 0 0-8-8z" fill="#fff"/><path d="M10.6 5h2.8v2.6H16v2.8h-2.6V13h-2.8v-2.6H8V7.6h2.6z" fill="var(--brand)"/></svg>
+      </div>
+      <div style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px">Deixe o Ondiva na tela do celular</div>
+      <div id="instTxt" style="font-size:13.5px;color:var(--ink2);font-weight:600;line-height:1.5;margin-bottom:16px">Assim ele abre com um toque, como qualquer aplicativo — e funciona até sem internet.</div>
+      <button id="instSim" class="cta" style="margin:0">${promptInstalar ? "Botar na tela" : "Ver como fazer"}</button>
+      <button id="instNao" class="themebtn" style="margin-top:10px">Agora não</button>
+    </div>`;
   document.body.appendChild(bar);
   document.getElementById("instNao").onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
   document.getElementById("instSim").onclick = ()=>{
-    if(promptInstalar){ bar.remove(); promptInstalar.prompt(); promptInstalar = null; }
-    else {
-      bar.querySelector("span").innerHTML = 'No iPhone: toque em <b>Compartilhar</b> (o quadrado com a seta, embaixo) e depois em <b>"Adicionar à Tela de Início"</b>.';
-      document.getElementById("instSim").remove();
-      const n = document.getElementById("instNao"); n.textContent = "Entendi";
-      n.onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
-    }
+    if(promptInstalar){ bar.remove(); promptInstalar.prompt(); promptInstalar = null; return }
+    document.getElementById("instTxt").innerHTML = APARELHO_IOS
+      ? 'No iPhone: toque em <b>Compartilhar</b> — o quadrado com a seta para cima, na barra de baixo do Safari — e depois em <b>"Adicionar à Tela de Início"</b>.'
+      : 'No menu do navegador (os três pontinhos), toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar aplicativo"</b>.';
+    document.getElementById("instSim").remove();
+    const n = document.getElementById("instNao"); n.textContent = "Entendi";
   };
 }
 
