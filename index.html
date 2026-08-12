@@ -2183,10 +2183,32 @@ function activeAlerts(h){
 /* só as faltas CONFIRMADAS viram consequência (esconder/rebaixar/alarme) */
 function faltasConfirmadas(h){ return activeAlerts(h).filter(a=>a.confirmado) }
 function alertLabel(a){
+  /* esc() no detalhe: o "Outra/Outro" é texto livre do usuário e o rótulo vai
+     para innerHTML — sem escapar seria injeção de HTML vinda da nuvem. */
   if(!a.vac) return a.type;
-  if(a.type==="Sem médico hoje")      return "Sem " + a.vac.toLowerCase() + " hoje";
-  if(a.type==="Equipamento quebrado") return a.vac + " indisponível";
-  return a.type + ": " + a.vac;
+  if(a.type==="Sem médico hoje")      return "Sem " + esc(a.vac.toLowerCase()) + " hoje";
+  if(a.type==="Equipamento quebrado") return esc(a.vac) + " indisponível";
+  return a.type + ": " + esc(a.vac);
+}
+/* Nos CARTÕES (lista e trilho do mapa) cabe uma linha só — mas "Vacina em
+   falta · +2 avisos" esconde justamente O QUE falta (pedido do Raphael,
+   11/08). Junta os avisos do MESMO tipo e mesma força do primeiro numa linha
+   ("Vacina em falta: Gripe, COVID-19, BCG"); os de outro tipo ou outra força
+   continuam no contador "+N aviso(s)". A lista chega ordenada com os
+   confirmados na frente. */
+function alertLine(als){
+  const a0 = als[0];
+  let grupo = [a0], rot;
+  if(a0.vac){
+    grupo = als.filter(a=>a.type===a0.type && a.confirmado===a0.confirmado && a.vac);
+    const nomes = grupo.map(a=>esc(a.vac));
+    if(a0.type==="Sem médico hoje")           rot = "Sem " + nomes.map(n=>n.toLowerCase()).join(", ") + " hoje";
+    else if(a0.type==="Equipamento quebrado") rot = nomes.join(", ") + (nomes.length>1 ? " indisponíveis" : " indisponível");
+    else                                      rot = a0.type + ": " + nomes.join(", ");
+  } else rot = alertLabel(a0);
+  const resto = als.length - grupo.length;
+  return rot + (a0.confirmado ? "" : " · não confirmado")
+             + (resto>0 ? " · +" + resto + " aviso" + (resto>1?"s":"") : "");
 }
 
 /* o que levar — só itens práticos, nada clínico */
@@ -2788,7 +2810,7 @@ function renderList(){
     const als = activeAlerts(h).sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0));
     const a0 = als[0];
     const avisoHtml = als.length
-      ? `<div style="margin:3px 0 5px"><span class="alertline" style="margin-top:0${a0.confirmado?'':';opacity:.72;font-weight:600'}">${alertLabel(a0)}${a0.confirmado?'':' · não confirmado'}${als.length>1?" · +"+(als.length-1)+" aviso"+(als.length>2?"s":""):""}</span></div>`
+      ? `<div style="margin:3px 0 5px"><span class="alertline" style="margin-top:0${a0.confirmado?'':';opacity:.72;font-weight:600'}">${alertLine(als)}</span></div>`
       : "";
     return `<button class="card ${cls}" data-id="${h.id}">
       <div class="info">
@@ -3198,7 +3220,7 @@ function renderRail(hs){
     /* mesmo princípio do cartão da lista: havendo aviso, ele ocupa a linha */
     const als = activeAlerts(h).sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0));
     const sub2 = als.length
-      ? alertLabel(als[0]) + (als[0].confirmado ? "" : " · não confirmado")
+      ? alertLine(als)
       : (tot===null
           ? `${distOf(h).toFixed(1).replace(".",",")} km`
           : `~${travelMin(h)} min de carro + ${w.min} min de fila`);
