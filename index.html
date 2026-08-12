@@ -1551,7 +1551,15 @@ const REGIONS = [
     {id:"u9462279", cnes:9462279, lat:-19.816089, lon:-43.956683, name:"Laboratório Lapecco Venda Nova", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Venda Nova", addr:"Rua Padre Pedro Pinto, 550", dist:13.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3134578888"},
     {id:"u9529578", cnes:9529578, lat:-19.922994, lon:-43.960405, name:"Instituto Hermes Pardini Contorno", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Barro Preto", addr:"Do Contorno, 9775", dist:3.1, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132731709", sus:true, lab:true},
   ]},
-  {id:"gbh", label:"Grande BH — Contagem, Betim e Nova Lima", userLoc:"Eldorado, Contagem", rankArea:"Grande BH", youX:220, youY:230, geo:{lat:-19.9400, lon:-44.0200, k:1000}, hospitals:[
+  /* GRANDE BH EM ESPERA (decisão do Raphael, 12/08/2026): a auditoria de
+     coordenadas achou 27 pinos errados SÓ em BH — onde havia o dado municipal
+     da PBH para conferir. A região metropolitana não tem segunda fonte, então
+     o risco de mandar gente ao lugar errado é invisível. Piloto ampliado +
+     pino errado = credibilidade perdida. As unidades FICAM aqui (nada foi
+     apagado): quem abrir a Grande BH vê "Em breve" e entra na lista de espera,
+     como SP e Rio. Religa tirando o soon:true, depois de conferir as
+     coordenadas contra uma segunda fonte (OSM/prefeituras). */
+  {id:"gbh", soon:true, label:"Grande BH — Contagem, Betim e Nova Lima", userLoc:"Eldorado, Contagem", rankArea:"Grande BH", youX:220, youY:230, geo:{lat:-19.9400, lon:-44.0200, k:1000}, hospitals:[
     {id:"u2190605", cnes:2190605, lat:-19.877923, lon:-44.048066, name:"Unidade Básica de Saúde Candida Ferreira", type:"Público", plans:["SUS"], profile:"basica", region:"Candida Ferreira", addr:"Alameda dos Rodoviarios, 300", dist:7.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133525699", sus:true, vac:true},
     {id:"u2189844", cnes:2189844, lat:-19.950895, lon:-44.044753, name:"Unidade Básica de Saúde Riacho", type:"Público", plans:["SUS"], profile:"basica", region:"Riacho das Pedras", addr:"Rua Rio Negro, 95", dist:2.9, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133635265", sus:true, vac:true},
     {id:"u2189968", cnes:2189968, lat:-19.914688, lon:-44.080994, name:"Unidade Básica de Saúde Centro", type:"Público", plans:["SUS"], profile:"basica", region:"Centro", addr:"Avenida Prefeito Gil Diniz, 401", dist:7.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133984310", sus:true, vac:true},
@@ -2149,19 +2157,37 @@ const ESPECIALIDADES = {
   basica:   ["Clínico (adulto)","Pediatra","Ginecologista","Dentista"],
   exames:   []
 };
-/* ⚠️ ESTES TEXTOS SÃO O FORMATO GRAVADO — no aparelho E na nuvem, o aviso
-   guarda o rótulo como `type`. Mudar uma palavra aqui órfã todos os avisos já
-   publicados (eles param de casar com filtros, agrupamento e detalhe). Toda
-   comparação no código usa estas constantes, nunca a string solta; rebatizar
-   na TELA sem quebrar o dado exige migração no servidor antes. */
-const T_VACINA="Vacina em falta", T_MEDICO="Sem médico hoje", T_EQUIP="Equipamento quebrado",
-      T_SEM_VACINACAO="Sem vacinação hoje", T_SEM_COLETA="Sem coleta hoje";
+/* CHAVES ESTÁVEIS DOS AVISOS (decisão do Raphael, 12/08/2026, feita ANTES do
+   primeiro testador real — a nuvem só tinha linha de teste, então a conversão
+   saiu de graça). O que se GRAVA (aparelho e nuvem) é o CÓDIGO; o texto da
+   tela vem do mapa de rótulos e pode mudar à vontade sem órfã dado nenhum.
+   Rótulo antigo (gravado pelas versões anteriores) é convertido em código em
+   DOIS portões: no carregamento do aparelho (migração v2) e no pull da nuvem
+   (tipoCanonico em nuvemPuxar) — nenhuma linha velha escapa. */
+const TIPO_ROTULO = {
+  vacina_falta:"Vacina em falta",        sem_vacinacao:"Sem vacinação hoje",
+  sem_medico:"Sem médico hoje",          equip_quebrado:"Equipamento quebrado",
+  fichas_acabaram:"Acabaram as fichas do dia", farmacia_sem:"Farmácia sem atendimento",
+  so_agendamento:"Só com agendamento hoje",    sem_coleta:"Sem coleta hoje",
+  sistema_fora:"Sistema fora do ar",     atend_suspenso:"Atendimento suspenso",
+  fechado_imprevisto:"Fechado (imprevisto)"
+};
+const ROTULO_TIPO = {}; Object.keys(TIPO_ROTULO).forEach(c=>{ ROTULO_TIPO[TIPO_ROTULO[c]] = c });
+function rotuloDoTipo(t){ return TIPO_ROTULO[t] || t }   /* desconhecido: mostra cru */
+function tipoCanonico(t){ return ROTULO_TIPO[t] || t }   /* rótulo velho -> código */
+const T_VACINA="vacina_falta", T_MEDICO="sem_medico", T_EQUIP="equip_quebrado",
+      T_SEM_VACINACAO="sem_vacinacao", T_SEM_COLETA="sem_coleta";
+/* migração v2: converte avisos gravados no aparelho com o rótulo antigo */
+if((state.v||1) < 2){
+  (state.alerts||[]).forEach(a=>{ a.type = tipoCanonico(a.type) });
+  state.v = 2; store.save(state);
+}
 function alertTypes(h){
-  const fim = ["Atendimento suspenso","Fechado (imprevisto)"];
+  const fim = ["atend_suspenso","fechado_imprevisto"];
   let t;
-  if(h.profile==="basica")      t = ["Acabaram as fichas do dia",T_VACINA,T_SEM_VACINACAO,T_MEDICO,"Farmácia sem atendimento","Só com agendamento hoje"];
-  else if(h.profile==="exames") t = [T_SEM_COLETA,T_EQUIP,"Só com agendamento hoje","Sistema fora do ar"];
-  else if(h.profile==="upa")    t = [T_MEDICO,"Acabaram as fichas do dia",T_EQUIP,T_VACINA];
+  if(h.profile==="basica")      t = ["fichas_acabaram",T_VACINA,T_SEM_VACINACAO,T_MEDICO,"farmacia_sem","so_agendamento"];
+  else if(h.profile==="exames") t = [T_SEM_COLETA,T_EQUIP,"so_agendamento","sistema_fora"];
+  else if(h.profile==="upa")    t = [T_MEDICO,"fichas_acabaram",T_EQUIP,T_VACINA];
   else                          t = [T_MEDICO,T_EQUIP];
   /* qualquer unidade com serviço oficial de imunização pode informar falta de
      vacina, mesmo sendo laboratório ou hospital */
@@ -2259,10 +2285,10 @@ function faltasConfirmadas(h){ return activeAlerts(h).filter(a=>a.confirmado) }
    guardar já escapado gerava "&amp;amp;" duplo na conferência e entidade HTML
    crua na mensagem compartilhada). */
 function alertLabelTxt(a){
-  if(!a.vac) return a.type;
+  if(!a.vac) return rotuloDoTipo(a.type);
   if(a.type===T_MEDICO) return "Sem " + a.vac.toLowerCase() + " hoje";
   if(a.type===T_EQUIP)  return a.vac + " indisponível";
-  return a.type + ": " + a.vac;
+  return rotuloDoTipo(a.type) + ": " + a.vac;
 }
 /* Versão para innerHTML: escapa o rótulo INTEIRO. O "Outra/Outro" é texto
    livre do usuário, e o `type` chega literal da nuvem (qualquer um escreve na
@@ -2282,7 +2308,7 @@ function alertLine(als){
     const nomes = grupo.map(a=>a.vac);
     if(a0.type===T_MEDICO)     rot = "Sem " + nomes.map(n=>n.toLowerCase()).join(", ") + " hoje";
     else if(a0.type===T_EQUIP) rot = nomes.join(", ") + (nomes.length>1 ? " indisponíveis" : " indisponível");
-    else                                      rot = a0.type + ": " + nomes.join(", ");
+    else                       rot = rotuloDoTipo(a0.type) + ": " + nomes.join(", ");
   } else rot = alertLabelTxt(a0);
   const resto = als.length - grupo.length;
   return esc(rot) + (a0.confirmado ? "" : " · não confirmado")
@@ -2926,6 +2952,7 @@ function cityBest(c){
   let best=null, total=0;
   c.regions.forEach(rid=>{
     const r=REGIONS.find(x=>x.id===rid);
+    if(r.soon) return; /* região em espera não conta no rótulo da cidade */
     const meds = r.hospitals.filter(h=>!isExam(h));
     total += meds.length;
     /* w.real: unidade aberta SEM relato não entra na conta — sem isso o
@@ -3905,7 +3932,7 @@ function exportarCsv(){
   (state.idas||[]).filter(i=>i.conf==="sim"||i.conf==="nao").forEach(i=>
     linhas.push(["conferencia",cnesDe(i.hid),nomeUnid(i.hid),new Date(i.ts).toISOString(),"","",
                  (i.conf==="sim"?"estava certo":"nao estava")+" - app dizia: "+(i.dizia.avisos.join(" / ")||i.dizia.min+" min")]));
-  state.alerts.forEach(a=>linhas.push(["aviso",cnesDe(a.hid),nomeUnid(a.hid),new Date(a.ts).toISOString(),"","",a.type+(a.vac?" - "+a.vac:"")]));
+  state.alerts.forEach(a=>linhas.push(["aviso",cnesDe(a.hid),nomeUnid(a.hid),new Date(a.ts).toISOString(),"","",rotuloDoTipo(a.type)+(a.vac?" - "+a.vac:"")]));
   state.fixes.forEach(f=>linhas.push(["correcao",f.cnes||"",nomeUnid(f.hid),new Date(f.ts).toISOString(),"","",f.tipo]));
   if(linhas.length===1){ toast("Nada para exportar ainda."); return }
   const csv = linhas.map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
@@ -4273,7 +4300,7 @@ function abrirAvisos(){
   if(!currentDetail) return;
   document.getElementById("vacPick").style.display="none";
   document.getElementById("alertOpts").innerHTML = alertTypes(currentDetail)
-    .map(t=>`<button class="cta sec" data-t="${t}" style="margin-top:8px">${t}</button>`).join("");
+    .map(t=>`<button class="cta sec" data-t="${t}" style="margin-top:8px">${rotuloDoTipo(t)}</button>`).join("");
   document.getElementById("alertOpts").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
     const tipo = b.dataset.t;
     const det = detalheDoAviso(currentDetail, tipo);
@@ -4652,7 +4679,8 @@ function nuvemPuxar(){
       state.reports = sRel.concat(state.reports.filter(r=>!r.cid || !cids.has(r.cid)));
     }
     if(Array.isArray(av)){
-      sAv = av.map(x=>({hid:x.hid, cnes:x.cnes, type:x.type, vac:x.vac||undefined, uid:x.uid, escrito:!!x.escrito, revisar:!!x.revisar, ts:Date.parse(x.ts), cid:x.cid}));
+      /* tipoCanonico: linha gravada por versão antiga (rótulo por extenso) vira código aqui */
+      sAv = av.map(x=>({hid:x.hid, cnes:x.cnes, type:tipoCanonico(x.type), vac:x.vac||undefined, uid:x.uid, escrito:!!x.escrito, revisar:!!x.revisar, ts:Date.parse(x.ts), cid:x.cid}));
       const cids = new Set(sAv.map(x=>x.cid));
       state.alerts = sAv.concat(state.alerts.filter(a=>!a.cid || !cids.has(a.cid)));
     }
