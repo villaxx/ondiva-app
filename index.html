@@ -42,8 +42,14 @@
     --shadow:0 10px 30px rgba(14,36,26,.18); --shadow-sm:0 3px 10px rgba(14,36,26,.10);
     --r:20px; --r-sm:13px;
   }
+  /* REGRA DO TEMA (12/08, fim da tripla cópia): o claro mora SÓ no :root de
+     cima; o bloco abaixo é o escuro-do-sistema, com a guarda :not() para o
+     tema forçado em claro vencer; e os blocos [data-theme="dark"] cobrem o
+     escuro forçado quando o sistema está claro. Cor nova se escreve em DOIS
+     lugares (claro no :root, escuro aqui e no [data-theme="dark"]) — nunca
+     mais em três. */
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#0A1410; --surface:#13221A; --surface2:#1B2F23; --ink:#E4F0E8; --ink2:#A9C4B4;
       --muted:#79957F; --line:#254434;
       --brand:#2FA562; --brand-vivid:#35C573; --brand-ink:#04130A; --brand-soft:#123A26;
@@ -52,17 +58,6 @@
       --map-ground:#0E1C15; --map-park:#14261B; --map-road:#22412F; --map-roadedge:#0B1710;
       --shadow:0 10px 30px rgba(0,0,0,.55); --shadow-sm:0 3px 10px rgba(0,0,0,.4);
     }
-  }
-  :root[data-theme="light"]{
-    --bg:#EAF3ED; --surface:#FFFFFF; --surface2:#DCEBE1; --ink:#0E241A; --ink2:#3C5A4A;
-    /* #6E8A7B dava 3,76 sobre branco e 3,05 sobre o cinza dos cartões — abaixo
-       dos 4,5 exigidos. Uma variável só reprovava 165 textos do app. */
-    --muted:#4E6E59; --line:#CFE2D5;
-    --brand:#007A43; --brand-vivid:#00B152; --brand-ink:#FFFFFF; --brand-soft:#D9F0E2;
-    --good:#00663A; --good-bg:#D9F0E2; --warn:#8A5200; --warn-bg:#F7EDD9; --crit:#B3362B; --crit-bg:#F9E5E2;
-    --you:#1D6FE0;
-    --map-ground:#DFEEE3; --map-park:#C9E5D2; --map-road:#FFFFFF; --map-roadedge:#C4DCCC;
-    --shadow:0 10px 30px rgba(14,36,26,.18); --shadow-sm:0 3px 10px rgba(14,36,26,.10);
   }
   :root[data-theme="dark"]{
     --bg:#0A1410; --surface:#13221A; --surface2:#1B2F23; --ink:#E4F0E8; --ink2:#A9C4B4;
@@ -151,9 +146,8 @@
   .chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
   .protopill{align-self:flex-start;font-size:10.5px;font-weight:700;color:var(--muted);background:var(--surface);border-radius:999px;padding:4px 11px;box-shadow:var(--shadow-sm);opacity:.92}
   .sosbtn{flex:none;width:44px;height:44px;border-radius:50%;background:var(--crit);color:#fff;font-size:11px;font-weight:800;letter-spacing:.04em;box-shadow:var(--shadow-sm)}
-  @media (prefers-color-scheme: dark){ .sosbtn{color:#1A0806} }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .sosbtn{color:#1A0806} }
   :root[data-theme="dark"] .sosbtn{color:#1A0806}
-  :root[data-theme="light"] .sosbtn{color:#fff}
   .sosbtn:active{transform:scale(.93)}
   a.cta{text-decoration:none}
   .cta.crit{background:var(--crit);color:#fff}
@@ -162,9 +156,8 @@
      outros: claro = fundo escuro e texto branco, escuro = fundo vivo e texto
      escuro. Assim ele acompanha o tema em vez de brigar com ele. */
   .cta.warnbtn{background:linear-gradient(135deg,#8A5200,#6B3F00);color:#fff}
-  @media (prefers-color-scheme: dark){ .cta.warnbtn{background:linear-gradient(135deg,#E0A040,#C4841F);color:#1A0F00} }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .cta.warnbtn{background:linear-gradient(135deg,#E0A040,#C4841F);color:#1A0F00} }
   :root[data-theme="dark"] .cta.warnbtn{background:linear-gradient(135deg,#E0A040,#C4841F);color:#1A0F00}
-  :root[data-theme="light"] .cta.warnbtn{background:linear-gradient(135deg,#8A5200,#6B3F00);color:#fff}
 
   /* trilho de cartões sobre o mapa */
   /* z-index 6, mesmo motivo dos chips: o trilho de recomendação fica ACIMA do
@@ -189,13 +182,16 @@
      encolhe com reticências em vez de empurrar o conteúdo para fora */
   .badge{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 9px;border-radius:999px;background:var(--surface2);color:var(--ink2);max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .badges{max-width:100%;min-width:0}
-  /* a etiqueta pequena (11px) precisa de 4,5 e estava em 4,03 */
-  .badge.ped{background:var(--brand-soft);color:var(--brand)}
-  :root[data-theme="light"] .badge, .badge{color:var(--ink2)}
-  @media (prefers-color-scheme: dark){ .badge{color:#C2D8CB} .badge.ped{color:#5FD08C} }
+  /* a etiqueta pequena (11px) precisa de 4,5: o verde da marca dava 4,03, por
+     isso o #00693A. (Antes o valor certo só valia no tema claro FORÇADO — o
+     claro do sistema ficava com o verde reprovado. Efeito da tripla cópia.) */
+  .badge.ped{background:var(--brand-soft);color:#00693A}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .badge{color:#C2D8CB}
+    :root:not([data-theme="light"]) .badge.ped{color:#5FD08C}
+  }
   :root[data-theme="dark"] .badge{color:#C2D8CB}
   :root[data-theme="dark"] .badge.ped{color:#5FD08C}
-  :root[data-theme="light"] .badge.ped{color:#00693A}
   .meta{font-size:12.5px;color:var(--muted);font-weight:600}
   /* em tela estreita a caixa do tempo cede espaço para o nome da unidade */
   .waitbox{flex:none;text-align:right;min-width:80px}
@@ -208,9 +204,8 @@
   .s-crit .wait{color:var(--crit)} .s-crit .statuspill{background:var(--crit-bg);color:var(--crit)}
   /* "sem relato" ficava em 3,05 — abaixo dos 4,5 exigidos para 11px */
   .s-off  .wait{color:var(--muted);font-size:17px} .s-off .statuspill{background:var(--surface2);color:var(--ink2)}
-  @media (prefers-color-scheme: dark){ .s-off .statuspill{color:#C2D8CB} }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .s-off .statuspill{color:#C2D8CB} }
   :root[data-theme="dark"] .s-off .statuspill{color:#C2D8CB}
-  :root[data-theme="light"] .s-off .statuspill{color:#3C5A4A}
   .rec{background:var(--surface);border-radius:var(--r);padding:16px 17px;margin-bottom:14px;box-shadow:var(--shadow);border:2px solid var(--brand)}
   .rec .rlab{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--brand)}
   .rec h3{margin:5px 0 2px;font-size:19px;font-weight:800;letter-spacing:-.02em}
@@ -218,9 +213,8 @@
   .rec .rwhy{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.5}
   /* no tema escuro o verde da marca clareia e branco sobre ele dava 3,14 */
   .rec .rbtn{display:block;width:100%;background:var(--brand);color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:12px;text-align:center;margin-top:12px}
-  @media (prefers-color-scheme: dark){ .rec .rbtn{color:var(--brand-ink)} }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .rec .rbtn{color:var(--brand-ink)} }
   :root[data-theme="dark"] .rec .rbtn{color:var(--brand-ink)}
-  :root[data-theme="light"] .rec .rbtn{color:#fff}
   .empty{color:var(--muted);text-align:center;padding:36px 10px;font-size:14px;font-weight:600}
   /* o aviso quebra linha em vez de vazar; é o texto que mais cresce no modo
      de texto grande, e é justamente o que não pode sumir da tela */
@@ -255,13 +249,11 @@
      texto escuro — sem o :not(.sec) as regras o pintavam de branco sobre
      fundo claro, deixando o texto invisível (contraste 1,0). */
   @media (prefers-color-scheme: dark){
-    .cta:not(.sec):not(.crit){background:linear-gradient(135deg,var(--brand-vivid),var(--brand));color:var(--brand-ink)}
-    .cta.crit{color:#1A0806}
+    :root:not([data-theme="light"]) .cta:not(.sec):not(.crit){background:linear-gradient(135deg,var(--brand-vivid),var(--brand));color:var(--brand-ink)}
+    :root:not([data-theme="light"]) .cta.crit{color:#1A0806}
   }
   :root[data-theme="dark"] .cta:not(.sec):not(.crit){background:linear-gradient(135deg,var(--brand-vivid),var(--brand));color:var(--brand-ink)}
   :root[data-theme="dark"] .cta.crit{color:#1A0806}
-  :root[data-theme="light"] .cta:not(.sec):not(.crit){background:linear-gradient(135deg,var(--brand),#006B39);color:#fff}
-  :root[data-theme="light"] .cta.crit{color:#fff}
   .cta.sec{background:var(--surface2);color:var(--ink);box-shadow:none}
   .besthour{background:var(--brand-soft);color:var(--brand);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;font-weight:700;margin:12px 0}
 
@@ -270,9 +262,8 @@
   .panel label{display:block;font-size:13px;font-weight:800;color:var(--ink2);margin-bottom:9px}
   .gpschip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--brand);background:var(--brand-soft);border-radius:999px;padding:4px 11px;font-weight:800;margin-top:9px}
   /* verde da marca sobre o verde suave dava 4,03 no tema escuro */
-  @media (prefers-color-scheme: dark){ .gpschip{color:var(--brand-vivid)} }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .gpschip{color:var(--brand-vivid)} }
   :root[data-theme="dark"] .gpschip{color:var(--brand-vivid)}
-  :root[data-theme="light"] .gpschip{color:var(--brand)}
   .grid-min{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   /* min-height garante os 44px da norma mesmo quando o texto é pequeno —
      com fonte de 12px o botão fechava em 43 */
@@ -288,10 +279,9 @@
      agora a cobertura do bairro) nunca tinham sido medidas. */
   .profcard{background:linear-gradient(140deg,var(--brand),#006B39 70%);color:#fff;border-radius:24px;padding:22px;box-shadow:var(--shadow)}
   @media (prefers-color-scheme: dark){
-    .profcard{background:linear-gradient(140deg,var(--brand-vivid),var(--brand) 70%);color:var(--brand-ink)}
+    :root:not([data-theme="light"]) .profcard{background:linear-gradient(140deg,var(--brand-vivid),var(--brand) 70%);color:var(--brand-ink)}
   }
   :root[data-theme="dark"] .profcard{background:linear-gradient(140deg,var(--brand-vivid),var(--brand) 70%);color:var(--brand-ink)}
-  :root[data-theme="light"] .profcard{background:linear-gradient(140deg,var(--brand),#006B39 70%);color:#fff}
   .profcard .lvl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.9}
   .profcard .pts{font-size:44px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}
   .bar{height:8px;background:rgba(255,255,255,.3);border-radius:99px;margin-top:12px;overflow:hidden}
@@ -353,10 +343,9 @@
      vê, eram os textos menos legíveis do aplicativo inteiro. */
   #login{position:fixed;inset:0;z-index:80;background:linear-gradient(165deg,var(--brand),#00532D 62%);display:none;overflow-y:auto}
   @media (prefers-color-scheme: dark){
-    #login{background:linear-gradient(165deg,#0F2A1C,#081711 62%)}
+    :root:not([data-theme="light"]) #login{background:linear-gradient(165deg,#0F2A1C,#081711 62%)}
   }
   :root[data-theme="dark"] #login{background:linear-gradient(165deg,#0F2A1C,#081711 62%)}
-  :root[data-theme="light"] #login{background:linear-gradient(165deg,var(--brand),#00532D 62%)}
   #login.show{display:block}
   .login-wrap{max-width:430px;margin:0 auto;min-height:100%;padding:46px 22px 40px;display:flex;flex-direction:column;justify-content:center}
   .login-logo{display:flex;align-items:center;gap:11px;color:#fff;font-size:32px;font-weight:800;justify-content:center;letter-spacing:-.02em}
@@ -1797,17 +1786,56 @@ const LEVELS = [[0,"Iniciante"],[100,"Colaborador"],[300,"Guardião da Fila"],[7
 
 /* ================= ESTADO ================= */
 const store = {
-  load(){ try{ return JSON.parse(localStorage.getItem("pronto-v1")) || {} }catch(e){ return {} } },
+  /* DUAS GAVETAS. O estado pessoal (pontos, meus relatos, pedidos) grava a
+     cada toque; o cache da comunidade (até 2000 linhas por tabela, vindas da
+     nuvem) grava SÓ no pull, em chave própria. Antes era tudo junto: cada
+     toque serializava ~700 KB no fio do toque — engasgo visível em celular
+     fraco. Linha é "minha" se não tem cid (nasceu aqui e nunca foi ao
+     servidor) ou se o uid é o meu apelido. */
+  _minhas(s, arr){
+    const eu = s.user && s.user.usuario;
+    return (arr||[]).filter(x=> !x.cid || (!!eu && x.uid===eu));
+  },
+  load(){
+    let s={}, nuvem={};
+    try{ s = JSON.parse(localStorage.getItem("pronto-v1")) || {} }catch(e){}
+    try{ nuvem = JSON.parse(localStorage.getItem("pronto-v1-nuvem")) || {} }catch(e){}
+    ["reports","alerts","giveups"].forEach(k=>{
+      const meus = s[k]||[];
+      const cids = new Set(meus.map(x=>x.cid).filter(Boolean));
+      s[k] = meus.concat((nuvem[k]||[]).filter(x=>x.cid && !cids.has(x.cid)));
+    });
+    return s;
+  },
   /* Se a memória do navegador estiver cheia ou bloqueada — aba privada, ajuste
      do aparelho — o gravar estoura. Sem este cerco o app morria calado no meio
-     de um envio. Medido: cada relato ocupa 70 bytes, cabem cerca de 74 mil
-     antes de encher, então isto é rede de proteção, não problema do dia a dia. */
+     de um envio. */
   save(s){
-    try{ localStorage.setItem("pronto-v1", JSON.stringify(s)) }
+    try{
+      const enxuto = Object.assign({}, s, {
+        reports:this._minhas(s, s.reports),
+        alerts:this._minhas(s, s.alerts),
+        giveups:this._minhas(s, s.giveups)
+      });
+      localStorage.setItem("pronto-v1", JSON.stringify(enxuto));
+    }
     catch(e){ try{ toast("Não consegui guardar no aparelho. Libere espaço no navegador.") }catch(_){} }
+  },
+  salvarNuvem(rel, av, des){
+    /* tabela que falhou no pull (null) preserva o cache anterior — um fetch
+       perdido não pode apagar o que a pessoa via offline */
+    try{
+      let velho={}; try{ velho = JSON.parse(localStorage.getItem("pronto-v1-nuvem")) || {} }catch(_){}
+      localStorage.setItem("pronto-v1-nuvem", JSON.stringify({
+        reports:rel||velho.reports||[], alerts:av||velho.alerts||[], giveups:des||velho.giveups||[]}));
+    }
+    catch(e){ /* cache é reconstruível no próximo pull; não incomoda ninguém */ }
   }
 };
-let state = Object.assign({pts:0, reports:[], giveups:[], alerts:[], fixes:[], pendentes:[], medals:[], waitlist:[], plans:[], idas:[], procuras:[], region:"bh", demo:false, big:false, modo:"carro", avisos:null, visitante:false}, store.load());
+/* v: versão do formato guardado — o ponto único para migração futura (hoje só
+   carimba; quando o formato mudar, o "if(s.v<2){...}" mora aqui, não espalhado) */
+let state = Object.assign({v:1, pts:0, reports:[], giveups:[], alerts:[], fixes:[], pendentes:[], medals:[], waitlist:[], plans:[], idas:[], procuras:[], region:"bh", demo:false, big:false, modo:"carro", avisos:null, visitante:false}, store.load());
+state.v = state.v || 1;
 /* LIMPEZA DE SEGURANÇA: até 03/08/2026 o arquivo de demonstração gravava na
    mesma chave que este app, e as filas de exemplo dele vazavam para cá. A marca
    "demoSeed" só existe no demo — se ela aparecer aqui, tudo que veio junto é
@@ -1995,7 +2023,8 @@ function ultimoRelato(h){
   if(!todos.length) return null;
   const u = todos.reduce((a,b)=> a.ts>b.ts ? a : b);
   const min = Math.round((Date.now()-u.ts)/60000);
-  return {min:u.min, hmin:min, txt: min<60 ? min+" min" : Math.floor(min/60)+"h"};
+  /* "há 1h50", não "há 1h" — cortar os minutos escondia meia hora do dado */
+  return {min:u.min, hmin:min, txt: min<60 ? min+" min" : Math.floor(min/60)+"h"+(min%60? String(min%60).padStart(2,"0"):"")};
 }
 function currentWait(h){
   if(!abertoAgora(h)) return {closed:true};
@@ -2051,6 +2080,11 @@ function filaStatus(min){
 }
 function fmtWait(min){ return min>=60 ? Math.floor(min/60)+"h"+String(min%60).padStart(2,"0") : min+"<small> min</small>" }
 function fmtShort(min){ return min>=60 ? Math.floor(min/60)+"h"+(min%60? String(min%60).padStart(2,"0"):"") : min+"'" }
+/* fmtWait sem as tags — para texto puro (compartilhar, frases corridas) */
+function fmtWaitTxt(min){ return fmtWait(min).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim() }
+/* km em pt-BR (vírgula, uma casa). Estava copiado em 11 lugares — mudança de
+   regra (ex.: metros abaixo de 1 km) agora é num lugar só. */
+function kmBR(km){ return km.toFixed(1).replace(".",",") }
 
 /* ===== avisos da comunidade (modelo Waze: estruturado, agregado, expira em 4h) ===== */
 /* Campanhas oficiais de vacinação. Cada item traz início e fim: fora do período
@@ -2102,22 +2136,29 @@ const ESPECIALIDADES = {
   basica:   ["Clínico (adulto)","Pediatra","Ginecologista","Dentista"],
   exames:   []
 };
+/* ⚠️ ESTES TEXTOS SÃO O FORMATO GRAVADO — no aparelho E na nuvem, o aviso
+   guarda o rótulo como `type`. Mudar uma palavra aqui órfã todos os avisos já
+   publicados (eles param de casar com filtros, agrupamento e detalhe). Toda
+   comparação no código usa estas constantes, nunca a string solta; rebatizar
+   na TELA sem quebrar o dado exige migração no servidor antes. */
+const T_VACINA="Vacina em falta", T_MEDICO="Sem médico hoje", T_EQUIP="Equipamento quebrado",
+      T_SEM_VACINACAO="Sem vacinação hoje", T_SEM_COLETA="Sem coleta hoje";
 function alertTypes(h){
   const fim = ["Atendimento suspenso","Fechado (imprevisto)"];
   let t;
-  if(h.profile==="basica")      t = ["Acabaram as fichas do dia","Vacina em falta","Sem vacinação hoje","Sem médico hoje","Farmácia sem atendimento","Só com agendamento hoje"];
-  else if(h.profile==="exames") t = ["Sem coleta hoje","Equipamento quebrado","Só com agendamento hoje","Sistema fora do ar"];
-  else if(h.profile==="upa")    t = ["Sem médico hoje","Acabaram as fichas do dia","Equipamento quebrado","Vacina em falta"];
-  else                          t = ["Sem médico hoje","Equipamento quebrado"];
+  if(h.profile==="basica")      t = ["Acabaram as fichas do dia",T_VACINA,T_SEM_VACINACAO,T_MEDICO,"Farmácia sem atendimento","Só com agendamento hoje"];
+  else if(h.profile==="exames") t = [T_SEM_COLETA,T_EQUIP,"Só com agendamento hoje","Sistema fora do ar"];
+  else if(h.profile==="upa")    t = [T_MEDICO,"Acabaram as fichas do dia",T_EQUIP,T_VACINA];
+  else                          t = [T_MEDICO,T_EQUIP];
   /* qualquer unidade com serviço oficial de imunização pode informar falta de
      vacina, mesmo sendo laboratório ou hospital */
-  if(h.vac && t.indexOf("Vacina em falta") < 0) t = t.concat(["Vacina em falta","Sem vacinação hoje"]);
+  if(h.vac && t.indexOf(T_VACINA) < 0) t = t.concat([T_VACINA,T_SEM_VACINACAO]);
   return t.concat(fim);
 }
 /* avisos que pedem um detalhe: qual vacina, qual especialidade, qual equipamento */
 function detalheDoAviso(h, tipo){
-  if(tipo==="Vacina em falta")      return {titulo:"Qual vacina está em falta?", opcoes:VACCINES, cols:3};
-  if(tipo==="Sem médico hoje"){
+  if(tipo===T_VACINA)      return {titulo:"Qual vacina está em falta?", opcoes:VACCINES, cols:3};
+  if(tipo===T_MEDICO){
     /* Poda só o que a marca oficial realmente prova. "Obstetra" depende de
        centro obstétrico e isso o CNES informa direito.
        "Pediatra" NÃO se poda: a marca `inf` vem de centro NEONATAL (UTI de
@@ -2131,7 +2172,7 @@ function detalheDoAviso(h, tipo){
     });
     return {titulo:"Qual profissional está faltando?", opcoes:ops, cols:2};
   }
-  if(tipo==="Equipamento quebrado") return {titulo:"Qual equipamento?", opcoes:EQUIPAMENTOS, cols:3};
+  if(tipo===T_EQUIP) return {titulo:"Qual equipamento?", opcoes:EQUIPAMENTOS, cols:3};
   return null;
 }
 /* DECISÃO 6.4 — o que cada registro guarda.
@@ -2194,8 +2235,8 @@ function faltasConfirmadas(h){ return activeAlerts(h).filter(a=>a.confirmado) }
    crua na mensagem compartilhada). */
 function alertLabelTxt(a){
   if(!a.vac) return a.type;
-  if(a.type==="Sem médico hoje")      return "Sem " + a.vac.toLowerCase() + " hoje";
-  if(a.type==="Equipamento quebrado") return a.vac + " indisponível";
+  if(a.type===T_MEDICO) return "Sem " + a.vac.toLowerCase() + " hoje";
+  if(a.type===T_EQUIP)  return a.vac + " indisponível";
   return a.type + ": " + a.vac;
 }
 /* Versão para innerHTML: escapa o rótulo INTEIRO. O "Outra/Outro" é texto
@@ -2214,8 +2255,8 @@ function alertLine(als){
   if(a0.vac){
     grupo = als.filter(a=>a.type===a0.type && a.confirmado===a0.confirmado && a.vac);
     const nomes = grupo.map(a=>a.vac);
-    if(a0.type==="Sem médico hoje")           rot = "Sem " + nomes.map(n=>n.toLowerCase()).join(", ") + " hoje";
-    else if(a0.type==="Equipamento quebrado") rot = nomes.join(", ") + (nomes.length>1 ? " indisponíveis" : " indisponível");
+    if(a0.type===T_MEDICO)     rot = "Sem " + nomes.map(n=>n.toLowerCase()).join(", ") + " hoje";
+    else if(a0.type===T_EQUIP) rot = nomes.join(", ") + (nomes.length>1 ? " indisponíveis" : " indisponível");
     else                                      rot = a0.type + ": " + nomes.join(", ");
   } else rot = alertLabelTxt(a0);
   const resto = als.length - grupo.length;
@@ -2349,8 +2390,8 @@ function passaNosFiltros(h){
     if(filters.item && filters.item.length && activeAlerts(h).some(a=>{
       if(!a.confirmado) return false;      /* falta não confirmada não esconde a unidade */
       if(a.vac && filters.item.includes(a.vac)) return true;                    /* vacina X em falta · equipamento X quebrado */
-      if(a.type==="Sem vacinação hoje" && filters.cat==="basica") return true;
-      if(a.type==="Sem coleta hoje" && filters.item.includes("Exame de sangue")) return true;
+      if(a.type===T_SEM_VACINACAO && filters.cat==="basica") return true;
+      if(a.type===T_SEM_COLETA && filters.item.includes("Exame de sangue")) return true;
       return false;
     })) return false;
     if(!filters.cat || filters.cat==="medico"){
@@ -2525,7 +2566,7 @@ function recomendacao(hs){
      mostramos o FATO de que a unidade recomendada não faz o que um
      pronto-socorro faz, e onde está o mais perto. Dado do CNES, não conselho. */
   const psPerto = nivelOf(escolhido)==="leve"
-    ? REG().hospitals.filter(h=>h.ps && !currentWait(h).closed)
+    ? REG().hospitals.filter(h=>h.ps && !h.espec && !currentWait(h).closed)
         .sort((a,b)=>distOf(a)-distOf(b))[0]
     : null;
   return {h:escolhido, temRelato, abreNaChegada, outras, pulados, conjunto, psPerto};
@@ -2545,7 +2586,7 @@ function htmlRec(rec){
      perto, aberta e com o que a pessoa precisa. O tempo de fila deixou de ser o
      número grande; quando há relato, ele entra como uma linha secundária e
      datada, nunca como o eixo da decisão. */
-  const tempo = `${distOf(h).toFixed(1).replace(".",",")} km de você`;
+  const tempo = `${kmBR(distOf(h))} km de você`;
   const porque = rec.abreNaChegada
     ? `Abre até você chegar (~${travelMin(h)||"?"} min de trajeto) e atende o que você precisa — a mais próxima sem aviso de falta.`
     : "Aberta agora e atende o que você precisa — e é a mais próxima sem aviso de falta.";
@@ -2572,7 +2613,7 @@ function htmlRec(rec){
   /* e, quando a recomendada não é pronto-socorro, onde está o mais perto.
      É fato do CNES, não avaliação de gravidade — o app não diagnostica. */
   const psLinha = rec.psPerto
-    ? `<div class="rwhy" style="margin-top:8px;font-weight:700">Esta unidade atende casos leves e urgências. Pronto-socorro mais perto: ${esc(dispName(rec.psPerto))}, a ${distOf(rec.psPerto).toFixed(1).replace(".",",")} km.</div>`
+    ? `<div class="rwhy" style="margin-top:8px;font-weight:700">Esta unidade atende casos leves e urgências. Pronto-socorro mais perto: ${esc(dispName(rec.psPerto))}, a ${kmBR(distOf(rec.psPerto))} km.</div>`
     : "";
   /* mostra o trabalho: dizer que pulou unidades com aviso é metade do valor
      do app — é a prova de que ele evitou uma viagem perdida */
@@ -2800,7 +2841,7 @@ function renderList(){
        deixou de ser o número grande do canto; quando há relato, ele vira uma
        linha pequena e datada. A cor por tamanho de fila (s-good/s-warn/s-crit)
        saiu junto: a fila não é mais o eixo, então não pinta mais o card. */
-    const kmTxt = distOf(h).toFixed(1).replace(".",",")+"<small> km</small>";
+    const kmTxt = kmBR(distOf(h))+"<small> km</small>";
     let cls="", pill, linha2;
     if(w.closed){
       cls="s-off"; pill = "abre " + h.ab + "h";
@@ -2809,7 +2850,7 @@ function renderList(){
       pill="aberto";
       const t=travelMin(h);
       linha2 = (t!=null ? `~${t} min de carro · ` : "") + `sem relato de fila — seja o primeiro`
-        + (w.antigo ? `<br><span style="opacity:.8">Último relato: há ${w.antigo.txt}, ${fmtWait(w.antigo.min).replace(/<[^>]+>/g," ")}</span>` : "");
+        + (w.antigo ? `<br><span style="opacity:.8">Último relato: há ${w.antigo.txt}, ${fmtWaitTxt(w.antigo.min)}</span>` : "");
     } else {
       pill="aberto";
       const t=travelMin(h);
@@ -3091,7 +3132,7 @@ function zoomAt(cx,cy,factor){
     vb = { x: pt.x-(pt.x-vb.x)*s, y: pt.y-(pt.y-vb.y)*s, w:nw, h:vb.h*s };
   }
   clampVB(); applyVB();
-  agendarRedesenho();   /* o tamanho do pino acompanha o zoom */
+  agendarRedesenhoOcioso();   /* pinos se reencaixam quando o gesto assenta */
 }
 /* redesenho coalescido: no meio da pinça redesenha no máximo uma vez por
    quadro, senão 746 pinos por gesto travam o celular */
@@ -3100,6 +3141,17 @@ function agendarRedesenho(){
   if(redesenhoPendente) return;
   redesenhoPendente = true;
   requestAnimationFrame(()=>{ redesenhoPendente = false; renderMap() });
+}
+/* Durante o gesto de zoom o mapa inteiro era reconstruído A CADA QUADRO
+   (reordenar 759 unidades, teste de colisão dos rótulos, innerHTML do SVG) —
+   o travamento que o coalescer por quadro só tinha empurrado para dentro do
+   quadro. Enquanto a pessoa ainda está mexendo, os pinos escalam junto com o
+   viewBox (de graça); a reconstrução de verdade roda UMA vez, 140 ms depois
+   do último tick do gesto. */
+let redesenhoOciosoT = null;
+function agendarRedesenhoOcioso(){
+  clearTimeout(redesenhoOciosoT);
+  redesenhoOciosoT = setTimeout(()=>renderMap(), 140);
 }
 function resetMapView(){ mapMode="city"; overShoot=0; enquadrarRegiao(); applyVB() }
 
@@ -3206,7 +3258,7 @@ function renderRail(hs){
   if(rec){
     const rh=rec.h, rw=currentWait(rh), rtot=totalMin(rh);
     const rs = rec.temRelato ? (rtot===null?filaStatus(rw.min):statusOf(rtot)) : null;
-    const rnum = rec.temRelato ? fmtShort(rtot===null?rw.min:rtot) : distOf(rh).toFixed(1).replace(".",",");
+    const rnum = rec.temRelato ? fmtShort(rtot===null?rw.min:rtot) : kmBR(distOf(rh));
     const rrot = rec.temRelato ? (rtot===null?"fila":"total") : "km";
     recCard = `<button class="rcard" data-id="${rh.id}" style="border:2px solid var(--brand)">
       <!-- o verde da marca com "km" branco em cima dava 3,14; o verde fundo passa -->
@@ -3214,7 +3266,7 @@ function renderRail(hs){
       <div>
         <div style="font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--brand);text-transform:uppercase">Recomendado</div>
         <div class="rname">${dispName(rh)}</div>
-        <div class="rmeta">${rec.abreNaChegada ? "abre até você chegar" : (rec.temRelato ? distOf(rh).toFixed(1).replace(".",",")+" km de você" : "sem relato ainda · a mais próxima")}</div>
+        <div class="rmeta">${rec.abreNaChegada ? "abre até você chegar" : (rec.temRelato ? kmBR(distOf(rh))+" km de você" : "sem relato ainda · a mais próxima")}</div>
       </div>
     </button>`;
   }
@@ -3241,7 +3293,7 @@ function renderRail(hs){
     const sub2 = als.length
       ? alertLine(als)
       : (tot===null
-          ? `${distOf(h).toFixed(1).replace(".",",")} km`
+          ? `${kmBR(distOf(h))} km`
           : `~${travelMin(h)} min de carro + ${w.min} min de fila`);
     const subCor = als.length ? (als[0].confirmado
         ? ' style="color:var(--warn);font-weight:800"'
@@ -3291,7 +3343,7 @@ function openDetail(id){
   currentDetail = h;
   document.getElementById("dName").textContent = dispName(h);
   document.getElementById("dBadges").innerHTML =
-    `<span class="badge">${h.type}</span>${nivelBadge(h)}${audBadge(h)}<span class="badge">${distOf(h).toFixed(1).replace(".",",")} km</span>`;
+    `<span class="badge">${h.type}</span>${nivelBadge(h)}${audBadge(h)}<span class="badge">${kmBR(distOf(h))} km</span>`;
   document.getElementById("dServe").textContent = serveText(h);
   /* ===== A JUSTIÇA DA FILA (Larson, 1987) =====
      O que mais destrói a paciência não é o relógio — é ver quem chegou depois
@@ -3332,7 +3384,7 @@ function openDetail(id){
     /* --muted aqui dava 4,34 no tema escuro, abaixo dos 4,5 exigidos */
     dP.style.background="var(--surface2)"; dP.style.color="var(--ink2)"; dP.textContent="sem relato agora";
     document.getElementById("dSub").textContent = "Ninguém relatou a fila daqui nas últimas 3 horas."
-      + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWait(w.antigo.min).replace(/<[^>]+>/g," ")}.` : "");
+      + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
   } else if(w.closed){
     dW.innerHTML="Fechada"; dW.style.color="var(--muted)"; dW.style.fontSize="";
     dP.style.background="var(--surface2)"; dP.style.color="var(--muted)";
@@ -3367,7 +3419,7 @@ function openDetail(id){
     dT.style.display="";
     const t=travelMin(h), tot=totalMin(h);
     if(t===null){
-      dT.innerHTML = `Fila relatada: cerca de <b>${w.min} min</b>. Distância: <b>${distOf(h).toFixed(1).replace(".",",")} km</b>. O tempo ${state.modo==="ape"?"a pé":"de ônibus"} aparece ao tocar em "Como chegar" — no app final ele virá dos dados oficiais da BHTrans e entrará nesta conta.`;
+      dT.innerHTML = `Fila relatada: cerca de <b>${w.min} min</b>. Distância: <b>${kmBR(distOf(h))} km</b>. O tempo ${state.modo==="ape"?"a pé":"de ônibus"} aparece ao tocar em "Como chegar" — no app final ele virá dos dados oficiais da BHTrans e entrará nesta conta.`;
     } else {
       const chega=new Date(Date.now()+tot*60000);
       dT.innerHTML = `Saindo agora: <b>cerca de ${t} min</b> de carro + <b>${w.min} min</b> de fila = <b style="color:${statusOf(tot).color}">${fmtWait(tot)}</b> até ser atendido (por volta das ${String(chega.getHours()).padStart(2,"0")}h${String(chega.getMinutes()).padStart(2,"0")})`;
@@ -3502,7 +3554,7 @@ const MIN_OPTS=[10,20,30,45,60,90,120,180];
 function renderReport(){
   const sel=document.getElementById("repHosp");
   const sorted=[...REG().hospitals].sort((a,b)=>distOf(a)-distOf(b));
-  sel.innerHTML = sorted.map(h=>`<option value="${h.id}">${dispName(h)} · ${distOf(h).toFixed(1).replace(".",",")} km</option>`).join("");
+  sel.innerHTML = sorted.map(h=>`<option value="${h.id}">${dispName(h)} · ${kmBR(distOf(h))} km</option>`).join("");
   if(rep.hosp && sorted.some(h=>h.id===rep.hosp)) sel.value=rep.hosp;
   /* trocar de unidade tem que redesenhar: o aviso de "você não está sozinho"
      é por unidade, e ficava parado no da unidade anterior */
@@ -3648,7 +3700,7 @@ function renderCobertura(){
     </div>`)
     + (faltam.length ? `<p class="vtitle">Esperando a primeira notícia de hoje</p><div class="panel acct">`
         + faltam.map(h=>`<button class="row" data-cob="${esc(h.id)}" style="width:100%;min-height:44px;text-align:left;background:none">
-             <span class="k">${esc(dispName(h))}</span><span class="v">${distOf(h).toFixed(1).replace(".",",")} km</span></button>`).join("")
+             <span class="k">${esc(dispName(h))}</span><span class="v">${kmBR(distOf(h))} km</span></button>`).join("")
         + `</div>` : "");
   el.querySelectorAll("[data-cob]").forEach(b=>b.addEventListener("click",()=>openDetail(b.dataset.cob)));
 }
@@ -4012,7 +4064,7 @@ function textoAviso(h){
   if(!w.closed && !w.semDados){
     const tot=totalMin(h);
     t += tot!==null
-      ? ` Devo ser atendido em cerca de ${fmtWait(tot).replace(/<[^>]+>/g," ").trim()}.`
+      ? ` Devo ser atendido em cerca de ${fmtWaitTxt(tot)}.`
       : ` A fila lá está em cerca de ${w.min} min.`;
   }
   return t + " Informação do Ondiva.";
@@ -4403,15 +4455,18 @@ function travelCarro(h){
   return Math.max(3, Math.round(distOf(h)*percurso/kmh*60));
 }
 function renderSosList(){
-  /* emergência grave: só unidades que atendem caso grave — UPA/AMA ficam de fora */
-  const rows = REG().hospitals.filter(h=>h.ps && !currentWait(h).closed)
+  /* emergência grave: só hospital GERAL com pronto-socorro. O !h.espec está no
+     código de propósito, mesmo que hoje nenhum cadastro tenha ps+espec juntos:
+     a regra clínica (nunca mandar caso grave para hospital especializado) não
+     pode depender de a base continuar assim. */
+  const rows = REG().hospitals.filter(h=>h.ps && !h.espec && !currentWait(h).closed)
     .map(h=>({h, t:travelCarro(h)}))
     .sort((a,b)=>a.t-b.t).slice(0,3);
   const el=document.getElementById("sosList");
   el.innerHTML = rows.map(({h,t})=>`<button class="card" data-id="${h.id}" style="margin-bottom:8px">
     <div class="info">
       <h3>${dispName(h)}</h3>
-      <div class="meta">${h.region} · ${distOf(h).toFixed(1).replace(".",",")} km</div>
+      <div class="meta">${h.region} · ${kmBR(distOf(h))} km</div>
     </div>
     <div class="waitbox"><div class="wait" style="color:var(--crit);font-size:22px">${t}<small> min</small></div><span class="statuspill" style="background:var(--crit-bg);color:var(--crit)">de carro</span></div>
   </button>`).join("");
@@ -4565,22 +4620,25 @@ function nuvemPuxar(){
   const pega = t => fetch(NUVEM.url+"/rest/v1/"+t+"?select=*&ts=gte."+corte+"&order=ts.desc&limit=2000",
       {headers:{"apikey":NUVEM.anon,"Authorization":"Bearer "+NUVEM.anon}}).then(r=>r.ok?r.json():null).catch(()=>null);
   Promise.all([pega("relatos"), pega("avisos"), pega("desistencias")]).then(([rel,av,des])=>{
+    let sRel=null, sAv=null, sDes=null;
     if(Array.isArray(rel)){
-      const servo = rel.map(x=>({hid:x.hid, cnes:x.cnes, min:x.min, est:null, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
-      const cids = new Set(servo.map(x=>x.cid));
-      state.reports = servo.concat(state.reports.filter(r=>!r.cid || !cids.has(r.cid)));
+      sRel = rel.map(x=>({hid:x.hid, cnes:x.cnes, min:x.min, est:null, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
+      const cids = new Set(sRel.map(x=>x.cid));
+      state.reports = sRel.concat(state.reports.filter(r=>!r.cid || !cids.has(r.cid)));
     }
     if(Array.isArray(av)){
-      const servo = av.map(x=>({hid:x.hid, cnes:x.cnes, type:x.type, vac:x.vac||undefined, uid:x.uid, escrito:!!x.escrito, revisar:!!x.revisar, ts:Date.parse(x.ts), cid:x.cid}));
-      const cids = new Set(servo.map(x=>x.cid));
-      state.alerts = servo.concat(state.alerts.filter(a=>!a.cid || !cids.has(a.cid)));
+      sAv = av.map(x=>({hid:x.hid, cnes:x.cnes, type:x.type, vac:x.vac||undefined, uid:x.uid, escrito:!!x.escrito, revisar:!!x.revisar, ts:Date.parse(x.ts), cid:x.cid}));
+      const cids = new Set(sAv.map(x=>x.cid));
+      state.alerts = sAv.concat(state.alerts.filter(a=>!a.cid || !cids.has(a.cid)));
     }
     if(Array.isArray(des)){
-      const servo = des.map(x=>({hid:x.hid, cnes:x.cnes, min:(x.min==null?undefined:x.min), motivo:x.motivo, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
-      const cids = new Set(servo.map(x=>x.cid));
-      state.giveups = servo.concat(state.giveups.filter(g=>!g.cid || !cids.has(g.cid)));
+      sDes = des.map(x=>({hid:x.hid, cnes:x.cnes, min:(x.min==null?undefined:x.min), motivo:x.motivo, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
+      const cids = new Set(sDes.map(x=>x.cid));
+      state.giveups = sDes.concat(state.giveups.filter(g=>!g.cid || !cids.has(g.cid)));
     }
     store.save(state);
+    /* o cache da comunidade grava aqui, e SÓ aqui — é a outra gaveta */
+    if(sRel || sAv || sDes) store.salvarNuvem(sRel, sAv, sDes);
     renderList(); renderMap(); renderRankView();
   }).catch(()=>{}).finally(()=>{ nuvemPuxando=false; });
 }
@@ -5167,10 +5225,20 @@ function iniciarMapaReal(){
 }
 /* desenha só o que está na vista — com centenas de unidades, desenhar tudo
    trava o celular */
+let _pinosChave = "", _pinosIdx = null;
 function desenharPinosReais(){
   if(!mapaReal || !camadaPinos) return;
-  camadaPinos.clearLayers();
   const vista = mapaReal.getBounds();
+  /* mesma vista + mesmos dados (identidade do índice) + mesmo minuto = nada a
+     redesenhar. moveend e zoomend disparam juntos no fim do gesto, e sem isso
+     cada um derrubava e recriava até 300 marcadores à toa. O minuto entra na
+     chave porque os rótulos envelhecem com o relógio ("há X min"). */
+  const chave = vista.toBBoxString()+"|"+mapaReal.getZoom()
+    +"|"+(gps?gps.lat+","+gps.lon:"-")
+    +"|"+Math.floor(Date.now()/60000);
+  if(chave===_pinosChave && idxPorHid()===_pinosIdx) return;
+  _pinosChave = chave; _pinosIdx = idxPorHid();
+  camadaPinos.clearLayers();
   const hs = unidadesMetropolitanas().filter(h=>h.lat!==undefined && vista.contains([h.lat,h.lon]));
   const zoom = mapaReal.getZoom();
   const mostraNome = zoom >= 15;
