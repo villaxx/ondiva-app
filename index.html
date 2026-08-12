@@ -798,8 +798,6 @@
       <p class="vtitle" id="avisoItemTitulo">Qual?</p>
       <div class="grid-min" id="avisoItem" style="grid-template-columns:repeat(3,1fr)"></div>
     </div>
-    <p class="vtitle" style="margin-top:14px">Como você vai?</p>
-    <div class="grid-min" id="avisoModo" style="grid-template-columns:repeat(2,1fr)"></div>
     <div class="walert" id="avisoRaio" style="display:none;margin:10px 0 0"></div>
     <p class="vtitle">Avisar perto de onde?</p>
     <div class="grid-min" id="avisoOnde" style="grid-template-columns:repeat(2,1fr)"></div>
@@ -959,6 +957,59 @@
 
 /* ================= DADOS ================= */
 const PLANS = ["SUS","Convênio ou particular"];
+
+/* ===================== CONVÊNIOS ACEITOS =====================
+   Levantado em 06/08/2026 no site oficial de cada rede (ver
+   convenios-unidades.json, que guarda a fonte de cada uma). Convênio é da
+   REDE, não da unidade — por isso a busca é pelo nome, e uma lista cobre as
+   dezenas de unidades daquele laboratório.
+   REGRAS: é INFORMAÇÃO na tela da unidade, nunca filtro (filtrar por convênio
+   esconderia as centenas de unidades cuja lista a gente não tem — o erro que
+   o app existe para evitar). Sempre com a data e o aviso de confirmar por
+   telefone, porque convênio muda e o site pode estar velho. */
+const CONVENIOS_REDE = [
+  {re:/s[ãa]o marcos/i, data:"06/08/2026",
+   lista:["Unimed BH","Bradesco Saúde","Amil","SulAmérica","Hapvida","IPSEMG","Golden Cross","Cassi","Saúde Caixa","Porto Seguro","Notre Dame Intermédica","Mediservice","Postal Saúde","Vale/Pasa","Copass","Fundação Itaú","Stellantis/Fiat","Vitallis","e mais 23"],
+   excecao:"o site avisa que alguns convênios valem só em certas unidades"},
+  {re:/hermes pardini/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco Saúde","Amil","SulAmérica","Caixa Saúde","Care Plus","Itaú Saúde"],
+   excecao:"o site publica só os principais — pode aceitar outros"},
+  {re:/axial/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco","Amil","Cassi","Cemig Saúde","GEAP","Saúde Caixa","Casembrapa","Copasa","e mais de 350"],
+   excecao:null},
+  {re:/tomografia computadorizada/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco Saúde","Amil","Cassi","Cemig Saúde","IPSEMG","IPSM (PMMG)","Saúde Caixa","GEAP","Copasa","Vale/Pasa","Usiminas","Saúde Petrobras","Postal Saúde","Fusex","Particular","e mais 20"],
+   excecao:"NÃO atende Unimed Pleno nem Unifácil"},
+  {re:/conrad/i, data:"06/08/2026",
+   lista:["Unimed","Cassi","Cemig Saúde/Forluz","Copasa","Correios","Vale/Pasa","Saúde Caixa","Saúde Petrobras","IPSM (Polícia Militar)","Amagis","Stellantis","e mais 15"],
+   excecao:"NÃO atende Unimed Unifácil, Digital nem Pleno"},
+  {re:/laborat[óo]rio s[ãa]o paulo/i, data:"06/08/2026",
+   lista:["Unimed","IPSEMG","Bradesco Saúde","SulAmérica","Amil","PMMG","Saúde Caixa","FCA","Usiminas","GEAP","Copass","CASU","Sindeac","Pasa","Vale Saúde Sempre","Itaú Saúde","Metropax"],
+   excecao:null},
+  {re:/eccos/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco Saúde","SulAmérica","Amil","IPSEMG","Cemig Saúde","Saúde Caixa","GEAP (Pame)","Golden Cross","Postal Saúde","Polícia Militar","Fusex","Copass","Mediservice","e mais 13"],
+   excecao:null},
+  {re:/sonar/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco","SulAmérica","Cassi","IPSEMG","IPSM","Cemig","Copasa","Saúde Caixa","GEAP","Postal Saúde","Petrobras","Porto Seguro","Mediservice","e mais 12"],
+   excecao:null},
+  {re:/hospital s[ãa]o lucas/i, data:"06/08/2026",
+   lista:["Unimed","Bradesco Saúde","IPSEMG","IPSM","Cemig Saúde","Copasa","Saúde Caixa","GNDI","Mediservice","Amagis","Assefaz","Fusex","e mais 18"],
+   excecao:"a lista MUDA por serviço: internação, pronto atendimento e ambulatório têm coberturas diferentes"},
+  {re:/hospital belo horizonte/i, data:"06/08/2026",
+   lista:["Unimed?","Bradesco Saúde","Amil","SulAmérica","Cassi","Cemig","Caixa Saúde","GEAP","IPSM/PMMG","Itaú Saúde","Golden Cross","Notre Dame Intermédica","Postal Saúde","Vale","Vitallis","e mais 34"],
+   excecao:"a Unimed não consta na lista publicada"},
+  {re:/instituto de olhos de belo/i, data:"06/08/2026",
+   lista:["Amil","Cassi","Gama Saúde","Notre Dame Intermédica","Saúde Caixa","SulAmérica"],
+   excecao:"o site diz 'entre outros' — pode aceitar mais"},
+  {re:/imunologica vacinas/i, data:"06/08/2026",
+   lista:[], /* vazio = não trabalha com convênio */
+   excecao:null}
+];
+function convenioDe(h){
+  if(!h || !h.name) return null;
+  const r = CONVENIOS_REDE.find(c=>c.re.test(h.name));
+  return r || null;
+}
 
 const REGIONS = [
   {id:"sp", soon:true, label:"São Paulo — Capital", userLoc:"Vila Mariana, São Paulo", rankArea:"Vila Mariana", youX:255, youY:270, hospitals:[
@@ -3243,7 +3294,21 @@ function openDetail(id){
   } else {
     dB.style.display="none";
   }
-  document.getElementById("dPlans").innerHTML = h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("");
+  /* ===== CONVÊNIOS DE VERDADE, ONDE A GENTE TEM (11/08) =====
+     "Convênio ou particular" não ajuda ninguém a decidir. Onde levantamos a
+     lista no site oficial do próprio estabelecimento (ver convenios-unidades
+     .json), ela aparece aqui — com a data e a fonte, porque é dado que muda.
+     NÃO vira filtro: temos 12 de 746 unidades, e filtrar por convênio
+     esconderia as 734 que talvez aceitem — o erro que o app existe para
+     evitar (mesma razão da decisão 6.1 sobre a base da ANS). */
+  const cv = convenioDe(h);
+  document.getElementById("dPlans").innerHTML =
+    h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("")
+    + (cv ? `<div style="margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--ink2);font-weight:600">
+         ${cv.lista.length ? `<b>Aceita:</b> ${cv.lista.map(esc).join(" · ")}` : "<b>Não trabalha com convênio</b> — atendimento particular."}
+         ${cv.excecao ? `<div style="color:var(--warn);font-weight:800;margin-top:4px">Atenção: ${esc(cv.excecao)}</div>` : ""}
+         <div style="font-size:11px;color:var(--muted);margin-top:4px">Informado pelo site da unidade em ${esc(cv.data)} — confirme por telefone antes de ir.</div>
+       </div>` : "");
   const addrEl = document.getElementById("dAddr");
   /* Link de verdade, não botão com window.open: dentro de página incorporada
      o window.open é bloqueado silenciosamente e o toque não fazia nada. */
@@ -4015,14 +4080,18 @@ function abrirEscolhaPlano(){
   const g = document.getElementById("needGrid");
   document.getElementById("needTitle").textContent = "Como você vai ser atendido?";
   g.style.gridTemplateColumns = "repeat(1,1fr)";
-  /* Três opções, não quatro: com os dois planos marcados, "Meus convênios" e
-     "Qualquer forma" mostravam exatamente a mesma lista. */
+  /* A OPÇÃO REPETIDA (bug pego pelo Raphael, 11/08): a lista trazia "meus" com
+     o rótulo do próprio plano da pessoa E o plano de novo na lista fixa — dois
+     botões escritos "Convênio ou particular", indistinguíveis. Como só existem
+     dois planos, "meus" é SEMPRE redundante: com um marcado equivale a filtrar
+     por ele, com os dois equivale a "Ver todas". Sai da tela; segue existindo
+     por baixo como o padrão de quem acabou de se cadastrar. */
   const doisPlanos = state.plans.length === PLANS.length;
-  const ops = (state.plans.length && !doisPlanos
-      ? [["meus", state.plans.length===1 ? state.plans[0] : "Como eu sou atendido"]]
-      : [])
-    .concat(PLANS.map(p=>[p, p==="SUS" ? "SUS / público" : p]), [["Todos","Ver todas"]]);
-  g.innerHTML = ops.map(o=>`<button class="minbtn ${filters.plan===o[0]?'sel':''}" data-p="${o[0]}" style="font-size:13px">${o[1]}</button>`).join("");
+  const ops = PLANS.map(p=>[p, p==="SUS" ? "SUS / público" : p]).concat([["Todos","Ver todas"]]);
+  /* qual delas representa o estado atual, inclusive quando o filtro é "meus" */
+  const equivale = o => filters.plan===o
+    || (filters.plan==="meus" && (doisPlanos || !state.plans.length ? o==="Todos" : o===state.plans[0]));
+  g.innerHTML = ops.map(o=>`<button class="minbtn ${equivale(o[0])?'sel':''}" data-p="${o[0]}" style="font-size:13px">${o[1]}</button>`).join("");
   const btnAny = document.getElementById("needAny");
   btnAny.textContent = "Fechar";
   btnAny.onclick = ()=>{ fecharFolhas(); document.getElementById("backdrop").classList.remove("open"); };
@@ -4535,11 +4604,13 @@ const AVISO_MAX_MIN = 15;
    Custo da mudança, medido daqui: 54 unidades no raio antigo, 20 no novo —
    menos opções, porém todas de fato alcançáveis a pé. */
 const AVISO_MAX_KM_APE = 0.8;
+/* SEM PERGUNTAR COMO A PESSOA VAI (11/08, decisão do Raphael): perguntar
+   carro/a pé era mais um passo num formulário que já tem cinco. O aviso passa
+   a valer para os DOIS: alcança em 15 min de carro OU em 800 m a pé — a união,
+   que na prática é o raio de carro. Uma nota explica; o app não interroga. */
 function alcancavelParaAviso(h){
-  if(state.modo==="onibus") return false;
-  const t = travelMin(h);
-  if(t===null) return distOf(h) <= AVISO_MAX_KM_APE;
-  return t <= AVISO_MAX_MIN;
+  const t = travelMin(h, true);   /* sempre a conta de carro, qualquer que seja o modo */
+  return distOf(h) <= AVISO_MAX_KM_APE || (t!==null && t <= AVISO_MAX_MIN);
 }
 function unidadesNoRaio(perfil, itens){
   /* usa os serviços oficiais, igual aos filtros */
@@ -4638,34 +4709,14 @@ function renderAviso(){
   const p=document.getElementById("avisoPrazo");
   p.innerHTML = AVISO_PRAZOS.map(([k,l])=>`<button class="minbtn ${avisoTmp.prazo===k?'sel':''}" data-p="${k}" style="font-size:13px">${l}</button>`).join("");
   p.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{avisoTmp.prazo=b.dataset.p; renderAviso()}));
-  /* ===== COMO VOCÊ VAI (11/08) =====
-     O modo (carro/a pé) só existia num chip lá no mapa — quem vai a pé nunca
-     achava, e o aviso vinha calculado para carro, cobrindo unidades longe
-     demais para caminhar. A pergunta agora está AQUI, onde ela muda a
-     resposta. Ônibus fica de fora: sem os dados da BHTrans o tempo é chute,
-     e chute manda a pessoa para o lugar errado. */
-  const md=document.getElementById("avisoModo");
-  if(md){
-    md.innerHTML = [["carro","De carro"],["ape","A pé"]].map(([k,l])=>
-      `<button class="minbtn ${state.modo===k?'sel':''}" data-md="${k}" style="font-size:12.5px">${l}</button>`).join("");
-    md.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
-      state.modo=b.dataset.md; store.save(state); applyModoTexts(); renderChips(); renderAviso();
-    }));
-  }
-  /* deixa claro o alcance, com o número real de unidades que se encaixam */
+  /* o alcance é informado, não perguntado — com o número real de unidades */
   const r=document.getElementById("avisoRaio");
   if(r){
-    if(state.modo==="onibus"){
-      r.innerHTML = `<b>De ônibus o aviso ainda não funciona.</b> Sem os horários oficiais da BHTrans, o tempo até chegar é chute — e chute manda você para o lugar errado. Escolha <b>de carro</b> ou <b>a pé</b> acima.`;
-      r.style.display="";
-    } else if(avisoTmp.tipo){
+    if(avisoTmp.tipo){
       const n = unidadesNoRaio(avisoTmp.tipo, avisoTmp.itens);
-      const aPe = state.modo==="ape";
-      const alcance = aPe ? `<b>${(AVISO_MAX_KM_APE*1000).toFixed(0)} metros a pé</b> (uns 10 minutos de caminhada)`
-                          : `<b>${AVISO_MAX_MIN} minutos de carro</b>`;
       r.innerHTML = n
-        ? `Só aviso de unidades a até ${alcance} — hoje são <b>${n}</b> perto de você. Mais longe que isso, a fila muda antes de você chegar.`
-        : `Nenhuma unidade desse tipo a ${alcance} de você.${aPe ? " Se puder ir de carro, troque acima e o raio aumenta." : ""}`;
+        ? `Só aviso de unidades perto: até <b>800 metros a pé</b> ou <b>15 minutos de carro</b> — hoje são <b>${n}</b>. Mais longe que isso, a fila muda antes de você chegar.`
+        : `Nenhuma unidade desse tipo perto de você (800 m a pé ou 15 min de carro). O aviso não teria como ajudar.`;
       r.style.display="";
     } else r.style.display="none";
   }
