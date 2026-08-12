@@ -650,7 +650,7 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">Avisar quem está indo</h2>
-    <div class="herosub">Escolha o aviso — dá para marcar mais de um. Ele vale por 3 horas e, quando outra pessoa confirma, aparece com força para todo mundo.</div>
+    <div class="herosub">Escolha o aviso — dá para marcar mais de um. Vacina em falta vale até o fim do dia; os demais valem 3 horas. Quando outra pessoa confirma, aparece com força para todo mundo.</div>
     <div id="alertOpts"></div>
     <div id="vacPick" style="display:none">
       <p class="vtitle" id="vacTitle">Qual vacina está em falta?</p>
@@ -1132,7 +1132,20 @@ const REGIONS = [
     {id:"u24147", cnes:24147, lat:-19.947167, lon:-43.935506, name:"Centro de Saúde Santa Rita de Cássia", type:"Público", plans:["SUS"], profile:"basica", region:"São Pedro", addr:"Rua Cristina, 961", dist:1.1, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132778826", sus:true, vac:true},
     {id:"u24155", cnes:24155, lat:-19.950671, lon:-43.946796, name:"Centro de Saúde Santa Lucia", type:"Público", plans:["SUS"], profile:"basica", region:"Santo Antônio", addr:"Rua Murilo Moraes de Andrade, 125", dist:2.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132778813", sus:true, vac:true},
     {id:"u24163", cnes:24163, lat:-19.951883, lon:-43.954379, name:"Centro de Saúde Conjunto Santa Maria", type:"Público", plans:["SUS"], profile:"basica", region:"São Bento", addr:"Rua Gentios, 821", dist:2.7, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132778823", sus:true, vac:true},
-    {id:"u24171", cnes:24171, lat:-19.918777, lon:-43.982555, name:"Centro de Saúde Cafezal", type:"Público", plans:["SUS"], profile:"basica", region:"Santana do Cafezal", addr:"Rua Bela Vista, 30", dist:5.4, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132775243", sus:true, vac:true},
+    /* CAFEZAL corrigido em 12/08/2026: a coordenada do CNES aponta a Rua Bela
+   Vista do PADRE EUSTÁQUIO (rua homônima) — 7 km da unidade. Lat/lon abaixo
+   vêm do dado municipal (PBH, Rede de Assistência Saúde, CSV de 07/2026,
+   ID_EQ_SAUDE 228, UTM 23S convertido). Endereço confere com o CNES. */
+{id:"u24171", cnes:24171, lat:-19.936170, lon:-43.911201, name:"Centro de Saúde Cafezal", type:"Público", plans:["SUS"], profile:"basica", region:"Santana do Cafezal", addr:"Rua Bela Vista, 30", dist:3.4, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132775243", sus:true, vac:true},
+/* SÃO MIGUEL ARCANJO incluído em 12/08/2026 (faltava na base; achado na
+   preparação do piloto da Serra). CNES 3128989 (API dadosabertos, atual.
+   09/2025: turnos manhã/tarde/noite, ambulatorial SUS SIM); coordenada e
+   número do imóvel do dado municipal (PBH, Rede de Assistência Saúde, CSV de
+   07/2026, ID_EQ_SAUDE 417, UTM 23S convertido — a lat/lon do CNES aponta
+   -19.73, região Norte, errada). vac:false porque o serviço 174-IMUNIZAÇÃO
+   não foi confirmado para este CNES — conferir na próxima recarga da base
+   completa antes de ligar o filtro Vacina para ele. */
+{id:"u3128989", cnes:3128989, lat:-19.934672, lon:-43.902422, name:"Centro de Saúde São Miguel Arcanjo", type:"Público", plans:["SUS"], profile:"basica", region:"Nossa Senhora de Fátima", addr:"Rua Nossa Senhora de Fátima, 2640", dist:4.2, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132776412", sus:true, vac:false},
     {id:"u2695421", cnes:2695421, lat:-19.839562, lon:-43.934612, name:"Centro de Saúde Floramar", type:"Público", plans:["SUS"], profile:"basica", region:"Floramar", addr:"Rua Igaraunas, 15", dist:10.8, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132776768", sus:true, vac:true},
     {id:"u2695448", cnes:2695448, lat:-19.927538, lon:-44.003786, name:"Centro de Saúde João Pinheiro", type:"Público", plans:["SUS"], profile:"basica", region:"João Pinheiro", addr:"Rua Barao de Airuoca, 621", dist:7.3, ab:7, fe:18, turno:"Manhã e tarde", sus:true, vac:true},
     {id:"u2695456", cnes:2695456, lat:-19.833559, lon:-43.912133, name:"Centro de Saúde Lajedo", type:"Público", plans:["SUS"], profile:"basica", region:"Tupi", addr:"Rua Julio Ribeiro, 681", dist:11.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132771324", sus:true, vac:true},
@@ -2207,11 +2220,23 @@ function esc(v){
    state.user.usuario; relato sem autor conhecido (semeado na demo, ou de versão
    antiga) conta como um autor só. Um relato NUNCA confirma a si mesmo. */
 const CONFIRMA_FALTA = 2;          /* relatores distintos para confirmar uma falta */
-const JANELA_FALTA   = 3*3600e3;   /* uma falta vale por 3 horas (régua inicial, a ajustar) */
+const JANELA_FALTA   = 3*3600e3;   /* aviso comum vale por 3 horas */
+/* FALTA DE VACINA VALE ATÉ O FIM DO DIA (decisão do Raphael, 12/08/2026, a
+   partir da simulação do piloto — resposta à pendência 6.12): vacina que
+   acabou não volta em 3 horas, e a janela curta era o que impedia o segundo
+   relator de confirmar (o aviso da manhã já tinha expirado quando o da tarde
+   chegava). A regra dos 2 relatores distintos NÃO muda; fila segue valendo 3h. */
+function validadeDoAviso(a){
+  if(a.type===T_VACINA || a.type===T_SEM_VACINACAO){
+    const d = new Date(a.ts);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()+1).getTime() - a.ts;
+  }
+  return JANELA_FALTA;
+}
 function activeAlerts(h){
   const now=Date.now();
   const agg={};
-  (idxPorHid().alerts.get(h.id)||[]).filter(a=>now-a.ts<JANELA_FALTA).forEach(a=>{
+  (idxPorHid().alerts.get(h.id)||[]).filter(a=>now-a.ts<validadeDoAviso(a)).forEach(a=>{
     const k=a.type+(a.vac||"");
     const ago=Math.max(1,Math.round((now-a.ts)/60000));
     /* sem autor conhecido, TODOS caem no mesmo balde "anon": aviso anônimo
