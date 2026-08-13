@@ -1128,7 +1128,7 @@ const REGIONS = [
   {id:"grj", soon:true, label:"Grande Rio — Niterói e Baixada", userLoc:"Icaraí, Niterói", rankArea:"Niterói", youX:230, youY:250, hospitals:[
     /* dados serão carregados das fontes oficiais na expansão */
   ]},
-  {id:"bh", label:"Belo Horizonte — Capital e Vila da Serra", userLoc:"Savassi, Belo Horizonte", rankArea:"Belo Horizonte", youX:230, youY:240, geo:{lat:-19.9370, lon:-43.9345, k:2600}, hospitals:[
+  {id:"bh", label:"Belo Horizonte — Capital, Vila da Serra e Vale do Sereno", userLoc:"Savassi, Belo Horizonte", rankArea:"Belo Horizonte", youX:230, youY:240, geo:{lat:-19.9370, lon:-43.9345, k:2600}, hospitals:[
     {id:"u22675", cnes:22675, lat:-19.999357, lon:-43.966766, name:"Centro de Saúde Pilar Olhos Dagua", type:"Público", plans:["SUS"], profile:"basica", region:"Serra do Curral", addr:"Rua São Pedro da Aldeia, 55", dist:7.7, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132778241", sus:true, espec:true, vac:true},
     {id:"u23248", cnes:23248, lat:-19.829761, lon:-43.927734, name:"Centro de Saúde Jardim Felicidade", type:"Público", plans:["SUS"], profile:"basica", region:"Jardim Felicidade", addr:"Rua Cecilia Trindade Silva, 201", dist:11.9, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132776767", sus:true, vac:true},
     {id:"u24139", cnes:24139, lat:-19.947773, lon:-43.949725, name:"Centro de Saúde Tia Amancia", type:"Público", plans:["SUS"], profile:"basica", region:"Vila Paris", addr:"Rua Irai, 248", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132778828", sus:true, vac:true},
@@ -2630,7 +2630,11 @@ function renderChips(){
        "o que você precisa": os dois são ação, o resto é filtro. */
     + (()=>{ const n = pedidos().length;
         return `<button class="chip" data-avise="1" aria-pressed="${n>0}" style="flex:none;${n?'background:var(--brand);color:var(--brand-ink)':''}">🔔 Me avise${n?" · "+n:""}</button>` })()
-    + `<button class="chip" data-modo="1" aria-pressed="true">${MODOS[state.modo]}</button>`
+    /* o chip do modo NÃO é filtro — é preferência de transporte, e vinha com
+       aria-pressed fixo em true, o que o pintava de verde como se estivesse
+       filtrando alguma coisa (achado do Raphael, 12/08). Verde só quando a
+       pessoa muda do padrão (carro), aí sim é escolha dela. */
+    + `<button class="chip" data-modo="1" aria-pressed="${state.modo!=="carro"}">${MODOS[state.modo]}</button>`
     + `<button class="chip" data-caso="1" aria-pressed="${filters.need!=='todos'}">${rotuloCaso()}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
     + `<button class="chip" data-x="ped" aria-pressed="${filters.ped}">Infantil</button>`
@@ -3461,7 +3465,13 @@ function renderRail(hs){
       </div>
     </button>`;
   }
-  const open = hs.filter(h=>{const w=currentWait(h); return !w.closed && !w.semDados})
+  /* SEM RELATO TAMBÉM ENTRA (12/08, achado do Raphael): o trilho exigia
+     `!w.semDados`, ou seja, só mostrava unidade que já tinha relato de fila —
+     resquício do app "menor fila". Como o app nasce sem relato nenhum, o mapa
+     abria com o trilho vazio enquanto a lista mostrava 40 unidades. Era o pior
+     cenário possível justamente no dia 1 do piloto. Agora o critério é o mesmo
+     da lista: ABERTA agora. Sem relato, o cartão mostra a distância. */
+  const open = hs.filter(h=>!currentWait(h).closed)
                  .filter(h=>!rec || h.id!==rec.h.id).slice(0,5);
   /* o trilho ficava em branco sem explicar nada — por exemplo ao filtrar
      "Vacina" de madrugada, quando todo posto está fechado */
@@ -3476,9 +3486,12 @@ function renderRail(hs){
   }
   document.getElementById("rail").innerHTML = recCard + open.map(h=>{
     const w=currentWait(h), tot=totalMin(h);
-    const s = tot===null ? filaStatus(w.min) : statusOf(tot);
-    const num = tot===null ? fmtShort(w.min) : fmtShort(tot);
-    const rot = tot===null ? "fila" : "total";
+    /* sem relato: a caixa mostra a DISTÂNCIA, não uma fila que não existe
+       (fmtShort(undefined) dava "NaN" na tela) */
+    const semRel = !!w.semDados;
+    const s = semRel ? {color:"#4E6E59"} : (tot===null ? filaStatus(w.min) : statusOf(tot));
+    const num = semRel ? kmBR(distOf(h)) : (tot===null ? fmtShort(w.min) : fmtShort(tot));
+    const rot = semRel ? "km" : (tot===null ? "fila" : "total");
     /* mesmo princípio do cartão da lista: havendo aviso, ele ocupa a linha */
     const als = activeAlerts(h).sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0));
     const sub2 = als.length
