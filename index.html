@@ -664,6 +664,29 @@
   </div>
 </div>
 
+<!-- ============ TROCAR APELIDO ============
+     O app dizia "se esse for seu nome verdadeiro, dá para trocar" e NÃO DAVA:
+     só existia "Sair da conta", que apaga pontos, medalhas e histórico. Quem
+     percebia o erro era punido por corrigi-lo — o contrário do que a LGPD
+     chama de direito de correção, e uma promessa que o app não cumpria.
+     Criada em 12/08/2026. -->
+<div class="sheet" id="apelidoSheet" role="dialog" aria-modal="true" aria-label="Trocar apelido">
+  <div class="sheet-inner">
+    <div class="grab"></div>
+    <button class="closex" data-back="1" aria-label="Voltar">✕</button>
+    <h2 style="padding-right:44px">Trocar meu apelido</h2>
+    <div class="walert" style="margin:0 0 12px"><b>Invente um — não use seu nome verdadeiro.</b> Ele aparece nos seus relatos, para as outras pessoas.</div>
+    <div class="field" id="f-apelido">
+      <label for="inApelido">Novo apelido</label>
+      <input id="inApelido" autocapitalize="none" autocomplete="off" maxlength="20" placeholder="ex.: canario10">
+      <div class="err">Use 3 a 20 letras ou números, sem espaços.</div>
+    </div>
+    <button class="cta sec" id="btnSortearTroca">Sortear um apelido para mim</button>
+    <button class="cta" id="btnSalvarApelido">Salvar o novo apelido</button>
+    <div class="login-note" style="text-align:left">Seus pontos, medalhas e histórico continuam com você. <b>Os relatos que você já publicou seguem assinados com o apelido antigo</b> — o app não reescreve o que já saiu daqui.</div>
+  </div>
+</div>
+
 <!-- ============ TERMOS E PRIVACIDADE ============ -->
 <div class="sheet" id="legalSheet" role="dialog" aria-modal="true" aria-label="Termos de uso e privacidade">
   <div class="sheet-inner">
@@ -896,12 +919,22 @@
              confie no aviso, desenhe para o erro não acontecer.
            Resultado: o piloto roda com ZERO dado pessoal no aparelho e na
            nuvem. Só um apelido inventado assinando os relatos. -->
+      <!-- O AVISO SUBIU E GANHOU COR (12/08). Ele estava DEPOIS do campo, em
+           cinza: a pessoa lia depois de já ter digitado. Agora vem antes de
+           digitar, em âmbar — a mesma cor de "vacina em falta", que no app
+           quer dizer "atenção". Vermelho foi descartado de propósito: no
+           Ondiva vermelho é emergência (SOS, unidade fechada), e gastar
+           vermelho aqui enfraquece o vermelho que salva vida. -->
+      <div class="walert" style="margin:0 0 12px"><b>Invente um — não use seu nome verdadeiro.</b> Ele aparece nos seus relatos, para as outras pessoas.</div>
       <div class="field" id="f-user">
         <label for="inUser">Apelido no app</label>
-        <input id="inUser" autocapitalize="none" autocomplete="off" placeholder="ex.: canario10">
+        <input id="inUser" autocapitalize="none" autocomplete="off" maxlength="20" placeholder="ex.: canario10">
         <div class="err">Use 3 a 20 letras ou números, sem espaços.</div>
       </div>
-      <div class="login-note" style="text-align:left;margin:-4px 0 12px">Aparece nos seus relatos, para os outros. <b>Invente um — não use seu nome verdadeiro.</b></div>
+      <!-- FOGG: não confie no aviso, tire o trabalho. Quem precisa INVENTAR um
+           apelido na hora pega o caminho mais curto — o próprio nome. Com um
+           apelido pronto a um toque, o caminho mais curto passa a ser o certo. -->
+      <button class="cta sec" id="btnSortear" style="margin-top:0">Sortear um apelido para mim</button>
       <button class="cta" id="btnSignup">Continuar</button>
       <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
            e sobrava só o link, torto — pego pelo Raphael no celular. A classe
@@ -3658,9 +3691,19 @@ const ESPERA_ENTRE_RELATOS = 3600e3;
    veio do servidor (é minha); linha com cid é minha só se o uid bate com o meu
    apelido. (Apelido repetido entre duas pessoas pode contar a mais — limitação
    aceita do piloto, o servidor não tem conta de verdade.) */
-function ehMeu(x){
+/* Quem troca de apelido não deixa de ser dono do que já fez. Guardamos os
+   apelidos anteriores porque o registro que JÁ SUBIU carrega o antigo — e volta
+   com ele no próximo pull da nuvem. Sem esta lista, corrigir o apelido apagaria
+   medalhas e pontos da pessoa, punindo justamente quem se corrigiu. */
+function meusApelidos(){
   const eu = state.user && state.user.usuario;
-  return !x.cid || (!!eu && x.uid===eu);
+  const antigos = state.apelidosAntigos || [];
+  return eu ? antigos.concat([eu]) : antigos;
+}
+function ehMeu(x){
+  if(!x.cid) return true;              /* nasceu neste aparelho e nunca foi ao servidor */
+  const meus = meusApelidos();
+  return !!x.uid && meus.indexOf(x.uid) >= 0;
 }
 function bloqueioDeRepeticao(hid){
   /* só MEU relato me trava: o relato de outra pessoa na mesma unidade não pode
@@ -3984,8 +4027,10 @@ function renderProfile(){
         <b>Tudo isto fica neste celular:</b> seus pontos, medalhas, avisos ligados e histórico. Trocou de aparelho ou limpou o navegador, começa do zero.<br>
         <b>O que você relata vai para o servidor</b> e continua ajudando o bairro, aconteça o que acontecer com o seu celular.
       </div>
+      <button class="logout" id="btnTrocarApelido" style="color:var(--brand)">Trocar meu apelido</button>
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
       <button class="logout" id="btnLogout">Sair da conta</button>`;
+    document.getElementById("btnTrocarApelido").addEventListener("click",abrirTrocaApelido);
     document.getElementById("btnEditPlans").addEventListener("click",showPlanSetup);
     document.getElementById("btnLogout").addEventListener("click",()=>{
       /* Sair da conta tem que limpar os convênios também. Sem isto a tela de
@@ -4620,7 +4665,7 @@ function enableSwipeClose(id){
     startY=null; curY=0; armado=false;
   });
 }
-["sheet","locSheet","sosSheet","alertSheet","needSheet","legalSheet","fixSheet","goSheet","giveupSheet","saidaSheet","motivoSheet","avisoSheet","shareSheet","avisarSheet"].forEach(enableSwipeClose);
+["sheet","locSheet","sosSheet","alertSheet","needSheet","legalSheet","fixSheet","goSheet","giveupSheet","saidaSheet","motivoSheet","avisoSheet","shareSheet","avisarSheet","apelidoSheet"].forEach(enableSwipeClose);
 
 /* ===== NUVEM (Supabase) — os relatos de todo mundo num lugar só =====
    Até aqui cada celular era uma ilha: o relato de um não aparecia para o outro.
@@ -5063,6 +5108,22 @@ document.getElementById("btnVisitante").addEventListener("click",()=>{
   renderChips(); renderList(); renderMap(); renderProfile(); renderRankView();
   toast("Pronto. Para avisar ou relatar, aí sim precisa de conta.");
 });
+/* ===== SORTEAR APELIDO =====
+   Bichos brasileiros + número: some do nome civil, é fácil de lembrar e de
+   ditar para alguém. Nada de palavra que possa virar ofensa ou nome de gente. */
+const APELIDO_BICHOS = ["canario","tucano","bemtevi","sabia","curio","jabuti","quati",
+  "siriema","arara","colibri","tatu","capivara","lontra","tamandua","sagui","gaivota",
+  "pardal","joaninha","libelula","cambaxirra","maritaca","periquito","tiziu","corruira"];
+function sortearApelido(){
+  const b = APELIDO_BICHOS[Math.floor(Math.random()*APELIDO_BICHOS.length)];
+  return b + (10 + Math.floor(Math.random()*90));
+}
+document.getElementById("btnSortear").addEventListener("click",()=>{
+  const el = document.getElementById("inUser");
+  el.value = sortearApelido();
+  setBad("f-user", false);
+  el.focus();
+});
 document.getElementById("btnSignup").addEventListener("click",()=>{
   /* ZERO DADO PESSOAL (11/08): a conta do piloto é só um apelido inventado */
   const usuario=document.getElementById("inUser").value.trim();
@@ -5075,7 +5136,7 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
      escolheu um apelido legítimo assim */
   if(/^[A-Za-z]{3,}[._-][A-Za-z]{3,}$/.test(usuario) && !state.avisouApelido){
     state.avisouApelido = true; store.save(state);
-    toast("Dica: o apelido aparece para outras pessoas — se esse for seu nome verdadeiro, dá para trocar.");
+    toast("Dica: o apelido aparece para outras pessoas — se esse for seu nome verdadeiro, dá para trocar no Perfil.");
   }
   state.user = {usuario};
   state.visitante = false;
@@ -5083,6 +5144,42 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
   store.save(state);
   renderRankView(); renderProfile();
   showPlanSetup();
+});
+
+/* ===== TROCAR APELIDO (12/08) — o direito de se corrigir =====
+   Sem isto, quem digitou o nome verdadeiro só tinha a saída de "Sair da conta",
+   que apaga pontos, medalhas e histórico: a pessoa era punida por corrigir o
+   erro. Trocar não mexe no que já subiu (o app não reescreve o que publicou),
+   mas `meusApelidos()` continua reconhecendo os registros antigos como dela. */
+function abrirTrocaApelido(){
+  if(!state.user) return;
+  const el = document.getElementById("inApelido");
+  el.value = state.user.usuario;
+  setBad("f-apelido", false);
+  document.getElementById("backdrop").classList.add("open");
+  document.getElementById("apelidoSheet").classList.add("open");
+  el.focus();
+}
+document.getElementById("btnSortearTroca").addEventListener("click",()=>{
+  const el = document.getElementById("inApelido");
+  el.value = sortearApelido();
+  setBad("f-apelido", false);
+  el.focus();
+});
+document.getElementById("btnSalvarApelido").addEventListener("click",()=>{
+  if(!state.user) return;
+  const novo = document.getElementById("inApelido").value.trim();
+  if(setBad("f-apelido", novo.length<3 || novo.length>20 || !/^[A-Za-z0-9._-]+$/.test(novo))){
+    toast("Escolha um apelido de 3 a 20 letras ou números, sem espaços."); return;
+  }
+  const antigo = state.user.usuario;
+  if(novo === antigo){ closeDetail(); return }
+  state.apelidosAntigos = (state.apelidosAntigos || []).concat([antigo]);
+  state.user.usuario = novo;
+  store.save(state);
+  closeDetail();
+  renderProfile(); renderRankView(); renderList();
+  toast("Pronto. Agora você aparece como @" + novo + ".");
 });
 /* concordância dos termos no momento do cadastro (não é parede na entrada: só
    aqui, quando vai criar conta e contribuir). O link abre os termos que já
