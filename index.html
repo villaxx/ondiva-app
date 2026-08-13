@@ -448,6 +448,15 @@
       </div>
       <div class="filterwrap"><div class="filters" id="chipsMap"></div></div>
       <span class="protopill" id="protoPill">Não perca a viagem · unidades oficiais do CNES</span>
+      <!-- INSTALAR NO MAPA (12/08, pedido do Raphael): o convite existia só no
+           Perfil e num popup que depende do evento `beforeinstallprompt` — que
+           no iPhone NUNCA dispara, então metade dos testadores nunca via nada.
+           Aqui é um chip discreto na tela que abre primeiro, sem tapar o mapa,
+           e some sozinho quando o app já está instalado. -->
+      <button class="protopill" id="instalarChip" style="display:none;align-self:flex-start;color:var(--brand);font-weight:800;border:none;cursor:pointer;gap:5px;align-items:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5z"/></svg>
+        Botar o Ondiva na tela do celular
+      </button>
     </div>
 
     <div class="mapzoom">
@@ -4853,6 +4862,8 @@ function nuvemPuxar(){
     /* o cache da comunidade grava aqui, e SÓ aqui — é a outra gaveta */
     if(sRel || sAv || sDes) store.salvarNuvem(sRel, sAv, sDes);
     renderList(); renderMap(); renderRankView();
+    /* chegou dado novo da comunidade: é a hora de conferir os "Me avise" */
+    mostrarAvisoDePedido();
   }).catch(()=>{}).finally(()=>{ nuvemPuxando=false; });
 }
 
@@ -5002,6 +5013,42 @@ const AVISO_MAX_KM_APE = 0.8;
 function alcancavelParaAviso(h){
   const t = travelMin(h, true);   /* sempre a conta de carro, qualquer que seja o modo */
   return distOf(h) <= AVISO_MAX_KM_APE || (t!==null && t <= AVISO_MAX_MIN);
+}
+/* ===== O AVISO QUE FALTAVA DISPARAR (12/08/2026) =====
+   O "Me avise" guardava o pedido, mostrava na lista, deixava desligar — e
+   NUNCA avisava nada. Promessa não cumprida é pior que recurso ausente: os 20
+   testadores ligariam o sino e concluiriam que o app não funciona.
+   Notificação de verdade (push) só existe com app nativo + Firebase, que estão
+   nos Blocos 2 e 3. Enquanto isso, o aviso aparece QUANDO A PESSOA ABRE o app.
+
+   O QUE ELE PODE DIZER, sem inventar: o app não sabe se a vacina chegou — ele
+   sabe que a falta que existia VENCEU ou foi desmentida. Então a frase é
+   exatamente essa, e manda ligar antes de ir. Dizer "chegou a vacina" seria
+   inventar, e é o que mataria a confiança no primeiro erro. */
+function conferirPedidos(){
+  const lista = pedidos();
+  if(!lista.length) return null;
+  const vistos = state.pedidosAvisados = state.pedidosAvisados || {};
+  for(const p of lista){
+    const itens = p.item ? [p.item] : null;
+    const n = unidadesNoRaio(p.tipo, itens);
+    if(!n) continue;                                  /* nada perto: nada a dizer */
+    /* só avisa quando VIROU: da última vez que olhamos, não havia nenhuma */
+    if(vistos[p.id] === undefined){ vistos[p.id] = n; continue }
+    if(vistos[p.id] === 0 && n > 0){
+      vistos[p.id] = n; store.save(state);
+      return {pedido:p, n};
+    }
+    vistos[p.id] = n;
+  }
+  store.save(state);
+  return null;
+}
+function mostrarAvisoDePedido(){
+  const r = conferirPedidos();
+  if(!r) return;
+  const oque = textoPedido(r.pedido);
+  toast(`Perto de você já tem ${r.n===1?"1 unidade":r.n+" unidades"} sem aviso de falta de ${oque.toLowerCase()}. Ligue antes de ir — o app não confirma estoque.`);
 }
 function unidadesNoRaio(perfil, itens){
   /* usa os serviços oficiais, igual aos filtros */
@@ -5402,7 +5449,18 @@ function podeOferecerInstalar(){
   if(state.instalarDepois && Date.now()-state.instalarDepois < 14*24*3600e3) return false;
   return !!promptInstalar || APARELHO_IOS;
 }
+/* O CHIP DO MAPA. Aparece sempre que dá para instalar — sem esperar a 2ª
+   visita e sem o silêncio de 14 dias do popup, porque ele não interrompe
+   ninguém: fica quieto num canto até alguém querer. É o que garante que o
+   iPhone (onde o popup automático nunca dispara) tenha um caminho visível. */
+function atualizarChipInstalar(){
+  const c = document.getElementById("instalarChip");
+  if(!c) return;
+  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO && (!!promptInstalar || APARELHO_IOS);
+  c.style.display = dá ? "inline-flex" : "none";
+}
 function oferecerInstalar(){
+  atualizarChipInstalar();
   if(!podeOferecerInstalar()) return;
   if(document.getElementById("instalarBar")) return;
   const bar = document.createElement("div");
@@ -5434,6 +5492,22 @@ function oferecerInstalar(){
   };
 }
 
+/* o chip do mapa também ignora o silêncio: quem TOCA nele quer instalar agora */
+(function(){
+  const c = document.getElementById("instalarChip");
+  if(!c) return;
+  c.addEventListener("click", ()=>{
+    if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
+    /* iPhone: não existe instalação automática, então mostra o caminho */
+    const antes = state.instalarDepois; delete state.instalarDepois;   /* o toque vence o silêncio */
+    const bar = document.getElementById("instalarBar"); if(bar) bar.remove();
+    const visitas = state.visitas; state.visitas = Math.max(2, visitas||0);
+    oferecerInstalar();
+    state.visitas = visitas; if(antes) state.instalarDepois = antes;
+    const b2 = document.getElementById("instSim"); if(b2) b2.click();
+  });
+  atualizarChipInstalar();
+})();
 /* o botão do Perfil ignora o silêncio de 14 dias: quem foi até lá QUER instalar */
 (function(){
   const b = document.getElementById("btnInstalar");
@@ -5570,6 +5644,9 @@ renderRankView();
 renderProfile();
 store.save(state);                        /* grava a contagem de visitas */
 setTimeout(oferecerInstalar, 8000);       /* o convite espera a pessoa usar */
+/* o "Me avise" confere na abertura e a cada pull da nuvem — enquanto não há
+   notificação de verdade, é aqui que a promessa é cumprida */
+setTimeout(mostrarAvisoDePedido, 2500);
 carregarLeaflet();                        /* mapa de ruas onde houver rede externa */
 </script>
 
