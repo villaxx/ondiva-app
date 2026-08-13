@@ -1042,7 +1042,7 @@ const CONVENIOS_REDE = [
 const CONVENIOS_SITE={
   "26794":{l:[],d:"2026-08-12"},
   "26859":{l:["Unimed","Bradesco Seguros","SulAmerica","Amil","Cassi","Cemig Saude","NotreDame Intermedica","Saude Caixa","Mediservice","Allianz","IPSM","Fusex","Care Plus","Omint","Porto Saude","Saude Petrobras","Usisaude","Abertta Saude","Amagis Saude","Fundaffemg","Fundacao Libertas","Assefaz","Agros","Copass Saude","Premium Saude"],d:"2026-08-12",e:"IPSEMG NAO consta na lista oficial. Atende tambem SUS e gratuidade (filantropico) alem de particular."},
-  "27014":{l:[],d:"2026-08-12",e:"Esta unidade (Av. Francisco Sales, 1111) e 100% SUS. Quem tem plano e atendido no Hospital Sao Lucas, do mesmo grupo, no numero 1186 - outro predio, outras regras."},
+  "27014":{l:[],d:"2026-08-12",e:"Esta unidade (Av. Francisco Sales, 1111) e 100% SUS. QUEM TEM PLANO e atendido no Hospital Sao Lucas, do mesmo grupo, quase ao lado, no numero 1186."},
   "27820":{l:["Allianz","Amil","Assefaz","Bradesco Saude","Cassi","Cemig Saude","Confianca Saude","Copass","Fundacao Saude Itau","IPSM","Medgold","Mediservice","Postal Saude","SulAmerica","Unimed BH","USI Saude"],d:"2026-08-12"},
   "27863":{l:[],d:"2026-08-12",e:"100% SUS, filantropico, porta aberta 24h. Nao atende convenio nem particular."},
   "27987":{l:["IPSM"],d:"2026-08-12",e:"Atendimento RESTRITO a beneficiarios do IPSM (militares estaduais, bombeiros, dependentes e pensionistas). Nao atende convenio privado nem publico geral."},
@@ -1062,6 +1062,7 @@ const CONVENIOS_SITE={
   "5524660":{l:["Abertta Saude","Aeronautica","Allianz","Amagis Saude","Amil","AMMP","Assefaz","Banco Central","Bradesco Saude","Care Plus","Cassi","Casu","Cemig Saude","Copasa","Desban","Fundaffemg","Fusex","GEAP","Golden Cross","Hapvida","IPSEMG","Fundacao Libertas","Marinha do Brasil","Mediservice","NotreDame","Omint","Petrobras","Plan Assiste","PMMG","Postal Saude","Saude Caixa","Fundacao Itau","SulAmerica","Unimed","Usisaude"],d:"2026-08-12"},
   "6675352":{l:["Allianz","Amagis","AMMP","Amil","Assefaz","Aurora Saude","Blue Saude","Capesesp","Casembrapa","Cassi","Casu","Cemig Saude","Copass Saude","Postal Saude","Fundaffemg","Fusex","GEAP","Golden Cross","IPSEMG","Medsenior"],d:"2026-08-12"},
   "6969097":{l:["Abertta Saude","Allianz","Amagis","Amil","AMMP","Assefaz","Assembleia Legislativa MG","Bacen","Bradesco Saude","Camed","Care Plus","Cassi","Cemig Saude","Cenibra","Copass Saude"],d:"2026-08-12",e:"Lista da unidade Santo Agostinho; ha pagina separada para Hapvida-GNDI."},
+  "7166966":{l:["Unimed","Bradesco Saude","IPSEMG","IPSM (PMMG)","Cemig Saude","Copasa","Saude Caixa","NotreDame Intermedica","Mediservice","Amagis","Assefaz","Fusex","Fundaffemg"],d:"2026-08-12",e:"A lista MUDA por servico: internacao, pronto atendimento e ambulatorio tem coberturas diferentes - confirme por telefone. ESTE predio (n. 1186) e o do CONVENIO; quem vai pelo SUS e atendido na Santa Casa, quase ao lado, no numero 1111."},
   "7268653":{l:[],d:"2026-08-12",e:"PESQUISA, nao atendimento: e laboratorio do Instituto Rene Rachou (Fiocruz Minas)."},
   "7268726":{l:[],d:"2026-08-12",e:"PESQUISA, nao atendimento: laboratorio da Fiocruz Minas."},
   "7268742":{l:[],d:"2026-08-12",e:"PESQUISA, nao atendimento: laboratorio da Fiocruz Minas."},
@@ -1286,15 +1287,15 @@ const REGIONS = [
     {id:"u9166718", cnes:9166718, lat:-19.804643, lon:-43.928075, name:"Centro de Saúde Zilah Sposito", type:"Público", plans:["SUS"], profile:"basica", region:"Jaqueline", addr:"Rua Coquilho, 85", dist:14.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775482", sus:true, vac:true},
     {id:"u9166793", cnes:9166793, lat:-19.819024, lon:-43.967806, name:"Centro de Saúde Alameda dos Ipes", type:"Público", plans:["SUS"], profile:"basica", region:"São João Batista", addr:"Rua Bernardino Oliveira Pena, 85", dist:13.6, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132469024", sus:true, vac:true},
     /* hospitais de BH que faltavam na base (conferidos no CNES em 11/08) */
-    {id:"u27685", cnes:27685, lat:-19.911994, lon:-43.922897, name:"Hospital Infantil São Camilo (Unimed)", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Horto", addr:"Av Silviano Brandão, 1600", dist:3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134819100", sus:false, h24:true, cir:true, intern:true, inf:true},
+    {id:"u27685", cnes:27685, soPlano:true, lat:-19.911994, lon:-43.922897, name:"Hospital Infantil São Camilo (Unimed)", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Horto", addr:"Av Silviano Brandão, 1600", dist:3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134819100", sus:false, h24:true, cir:true, intern:true, inf:true},
     {id:"u27863", cnes:27863, lat:-19.817542, lon:-43.948531, name:"Hospital Risoleta Tolentino Neves", type:"Público", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Venda Nova", addr:"Rua das Gabirobas, 01", dist:13.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134593200", sus:true, h24:true, cir:true, obst:true, intern:true, ps:true},
-    {id:"u6437745", cnes:6437745, lat:-19.922095, lon:-43.919557, name:"Hospital Unimed Contorno", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av do Contorno, 3097", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132148362", sus:false, h24:true, cir:true, intern:true},
+    {id:"u6437745", cnes:6437745, soPlano:true, lat:-19.922095, lon:-43.919557, name:"Hospital Unimed Contorno", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av do Contorno, 3097", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132148362", sus:false, h24:true, cir:true, intern:true},
     {id:"u2695332", cnes:2695332, lat:-19.935786, lon:-43.969121, name:"Hospital da Criança", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Alto Barroca", addr:"Rua Viamão, 510", dist:3.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3121058900", sus:true, h24:true, cir:true, intern:true, inf:true},
     {id:"u26816", cnes:26816, lat:-19.974006, lon:-44.01525, name:"Hospital Infantil de Urgência São Paulo", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barreiro", addr:"Rua Flávio Marques Lisboa, 80", dist:9.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133841700", sus:false, h24:true, cir:true, intern:true, ps:true, inf:true},
-    {id:"u3702693", cnes:3702693, lat:-19.937317, lon:-43.968506, name:"Maternidade Unimed Grajaú", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Grajaú", addr:"Rua Viamão, 1171", dist:3.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133195700", sus:false, h24:true, cir:true, obst:true, intern:true},
+    {id:"u3702693", cnes:3702693, soPlano:true, lat:-19.937317, lon:-43.968506, name:"Maternidade Unimed Grajaú", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Grajaú", addr:"Rua Viamão, 1171", dist:3.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133195700", sus:false, h24:true, cir:true, obst:true, intern:true},
     {id:"u2200414", cnes:2200414, lat:-19.959548, lon:-43.914723, name:"Fundação Hilton Rocha", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Mangabeiras", addr:"Av José do Patrocínio Pontes, 1355", dist:3.2, ab:7, fe:19, turno:"manhã e tarde", fone:"3132891500", sus:true, cir:true, intern:true},
     {id:"u4077717", cnes:4077717, lat:-19.946464, lon:-43.959345, name:"HSR — Hospital Raja Gabaglia", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Av Raja Gabaglia, 1380", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3125170900", sus:false, h24:true, cir:true, intern:true},
-    {id:"u5509483", cnes:5509483, lat:-19.975, lon:-44.016, name:"Notre Dame Intermédica Barreiro", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barreiro", addr:"Rua Joaquim de Figueiredo, 140", dist:9.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132715470", sus:false, h24:true, cir:true, intern:true},
+    {id:"u5509483", cnes:5509483, soPlano:true, lat:-19.975, lon:-44.016, name:"Notre Dame Intermédica Barreiro", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barreiro", addr:"Rua Joaquim de Figueiredo, 140", dist:9.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132715470", sus:false, h24:true, cir:true, intern:true},
     {id:"u2695383", cnes:2695383, lat:-19.934225, lon:-43.966775, name:"Hospital Santana", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Alto Barroca", addr:"Rua Santa Cruz, 137", dist:3.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133328077", sus:true, h24:true, cir:true, intern:true},
     {id:"u28037", cnes:28037, lat:-19.921163, lon:-43.924114, name:"Hospital Arapiara", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av do Contorno, 2983", dist:2.1, ab:7, fe:19, turno:"manhã e tarde", fone:"3132183300", sus:false, cir:true, intern:true},
     {id:"u27731", cnes:27731, lat:-19.956914, lon:-43.957422, name:"Hospital Fraucenter", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"São Bento", addr:"Av Raja Gabaglia, 2400", dist:3.3, ab:7, fe:19, turno:"manhã e tarde", fone:"3133344676", sus:false, cir:true, intern:true},
@@ -1303,7 +1304,7 @@ const REGIONS = [
     {id:"u27987", cnes:27987, lat:-19.921609, lon:-43.921567, name:"Hospital da Polícia Militar", type:"Público", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av do Contorno, 2787", dist:2.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3130715308", h24:true, cir:true, intern:true, ps:true, vac:true, img:true},
     {id:"u27979", cnes:27979, lat:-19.885075, lon:-43.950901, name:"Hospital Belo Horizonte", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cachoeirinha", addr:"Av Presidente Antônio Carlos, 1694", dist:6.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134497808", h24:true, cir:true, obst:true, intern:true, ps:true, lab:true, img:true},
     {id:"u27014", cnes:27014, lat:-19.92446, lon:-43.925704, name:"Santa Casa de Belo Horizonte", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av Francisco Sales, 1111", dist:1.7, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132388100", sus:true, h24:true, cir:true, obst:true, intern:true, ps:true, lab:true, img:true},
-    {id:"u4841069", cnes:4841069, lat:-19.850804, lon:-43.963024, name:"Hospital Medsenior Pampulha", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"São Luiz", addr:"Avenida Presidente Antônio Carlos, 8000", dist:10.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
+    {id:"u4841069", cnes:4841069, soPlano:true, lat:-19.850804, lon:-43.963024, name:"Hospital Medsenior Pampulha", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"São Luiz", addr:"Avenida Presidente Antônio Carlos, 8000", dist:10.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26727", cnes:26727, lat:-19.925671, lon:-43.931945, name:"Hospital Semper", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Al Ezequiel Dias, 389", dist:1.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3135191680", h24:true, cir:true, intern:true, ps:true, img:true},
     {id:"u26808", cnes:26808, lat:-19.939931, lon:-43.912842, name:"Hospital Evangélico de Belo Horizonte", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Serra", addr:"Dr Alipio Goulart, 25", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132733926", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26824", cnes:26824, lat:-19.91786, lon:-43.951836, name:"Hospital Socor", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Avenida do Contorno, 10500", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"03133303179", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
@@ -1351,7 +1352,7 @@ const REGIONS = [
     {id:"u4850033", cnes:4850033, lat:-19.922742, lon:-43.957027, name:"Neocenter Utip", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Av do Contorno, 9530", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3139727241", h24:true, intern:true, espec:true},
     {id:"u7424345", cnes:7424345, lat:-19.935358, lon:-43.924745, name:"Proplastica Lifecenter", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Funcionarios", addr:"Avenida do Contorno, 4747", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132822339", cir:true, intern:true, espec:true},
     {id:"u9590676", cnes:9590676, lat:-19.941878, lon:-43.927714, name:"Neocenter Maternidade", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cruzeiro", addr:"Rua Martinho Campos, 25", dist:0.9, ab:7, fe:18, turno:"Turnos intermitentes", fone:"3132414843", obst:true, intern:true, espec:true, img:true},
-    {id:"u644870", cnes:644870, lat:-19.932979, lon:-43.954476, name:"Pronto Socorro Medsenior", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Avenida do Contorno, 8477", dist:2.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, lab:true, img:true},
+    {id:"u644870", cnes:644870, soPlano:true, lat:-19.932979, lon:-43.954476, name:"Pronto Socorro Medsenior", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Avenida do Contorno, 8477", dist:2.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, lab:true, img:true},
     {id:"u23582", cnes:23582, lat:-19.820014, lon:-43.953257, name:"Unidade de Pronto Atendimento Venda Nova", type:"Público", plans:["SUS"], profile:"upa", region:"São João Batista", addr:"Rua Padre Pedro Pinto, 175", dist:13.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132778909", sus:true, h24:true, lab:true, img:true},
     {id:"u9114378", cnes:9114378, lat:-19.927806, lon:-43.934677, name:"Doutor Agora", type:"Privado", plans:["Convênio ou particular"], profile:"upa", region:"Boa Viagem", addr:"Rua dos Timbiras, 1228", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3138898910", vac:true},
     {id:"u22683", cnes:22683, lat:-19.979490, lon:-44.029320, name:"Unidade de Pronto Atendimento Barreiro", type:"Público", plans:["SUS"], profile:"upa", region:"Diamante", addr:"Av Aurelio Lopes, 20", dist:11.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132775821", sus:true, h24:true, lab:true, img:true},
@@ -1451,8 +1452,8 @@ const REGIONS = [
     {id:"u113654", cnes:113654, lat:-19.929126, lon:-43.92422, name:"Eco Diagnósticos", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Avenida Carandai, 176", dist:1.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132890523", img:true},
     {id:"u131296", cnes:131296, lat:-19.915077, lon:-43.943126, name:"Gastro Center", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Lourdes", addr:"Olegario Maciel, 1569", dist:2.6, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132473000", img:true},
     {id:"u317616", cnes:317616, lat:-19.902111, lon:-43.931753, name:"Molecularsr", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Concordia", addr:"Rua Itapagipe, 780", dist:3.9, ab:7, fe:18, turno:"Manhã e tarde"},
-    {id:"u391670", cnes:391670, lat:-19.828111, lon:-43.966306, name:"Hospital Keralty", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"São João Batista", addr:"Rua Doutor Alvaro Camargos, 2002", dist:12.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3131154704"},
-    {id:"u399604", cnes:399604, lat:-19.921817, lon:-43.946775, name:"Hospital Keralty", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barro Preto", addr:"Avenida Augusto de Lima, 1106", dist:2.1, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3131154729"},
+    {id:"u391670", cnes:391670, soPlano:true, lat:-19.828111, lon:-43.966306, name:"Hospital Keralty", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"São João Batista", addr:"Rua Doutor Alvaro Camargos, 2002", dist:12.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3131154704"},
+    {id:"u399604", cnes:399604, soPlano:true, lat:-19.921817, lon:-43.946775, name:"Hospital Keralty", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barro Preto", addr:"Avenida Augusto de Lima, 1106", dist:2.1, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3131154729"},
     {id:"u470538", cnes:470538, lat:-19.868688, lon:-43.923937, name:"Target Medicina de Precisao", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Lourdes", addr:"Rua São Paulo, 1932", dist:7.7, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3125312200", lab:true},
     {id:"u483265", cnes:483265, lat:-19.944431, lon:-43.965708, name:"Labormax", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Carlos Prates", addr:"Rua Tres Pontas, 1137", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3130863928"},
     {id:"u483745", cnes:483745, lat:-19.81726, lon:-43.955591, name:"Labicon Laboratório Bioquimico de Contagem", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Av Afonso Pena, 726", dist:13.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125655769"},
@@ -2739,7 +2740,7 @@ function recomendacao(hs){
      mostramos o FATO de que a unidade recomendada não faz o que um
      pronto-socorro faz, e onde está o mais perto. Dado do CNES, não conselho. */
   const psPerto = nivelOf(escolhido)==="leve"
-    ? REG().hospitals.filter(h=>h.ps && !h.espec && !currentWait(h).closed)
+    ? REG().hospitals.filter(h=>h.ps && !h.espec && !h.soPlano && !currentWait(h).closed)
         .sort((a,b)=>distOf(a)-distOf(b))[0]
     : null;
   return {h:escolhido, temRelato, abreNaChegada, outras, pulados, conjunto, psPerto};
@@ -3630,8 +3631,12 @@ function openDetail(id){
      diferentes numa lista só faria a pessoa não saber em que está confiando. */
   const ans = (!cv && CONVENIOS_ANS[h.cnes]) ? CONVENIOS_ANS[h.cnes] : null;
   const restoAns = ans ? Math.max(0, ans.t - ans.p.length) : 0;
-  document.getElementById("dPlans").innerHTML =
-    h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("")
+  /* REDE PRÓPRIA DE OPERADORA: quem não tem aquele plano é mandado embora na
+     porta. Vai em vermelho e no topo do bloco porque é a informação que decide
+     a viagem — e, no caso dos que têm pronto-socorro, decide numa emergência. */
+  const soPlano = h.soPlano ? `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800;margin:0 0 8px">Atende SOMENTE quem tem o plano desta rede. Sem esse plano, não é atendido aqui — nem em emergência.</div>` : "";
+  document.getElementById("dPlans").innerHTML = soPlano
+    + h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("")
     + (cv ? `<div style="margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--ink2);font-weight:600">
          ${cv.lista.length ? `<b>Aceita:</b> ${cv.lista.map(esc).join(" · ")}` : "<b>Não trabalha com convênio</b> — atendimento particular."}
          ${cv.excecao ? `<div style="color:var(--warn);font-weight:800;margin-top:4px">Atenção: ${esc(cv.excecao)}</div>` : ""}
@@ -4651,11 +4656,15 @@ function travelCarro(h){
   return Math.max(3, Math.round(distOf(h)*percurso/kmh*60));
 }
 function renderSosList(){
-  /* emergência grave: só hospital GERAL com pronto-socorro. O !h.espec está no
-     código de propósito, mesmo que hoje nenhum cadastro tenha ps+espec juntos:
-     a regra clínica (nunca mandar caso grave para hospital especializado) não
-     pode depender de a base continuar assim. */
-  const rows = REG().hospitals.filter(h=>h.ps && !h.espec && !currentWait(h).closed)
+  /* emergência grave: só hospital GERAL com pronto-socorro, ABERTO A QUALQUER UM.
+     - !h.espec: nunca mandar caso grave para hospital especializado (olhos,
+       psiquiatria). Está no código de propósito, mesmo que hoje nenhum cadastro
+       tenha ps+espec juntos: a regra clínica não pode depender da base.
+     - !h.soPlano (12/08): hospital de REDE PRÓPRIA de operadora só atende quem
+       tem aquele plano. O MedSênior Pampulha tem pronto-socorro 24h e estava
+       sendo oferecido em emergência para todo mundo — quem não é beneficiário
+       chegaria lá e seria mandado embora, no pior momento possível. */
+  const rows = REG().hospitals.filter(h=>h.ps && !h.espec && !h.soPlano && !currentWait(h).closed)
     .map(h=>({h, t:travelCarro(h)}))
     .sort((a,b)=>a.t-b.t).slice(0,3);
   const el=document.getElementById("sosList");
