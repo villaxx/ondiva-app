@@ -5629,20 +5629,36 @@ function iniciarMapaReal(){
   document.getElementById("mapSvg").style.display = "none";
   const centro = gps ? [gps.lat, gps.lon] : (REG().geo ? [REG().geo.lat, REG().geo.lon] : [-19.92, -43.94]);
   mapaReal = L.map(div, {zoomControl:false, attributionControl:true}).setView(centro, 13);
-  /* O MAPA SEGUE O TEMA (12/08, pergunta do Raphael). O mapa de ruas vinha
-     sempre claro: no tema escuro ele acendia a tela inteira e os pinos
-     coloridos sumiam no meio do branco. Agora o escuro usa o mapa escuro do
-     CartoDB (gratuito, mesmo dado do OpenStreetMap), onde o pino colorido é a
-     única coisa que brilha — que é exatamente o que a pessoa precisa achar. */
+  /* O MAPA SEGUE O TEMA (12/08). No claro, OpenStreetMap. No escuro, o
+     Dark Gray Canvas da Esri — escolhido MEDINDO os tiles, não no chute: o
+     CartoDB dark_all, que estava aqui antes, tem luminância média 13 de 255 e
+     na tela vira uma mancha preta com as ruas invisíveis (reclamação do
+     Raphael: "parece uma tela preta"). Clarear por filtro não salva (sobe só
+     para 27). O Dark Gray fica em 78 — cinza-chumbo com as ruas em cinza
+     claro, que é o estilo de mapa noturno do Waze. Vem em duas camadas
+     (fundo + nomes de rua), como a Esri publica. */
   const claro = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-  const escuro = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+  const escuroBase = ESRI+"World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+  const escuroNomes = ESRI+"World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
   const noEscuro = ()=> (document.documentElement.getAttribute("data-theme") ||
       (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light")) === "dark";
-  camadaBase = L.tileLayer(noEscuro() ? escuro : claro, {
-    maxZoom: 19, minZoom: 9,
-    attribution: noEscuro() ? '&copy; OpenStreetMap &copy; CARTO' : '&copy; OpenStreetMap'
+  const ATR_CLARO = '&copy; OpenStreetMap';
+  const ATR_ESCURO = 'Esri, HERE, Garmin, &copy; OpenStreetMap';
+  camadaBase = L.tileLayer(noEscuro() ? escuroBase : claro, {
+    maxZoom: 19, minZoom: 9, attribution: noEscuro() ? ATR_ESCURO : ATR_CLARO
   }).addTo(mapaReal);
-  trocarBaseDoMapa = ()=>{ if(camadaBase) camadaBase.setUrl(noEscuro() ? escuro : claro) };
+  /* a camada de nomes só existe no escuro (no claro o OSM já traz os rótulos) */
+  let camadaNomes = noEscuro() ? L.tileLayer(escuroNomes, {maxZoom:19, minZoom:9}).addTo(mapaReal) : null;
+  trocarBaseDoMapa = ()=>{
+    if(!camadaBase) return;
+    camadaBase.setUrl(noEscuro() ? escuroBase : claro);
+    if(noEscuro()){
+      if(!camadaNomes) camadaNomes = L.tileLayer(escuroNomes, {maxZoom:19, minZoom:9});
+      camadaNomes.addTo(mapaReal);
+      if(camadaPinos) camadaPinos.bringToFront();   /* pino nunca fica atrás do nome */
+    } else if(camadaNomes){ mapaReal.removeLayer(camadaNomes) }
+  };
   camadaPinos = L.layerGroup().addTo(mapaReal);
   mapaReal.on("moveend zoomend", desenharPinosReais);
   desenharPinosReais();
