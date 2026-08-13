@@ -5496,7 +5496,13 @@ function podeOferecerInstalar(){
 function atualizarChipInstalar(){
   const c = document.getElementById("instalarChip");
   if(!c) return;
-  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO && (!!promptInstalar || APARELHO_IOS);
+  /* ANDROID IGUAL AO IPHONE (12/08, pedido do Raphael): o chip NÃO espera o
+     evento `beforeinstallprompt`. No Android ele às vezes demora, às vezes nem
+     dispara (se a pessoa já dispensou uma vez) — e aí o convite sumia justo no
+     aparelho mais comum do piloto. Agora o chip aparece sempre que dá para
+     instalar; se o navegador oferecer a instalação automática, ele usa; se
+     não, mostra o passo a passo do próprio aparelho. */
+  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO;
   c.style.display = dá ? "inline-flex" : "none";
 }
 function oferecerInstalar(){
@@ -5538,7 +5544,9 @@ function oferecerInstalar(){
   if(!c) return;
   c.addEventListener("click", ()=>{
     if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
-    /* iPhone: não existe instalação automática, então mostra o caminho */
+    /* sem instalação automática (iPhone sempre; Android quando o navegador não
+       ofereceu): mostra o caminho do próprio aparelho, que o popup já sabe
+       escrever para os dois sistemas */
     const antes = state.instalarDepois; delete state.instalarDepois;   /* o toque vence o silêncio */
     const bar = document.getElementById("instalarBar"); if(bar) bar.remove();
     const visitas = state.visitas; state.visitas = Math.max(2, visitas||0);
