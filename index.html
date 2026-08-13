@@ -5656,7 +5656,9 @@ function iniciarMapaReal(){
     if(noEscuro()){
       if(!camadaNomes) camadaNomes = L.tileLayer(escuroNomes, {maxZoom:19, minZoom:9});
       camadaNomes.addTo(mapaReal);
-      if(camadaPinos) camadaPinos.bringToFront();   /* pino nunca fica atrás do nome */
+      /* pino nunca fica atrás do nome de rua. layerGroup não tem
+         bringToFront(): tirar e recolocar é o que o joga para o topo. */
+      if(camadaPinos){ mapaReal.removeLayer(camadaPinos); camadaPinos.addTo(mapaReal) }
     } else if(camadaNomes){ mapaReal.removeLayer(camadaNomes) }
   };
   camadaPinos = L.layerGroup().addTo(mapaReal);
