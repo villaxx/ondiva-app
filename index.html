@@ -4754,8 +4754,16 @@ document.getElementById("themeBtn").addEventListener("click",()=>{
   const root=document.documentElement;
   const cur = root.getAttribute("data-theme") ||
     (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  root.setAttribute("data-theme", cur==="dark" ? "light" : "dark");
+  const novo = cur==="dark" ? "light" : "dark";
+  root.setAttribute("data-theme", novo);
+  /* A ESCOLHA AGORA FICA (12/08): antes o botão trocava o tema e, ao reabrir o
+     app, tudo voltava ao tema do sistema — a pessoa escolhia de novo toda vez.
+     Sem tema salvo, o padrão continua sendo o do celular, que é o certo. */
+  state.tema = novo; store.save(state);
+  if(trocarBaseDoMapa) trocarBaseDoMapa();     /* o mapa de ruas acompanha */
 });
+/* aplica o tema salvo na abertura, antes de qualquer render */
+if(state.tema==="dark" || state.tema==="light") document.documentElement.setAttribute("data-theme", state.tema);
 
 /* arrastar a aba para baixo fecha (gesto padrão de app) */
 function enableSwipeClose(id){
@@ -5580,6 +5588,7 @@ function oferecerInstalar(){
    Se o Leaflet não carregar (offline, ou rede externa bloqueada como no
    claude.ai), nada acontece: o SVG desenhado continua no lugar. */
 let mapaReal = null, camadaPinos = null, leafletTentado = false;
+let camadaBase = null, trocarBaseDoMapa = null;
 
 function carregarLeaflet(){
   if(leafletTentado) return; leafletTentado = true;
@@ -5602,10 +5611,20 @@ function iniciarMapaReal(){
   document.getElementById("mapSvg").style.display = "none";
   const centro = gps ? [gps.lat, gps.lon] : (REG().geo ? [REG().geo.lat, REG().geo.lon] : [-19.92, -43.94]);
   mapaReal = L.map(div, {zoomControl:false, attributionControl:true}).setView(centro, 13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  /* O MAPA SEGUE O TEMA (12/08, pergunta do Raphael). O mapa de ruas vinha
+     sempre claro: no tema escuro ele acendia a tela inteira e os pinos
+     coloridos sumiam no meio do branco. Agora o escuro usa o mapa escuro do
+     CartoDB (gratuito, mesmo dado do OpenStreetMap), onde o pino colorido é a
+     única coisa que brilha — que é exatamente o que a pessoa precisa achar. */
+  const claro = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const escuro = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  const noEscuro = ()=> (document.documentElement.getAttribute("data-theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light")) === "dark";
+  camadaBase = L.tileLayer(noEscuro() ? escuro : claro, {
     maxZoom: 19, minZoom: 9,
-    attribution: '&copy; OpenStreetMap'
+    attribution: noEscuro() ? '&copy; OpenStreetMap &copy; CARTO' : '&copy; OpenStreetMap'
   }).addTo(mapaReal);
+  trocarBaseDoMapa = ()=>{ if(camadaBase) camadaBase.setUrl(noEscuro() ? escuro : claro) };
   camadaPinos = L.layerGroup().addTo(mapaReal);
   mapaReal.on("moveend zoomend", desenharPinosReais);
   desenharPinosReais();
