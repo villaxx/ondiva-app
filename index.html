@@ -5025,30 +5025,54 @@ function alcancavelParaAviso(h){
    sabe que a falta que existia VENCEU ou foi desmentida. Então a frase é
    exatamente essa, e manda ligar antes de ir. Dizer "chegou a vacina" seria
    inventar, e é o que mataria a confiança no primeiro erro. */
+/* O QUE DISPARA, DE VERDADE: a falta que existia numa unidade PERTO acabou de
+   sair do ar (venceu ou ninguém confirmou). Contar "quantas unidades atendem"
+   não serve — perto de qualquer lugar de BH há dezenas de unidades que
+   vacinam, esse número nunca chega a zero e o aviso nunca dispararia.
+   O que muda de estado, e importa para quem está esperando, é a FALTA. */
+function faltasDoPedido(p){
+  const itens = p.item ? [p.item] : null;
+  const cabe = p.tipo==="basica" ? (h=>!!h.vac) : p.tipo==="lab" ? (h=>!!h.lab)
+             : p.tipo==="img" ? (h=>!!h.img) : (h=>h.profile===p.tipo);
+  const ids = [];
+  REG().hospitals.forEach(h=>{
+    if(!cabe(h) || !alcancavelParaAviso(h)) return;
+    const emFalta = activeAlerts(h).some(a=>a.confirmado && (
+       (itens && a.vac && itens.includes(a.vac)) ||
+       (!itens && (a.type===T_VACINA || a.type===T_SEM_VACINACAO))));
+    if(emFalta) ids.push(h.id);
+  });
+  return ids;
+}
 function conferirPedidos(){
   const lista = pedidos();
   if(!lista.length) return null;
   const vistos = state.pedidosAvisados = state.pedidosAvisados || {};
+  let mudou = false, achado = null;
   for(const p of lista){
-    const itens = p.item ? [p.item] : null;
-    const n = unidadesNoRaio(p.tipo, itens);
-    if(!n) continue;                                  /* nada perto: nada a dizer */
-    /* só avisa quando VIROU: da última vez que olhamos, não havia nenhuma */
-    if(vistos[p.id] === undefined){ vistos[p.id] = n; continue }
-    if(vistos[p.id] === 0 && n > 0){
-      vistos[p.id] = n; store.save(state);
-      return {pedido:p, n};
+    const agora = faltasDoPedido(p);
+    const antes = vistos[p.id];
+    if(Array.isArray(antes) && !achado){
+      /* saiu da falta alguma unidade que estava na lista da última vez? */
+      const liberadas = antes.filter(id=>!agora.includes(id));
+      if(liberadas.length){
+        const h = REG().hospitals.find(x=>x.id===liberadas[0]);
+        if(h) achado = {pedido:p, unidade:h};
+      }
     }
-    vistos[p.id] = n;
+    if(JSON.stringify(antes)!==JSON.stringify(agora)){ vistos[p.id] = agora; mudou = true }
   }
-  store.save(state);
-  return null;
+  if(mudou) store.save(state);
+  return achado;
 }
 function mostrarAvisoDePedido(){
   const r = conferirPedidos();
   if(!r) return;
-  const oque = textoPedido(r.pedido);
-  toast(`Perto de você já tem ${r.n===1?"1 unidade":r.n+" unidades"} sem aviso de falta de ${oque.toLowerCase()}. Ligue antes de ir — o app não confirma estoque.`);
+  const oque = r.pedido.item || (AVISO_TIPOS.find(x=>x[0]===r.pedido.tipo)||[,"atendimento"])[1];
+  const dono = r.pedido.quem ? ` (${r.pedido.quem})` : "";
+  /* honestidade: o app NÃO sabe que chegou — sabe que o aviso de falta saiu do
+     ar. Dizer "chegou a vacina" seria inventar, e é o que mataria a confiança. */
+  toast(`O aviso de falta de ${oque.toLowerCase()}${dono} em ${dispName(r.unidade)} não está mais valendo. Pode ter chegado — ligue antes de ir.`);
 }
 function unidadesNoRaio(perfil, itens){
   /* usa os serviços oficiais, igual aos filtros */
@@ -5212,7 +5236,10 @@ document.getElementById("avisoOk").addEventListener("click",()=>{
   /* `novo` morre dentro do forEach acima — aqui só avisoTmp existe */
   toast(avisoTmp.quem
     ? `Pronto. Aviso de ${nome} para ${avisoTmp.quem}, ${onde}.`
-    : `Pronto. Vou te avisar quando houver ${nome} ${onde}.`);
+    /* PROMESSA HONESTA (12/08): antes dizia "vou te avisar quando houver", e o
+       app NÃO tem como saber que chegou — ninguém relata "tem". O que ele sabe
+       é quando o aviso de falta sai do ar. É isso que ele promete agora. */
+    : `Pronto. Te aviso quando um aviso de falta de ${nome} ${onde} sair do ar.`);
 });
 
 let toastTimer=null;
