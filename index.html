@@ -498,7 +498,7 @@
         <span id="gpsTxt">Toque para usar sua localização</span>
       </span>
     </div>
-    <button class="cta warnbtn" id="repFalta">Avisar o que está faltando aqui · +30 pontos</button>
+    <button class="cta warnbtn" id="repFalta">Avisar o que está faltando aqui · +50 pontos</button>
     <div class="rwhy" style="margin:8px 2px 0;font-size:12.5px;color:var(--muted);font-weight:600">Vacina em falta, sem pediatra, fichas acabaram, equipamento quebrado… é o que evita a viagem perdida de quem vem depois.</div>
     <div class="walert" id="repJuntos" style="display:none;background:var(--surface2);color:var(--ink);margin:0 0 10px"></div>
     <p class="vtitle">Ou informe quanto tempo você esperou</p>
@@ -506,7 +506,7 @@
       <label>Quanto tempo esperou até ser atendido?</label>
       <div class="grid-min" id="minGrid"></div>
     </div>
-    <button class="cta" id="repSend">Enviar relato · +50 pontos</button>
+    <button class="cta" id="repSend">Enviar relato · +30 pontos</button>
     <!-- era "Desisti da fila e fui embora · +20 pontos": o app premiava o ato de
          desistir. O dado é o mesmo e continua valioso; o que sai é a comemoração
          da desistência. -->
@@ -587,7 +587,7 @@
          simulacao 5): o aviso vale o dia todo e e o dado que sustenta o app
          em base pequena; o relato de fila evapora em 3h. O relato NAO sai —
          e o ativo de longo prazo — mas cede o segundo lugar. -->
-    <button class="cta sec" id="dAlert">Avisar falta ou fechamento · +30 pts</button>
+    <button class="cta sec" id="dAlert">Avisar falta ou fechamento · +50 pts</button>
     <div style="font-size:11.5px;color:var(--muted);margin:2px 0 0">Aviso de falta vale o dia inteiro — é o que mais protege os vizinhos.</div>
     <button class="cta sec" id="dReport">Estou aqui — informar tempo de espera</button>
     <div class="herosub" id="dSub"></div>
@@ -680,7 +680,7 @@
       <div class="grid-min" id="vacGrid" style="grid-template-columns:repeat(3,1fr)"></div>
       <div id="outroBox" style="display:none;margin-top:12px">
         <div class="field"><input id="outroTxt" type="text" maxlength="40" placeholder="Escreva o que está faltando"></div>
-        <button class="cta" id="outroOk">Enviar aviso · +30 pontos</button>
+        <button class="cta" id="outroOk">Enviar aviso · +50 pontos</button>
         <div class="login-note" style="text-align:left">Aparece na hora na página da unidade, como "não confirmado". Quando outra pessoa confirmar, ganha força.</div>
       </div>
     </div>
@@ -783,7 +783,7 @@
     <div class="herosub" id="saidaNome"></div>
     <!-- FALTA PRIMEIRO (14/08, mesma logica do detalhe): quem acabou de sair
          e quem sabe o que faltou la dentro — e o aviso vale o dia todo. -->
-    <button class="cta" id="saidaFalta" style="margin-top:10px">Faltou alguma coisa lá? Avise · +30 pts</button>
+    <button class="cta" id="saidaFalta" style="margin-top:10px">Faltou alguma coisa lá? Avise · +50 pts</button>
     <p class="vtitle" style="margin-top:14px">Quanto tempo esperou para ser atendido?</p>
     <div class="grid-min" id="saidaMin"></div>
     <button class="cta sec" id="saidaNao" style="margin-top:10px">Não fui atendido</button>
@@ -896,7 +896,7 @@
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="3.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="3.5" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>
     Lista
   </button>
-  <button class="fab" id="fabReport" aria-label="Informar tempo de espera" aria-current="false">
+  <button class="fab" id="fabReport" aria-label="Informar — falta ou tempo de espera" aria-current="false">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
   </button>
   <button class="tab" data-v="rank" aria-current="false">
@@ -920,7 +920,7 @@
   <div class="sheet-inner">
     <div class="grab"></div>
     <h2 style="margin:4px 0 8px">Como você costuma ir?</h2>
-    <p class="herosub" style="margin:0 0 14px">O Ondiva mostra o que está <b>aberto e perto</b>, com o serviço que você precisa e o telefone para confirmar. Sua resposta ajusta a conta de "dá tempo de chegar". E quando alguém relata fila ou falta, aparece ao vivo — <b>quanto mais gente usando, mais avisos</b>.</p>
+    <p class="herosub" style="margin:0 0 14px">O Ondiva mostra o que está <b>aberto e perto</b>, com o serviço que você precisa e o telefone para confirmar. Sua resposta ajusta a conta de "dá tempo de chegar". E quando alguém avisa uma falta ou relata a fila, aparece ao vivo — <b>quanto mais gente usando, mais avisos</b>.</p>
     <button class="cta" data-bem="ape">🚶 A pé</button>
     <button class="cta" data-bem="onibus" style="margin-top:8px">🚌 De ônibus</button>
     <button class="cta" data-bem="carro" style="margin-top:8px">🚗 De carro</button>
@@ -2455,6 +2455,12 @@ const JANELA_FALTA   = 3*3600e3;   /* aviso comum vale por 3 horas */
    acabou não volta em 3 horas, e a janela curta era o que impedia o segundo
    relator de confirmar (o aviso da manhã já tinha expirado quando o da tarde
    chegava). A regra dos 2 relatores distintos NÃO muda; fila segue valendo 3h. */
+function validadeTxt(tipo){
+  /* o toast dizia "vale por 3h" para tudo — errado desde que vacina e
+     fechamento passaram a valer o dia inteiro (14/08) */
+  return (tipo===T_VACINA||tipo===T_SEM_VACINACAO||tipo==="fechado_imprevisto"||tipo==="atend_suspenso")
+    ? "Vale até o fim do dia" : "Vale por 3h";
+}
 function validadeDoAviso(a){
   /* vacina em falta não volta no mesmo dia; unidade que fechou de imprevisto
      ou suspendeu atendimento também não reabre (14/08 — era o 2º motivo de
@@ -3018,7 +3024,7 @@ function htmlPromptRelato(i){
      gente na mesma situação. Para os outros segue o pedido comum. */
   const meu = pedidos()[0];
   const chamada = meu
-    ? `<b>Você está esperando ${esc((meu.item || "atendimento").toLowerCase())}. Tem gente esperando o mesmo.</b><br>
+    ? `<b>Você está esperando ${esc((meu.item || "atendimento").toLowerCase())}${meu.quem?" — para "+esc(meu.quem):""}. Tem gente esperando o mesmo.</b><br>
        <span style="font-weight:600;opacity:.9">Quanto tempo você esperou lá? Um toque, e elas sabem.</span>`
     : `<b>Aproveitando: quanto tempo você esperou lá?</b><br>
        <span style="font-weight:600;opacity:.9">Um toque. É o que faz a próxima pessoa não perder a viagem.</span>`;
@@ -3027,10 +3033,23 @@ function htmlPromptRelato(i){
     <div class="grid-min" style="grid-template-columns:repeat(4,1fr);margin-top:10px">
       ${MIN_OPTS.map(m=>`<button class="minbtn" data-relm="${m}" style="font-size:12px">${m>=120?(m/60)+"h+":m+" min"}</button>`).join("")}
     </div>
-    <button class="themebtn" data-relm="nao" style="color:var(--ink)">Agora não</button>
+    <div style="display:flex;gap:12px;align-items:center;margin-top:2px">
+      <button class="themebtn" data-relf="${esc(i.hid)}" style="color:var(--brand);font-weight:800">Faltou algo lá? Avise · +50</button>
+      <button class="themebtn" data-relm="nao" style="color:var(--ink)">Agora não</button>
+    </div>
   </div>`;
 }
 function ligarPromptRelato(el, i){
+  /* FALTA TAMBEM AQUI (14/08, item 8 da auditoria): quem acabou de voltar
+     sabe o que faltou la dentro — o prompt so pedia minutos */
+  el.querySelectorAll("[data-relf]").forEach(b=>b.addEventListener("click",()=>{
+    const h = REG().hospitals.find(x=>x.id===b.dataset.relf)
+           || REGIONS.reduce((a,r)=>a.concat(r.hospitals||[]),[]).find(x=>x.id===b.dataset.relf);
+    if(!h) return;
+    i.prompt = "feito"; store.save(state);
+    currentDetail = h; voltarPara = null;
+    abrirAvisos();
+  }));
   el.querySelectorAll("[data-relm]").forEach(b=>b.addEventListener("click",()=>{
     i.prompt = "feito";
     if(b.dataset.relm === "nao"){ store.save(state); renderList(); return }
@@ -3042,12 +3061,12 @@ function ligarPromptRelato(el, i){
     const meu = {hid:i.hid, cnes:i.cnes, min:+b.dataset.relm, est:null, ts:Date.now(),
                  cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
     state.reports.push(meu);
-    state.pts += 50; checkMedals(); store.save(state);
+    state.pts += 30; checkMedals(); store.save(state);
     enviarAposDesfazer(()=>{ if(state.reports.includes(meu))
       nuvemEnviar("relatos", {cid:meu.cid, hid:meu.hid, cnes:meu.cnes, min:meu.min, uid:meu.uid, ts:nuvemISO(meu.ts)}) });
-    toastComDesfazer("+50 pontos! Seu relato aparece para quem abrir esta unidade nas próximas 3 horas.", ()=>{
+    toastComDesfazer("+30 pontos! Seu relato aparece para quem abrir esta unidade nas próximas 3 horas.", ()=>{
       state.reports = state.reports.filter(r=>r!==meu);
-      state.pts -= 50; i.prompt = null; store.save(state);
+      state.pts -= 30; i.prompt = null; store.save(state);
       renderList(); renderProfile(); renderRankView();
     });
     renderList(); renderProfile(); renderRankView();
@@ -3147,7 +3166,7 @@ function renderList(){
     } else if(w.semDados){
       pill="aberto";
       const t=travelMin(h);
-      linha2 = (t!=null ? `~${t} min ${MODO_TXT[state.modo]||""} · ` : "") + `sem relato de fila — seja o primeiro`
+      linha2 = (t!=null ? `~${t} min ${MODO_TXT[state.modo]||""} · ` : "") + `sem informação de hoje — seja o primeiro a avisar`
         + (w.antigo ? `<br><span style="opacity:.8">Último relato: há ${w.antigo.txt}, ${fmtWaitTxt(w.antigo.min)}</span>` : "");
     } else {
       pill="aberto";
@@ -3690,8 +3709,8 @@ function openDetail(id){
   if(w.semDados){
     dW.innerHTML="—"; dW.style.color="var(--muted)"; dW.style.fontSize="";
     /* --muted aqui dava 4,34 no tema escuro, abaixo dos 4,5 exigidos */
-    dP.style.background="var(--surface2)"; dP.style.color="var(--ink2)"; dP.textContent="sem relato agora";
-    document.getElementById("dSub").textContent = "Ninguém relatou a fila daqui nas últimas 3 horas."
+    dP.style.background="var(--surface2)"; dP.style.color="var(--ink2)"; dP.textContent="sem informação de hoje";
+    document.getElementById("dSub").textContent = (activeAlerts(h).length ? "Ninguém relatou a fila daqui nas últimas 3 horas." : "Ninguém relatou fila nem falta daqui hoje.")
       + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
   } else if(w.closed){
     dW.innerHTML="Fechada"; dW.style.color="var(--muted)"; dW.style.fontSize="";
@@ -3732,8 +3751,15 @@ function openDetail(id){
   else if(w.semDados){
     if(h.fone && !state.demo && !activeAlerts(h).length){
       dT.style.display="";
+      /* se o filtro diz o que a pessoa procura, o conselho fala DELA:
+         "a vacina de gripe" dói e serve mais que "algo específico" (14/08) */
+      const oq = (filters.item && filters.item.length)
+        ? (filters.cat==="basica" ? "da vacina de "+filters.item.join(" e de ").toLowerCase()
+                                  : "de "+filters.item.join(" e ").toLowerCase())
+        : null;
       dT.innerHTML = `Ninguém confirmou esta unidade hoje — nem fila, nem falta. `
-        + `Se você vai atrás de algo específico (vacina, coleta, exame), vale ligar antes: `
+        + (oq ? `Se você vai atrás ${esc(oq)}, vale ligar antes: `
+              : `Se você vai atrás de algo específico (vacina, coleta, exame), vale ligar antes: `)
         + `<a href="tel:+55${esc(h.fone)}" style="font-weight:800;color:var(--brand)">(${esc(h.fone.slice(0,2))}) ${esc(h.fone.slice(2,-4))}-${esc(h.fone.slice(-4))}</a>`;
     } else dT.style.display="none";
   }
@@ -3982,13 +4008,13 @@ function submitReport(){
   if(!online()){
     guardarOffline({tipo:"relato", dados});
     paraNuvem();   /* sem rede o envio falha e cai na fila da nuvem sozinho */
-    state.pts += 50; store.save(state);
-    toast("Sem internet — seu relato foi guardado e será enviado sozinho quando a conexão voltar. +50 pontos");
+    state.pts += 30; store.save(state);
+    toast("Sem internet — seu relato foi guardado e será enviado sozinho quando a conexão voltar. +30 pontos");
     rep.min=null; renderReport(); renderProfile(); voltarOuMapa();
     return;
   }
   state.reports.push(dados);
-  state.pts += 50;
+  state.pts += 30;
   checkMedals();
   store.save(state);
   /* sobe para a nuvem DEPOIS da janela do Desfazer — só se a pessoa não desfez */
@@ -4009,7 +4035,7 @@ function submitReport(){
   };
   /* FAXINA 05/08: saiu o "o app mostrava X min e você esperou Y" — era a
      comparação estimativa×real que os Termos dizem que o app não faz. */
-  toastComDesfazer(`+50 pontos! Seu relato aparece para quem abrir esta unidade nas próximas 3 horas.`, desfazer);
+  toastComDesfazer(`+30 pontos! Seu relato aparece para quem abrir esta unidade nas próximas 3 horas.`, desfazer);
   rep.min=null;
   renderReport(); renderList(); renderRankView(); renderProfile();
   voltarOuMapa(); /* volta para a unidade de onde veio */
@@ -4086,11 +4112,16 @@ const MEDAL_DEFS=[
   {id:"first", nm:"Primeiro Relato", ds:"Enviou a primeira informação de fila", test:s=>s.reports.filter(ehMeu).length>=1},
   {id:"five", nm:"Colaborador Ativo", ds:"5 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=5},
   {id:"ten", nm:"Voluntário Dedicado", ds:"10 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=10},
-  {id:"guard", nm:"Guardião da Fila", ds:"25 relatos enviados", test:s=>s.reports.filter(ehMeu).length>=25},
+  {id:"guard", nm:"Guardião do Bairro", ds:"25 contribuições (avisos e relatos)", test:s=>s.reports.filter(ehMeu).length+(s.alerts||[]).filter(ehMeu).length>=25},
   {id:"multi", nm:"Explorador", ds:"Relatos em 3 unidades diferentes", test:s=>new Set(s.reports.filter(ehMeu).map(r=>r.hid)).size>=3},
   {id:"night", nm:"Coruja", ds:"Relato entre meia-noite e 5h", test:s=>s.reports.filter(ehMeu).some(r=>{const h=new Date(r.ts).getHours(); return h>=0&&h<5})},
   {id:"dawn", nm:"Madrugador", ds:"Relato de vacina antes das 8h", test:s=>s.reports.filter(ehMeu).some(r=>new Date(r.ts).getHours()<8)},
   {id:"alert", nm:"Vigilante", ds:"Publicou um aviso sobre uma unidade", test:s=>(s.alerts||[]).filter(ehMeu).length>=1},
+  /* ESCADA DE AVISOS (14/08): o core do app é a falta avisada — a escada de
+     conquistas agora premia o dado que protege o dia inteiro */
+  {id:"sentin", nm:"Sentinela do Bairro", ds:"5 avisos publicados", test:s=>(s.alerts||[]).filter(ehMeu).length>=5},
+  {id:"escudo", nm:"Escudo da Vizinhança", ds:"15 avisos publicados", test:s=>(s.alerts||[]).filter(ehMeu).length>=15},
+  {id:"olheiro", nm:"Olheiro de Plantão", ds:"Avisos em 3 unidades diferentes", test:s=>new Set((s.alerts||[]).filter(ehMeu).map(a=>a.hid)).size>=3},
   {id:"fix", nm:"Revisor", ds:"Ajudou a corrigir o cadastro de uma unidade", test:s=>(s.fixes||[]).length>=1},
 ];
 function checkMedals(){
@@ -4706,17 +4737,19 @@ function submitAlert(type, vac, escrito){
   });
   /* uma ida, uma contribuição, um crédito: relatar 3 faltas de uma vez não
      rende 90 pontos — senão o ponto compra spam */
-  state.pts += 30;
+  /* AVISO VALE MAIS QUE RELATO (14/08): o aviso protege o dia inteiro; o
+     relato evapora em 3h. A pontuação segue o valor do dado. */
+  state.pts += 50;
   store.save(state);
   fecharFolhas();
   let msg;
   {
     const conf = vacs.some(v=>activeAlerts(currentDetail).some(x=>x.type===type && (x.vac||"")===(v||"") && x.confirmado));
     msg = conf
-      ? "+30 pontos! Falta confirmada — agora aparece para todo mundo."
+      ? "+50 pontos! Falta confirmada — agora aparece para todo mundo."
       : (meus.length>1
-          ? `+30 pontos! ${meus.length} avisos recebidos. Valem por 3h e aparecem como não confirmados até outra pessoa confirmar.`
-          : "+30 pontos! Recebido. Vale por 3h e aparece como não confirmado até outra pessoa confirmar.");
+          ? `+50 pontos! ${meus.length} avisos recebidos. ${validadeTxt(type)} e aparecem como não confirmados até outra pessoa confirmar.`
+          : `+50 pontos! Recebido. ${validadeTxt(type)} e aparece como não confirmado até outra pessoa confirmar.`);
   }
   toastComDesfazer(msg, ()=>{
     state.alerts = state.alerts.filter(a=>!meus.includes(a));
@@ -5098,11 +5131,11 @@ function abrirSaida(h){
     const dSaida = {hid:h.id, cnes:h.cnes, min, est:null, ts:Date.now(),
                     cid:novoCid(), uid:(state.user&&state.user.usuario)||null};
     state.reports.push(dSaida);
-    state.pts+=50; checkMedals(); store.save(state);
+    state.pts+=30; checkMedals(); store.save(state);
     enviarAposDesfazer(()=>{ if(state.reports.includes(dSaida))
       nuvemEnviar("relatos", {cid:dSaida.cid, hid:dSaida.hid, cnes:dSaida.cnes, min:dSaida.min, uid:dSaida.uid, ts:nuvemISO(dSaida.ts)}) });
     fecharFolhas();
-    toast("+50 pontos! Obrigado — sua informação já está ajudando.");
+    toast("+30 pontos! Obrigado — sua informação já está ajudando.");
     renderList(); renderMap(); renderRankView(); renderProfile();
     openDetail(h.id);
   }));
