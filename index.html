@@ -583,12 +583,13 @@
          gráfico e endereço, e não achava onde tocar. Ir e informar agora vêm
          no topo; o resto continua embaixo, para quem quiser ler. -->
     <button class="cta" id="dRoute">Como chegar</button>
-    <button class="cta sec" id="dReport">Estou aqui — informar tempo de espera</button>
-    <!-- AVISO ACIMA DA DOBRA (14/08/2026, simulacao 5): em base pequena, o
-         relato de fila evapora em 3h; o aviso de falta vale o DIA TODO e e o
-         que faz a rede parecer viva primeiro. Ele merece o mesmo palco. -->
+    <!-- AVISO ANTES DO RELATO (14/08/2026, pedido do Raphael depois da
+         simulacao 5): o aviso vale o dia todo e e o dado que sustenta o app
+         em base pequena; o relato de fila evapora em 3h. O relato NAO sai —
+         e o ativo de longo prazo — mas cede o segundo lugar. -->
     <button class="cta sec" id="dAlert">Avisar falta ou fechamento · +30 pts</button>
     <div style="font-size:11.5px;color:var(--muted);margin:2px 0 0">Aviso de falta vale o dia inteiro — é o que mais protege os vizinhos.</div>
+    <button class="cta sec" id="dReport">Estou aqui — informar tempo de espera</button>
     <div class="herosub" id="dSub"></div>
     <div class="walert" id="dTotal" style="background:var(--surface2);color:var(--ink)"></div>
     <div class="besthour" id="dBest"></div>
@@ -780,7 +781,10 @@
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">Você saiu daqui agora</h2>
     <div class="herosub" id="saidaNome"></div>
-    <p class="vtitle">Quanto tempo esperou para ser atendido?</p>
+    <!-- FALTA PRIMEIRO (14/08, mesma logica do detalhe): quem acabou de sair
+         e quem sabe o que faltou la dentro — e o aviso vale o dia todo. -->
+    <button class="cta" id="saidaFalta" style="margin-top:10px">Faltou alguma coisa lá? Avise · +30 pts</button>
+    <p class="vtitle" style="margin-top:14px">Quanto tempo esperou para ser atendido?</p>
     <div class="grid-min" id="saidaMin"></div>
     <button class="cta sec" id="saidaNao" style="margin-top:10px">Não fui atendido</button>
     <!-- A TELA DE SAÍDA FICOU PARA TRÁS (11/08, achado do Raphael): ela nasceu
@@ -788,7 +792,6 @@
          o eixo virou FALTA — e quem acabou de sair da unidade é justamente
          quem sabe o que faltou lá dentro. É a informação mais valiosa do app,
          e ninguém estava pedindo. -->
-    <button class="cta" id="saidaFalta" style="margin-top:14px">Faltou alguma coisa lá? Avise · +30 pts</button>
     <div class="login-note" style="text-align:left">Vacina em falta, sem pediatra, fichas acabaram, equipamento quebrado — é o que evita a viagem perdida de quem vem depois.<br>No app instalado, esta tela abre sozinha ao tocar na notificação.</div>
   </div>
 </div>
@@ -5312,7 +5315,7 @@ function renderAviso(){
   ni.oninput = ()=>{ avisoTmp.quem = ni.value.trim() || null };
 
   const t=document.getElementById("avisoTipo");
-  t.innerHTML = AVISO_TIPOS.map(([k,l])=>`<button class="cta sec" data-t="${k}" style="margin-top:8px;${avisoTmp.tipo===k?'border:2px solid var(--brand-vivid)':''}">${l}</button>`).join("");
+  t.innerHTML = AVISO_TIPOS.map(([k,l])=>`<button class="cta sec" data-t="${k}" style="margin-top:8px;${avisoTmp.tipo===k?'background:var(--brand);color:var(--brand-ink);border:2px solid var(--brand-vivid)':''}">${avisoTmp.tipo===k?'✓ ':''}${l}</button>`).join("");
   t.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{avisoTmp.tipo=b.dataset.t; avisoTmp.itens=[]; renderAviso()}));
   /* qual vacina / qual exame — "me avise quando tiver vacina" é vago;
      "me avise quando tiver a da gripe" é o que a pessoa realmente quer */
