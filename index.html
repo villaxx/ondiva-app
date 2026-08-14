@@ -2455,18 +2455,20 @@ const JANELA_FALTA   = 3*3600e3;   /* aviso comum vale por 3 horas */
    acabou não volta em 3 horas, e a janela curta era o que impedia o segundo
    relator de confirmar (o aviso da manhã já tinha expirado quando o da tarde
    chegava). A regra dos 2 relatores distintos NÃO muda; fila segue valendo 3h. */
+/* PARIDADE ENTRE VERTICAIS (14/08, cobrança do Raphael): só a vacina tinha
+   ganhado "vale o dia todo" — mas "sem coleta HOJE", "sem médico HOJE",
+   "fichas DO DIA", equipamento quebrado, "só agendamento HOJE" e farmácia
+   dizem a mesma coisa no rótulo: não volta no mesmo dia. A validade agora
+   acompanha o que o rótulo promete, em TODAS as verticais. Só "sistema fora"
+   segue em 3h — sistema volta. */
+const VALE_O_DIA = [T_VACINA, T_SEM_VACINACAO, T_SEM_COLETA, T_MEDICO, T_EQUIP,
+  "fichas_acabaram", "so_agendamento", "farmacia_sem",
+  "fechado_imprevisto", "atend_suspenso"];
 function validadeTxt(tipo){
-  /* o toast dizia "vale por 3h" para tudo — errado desde que vacina e
-     fechamento passaram a valer o dia inteiro (14/08) */
-  return (tipo===T_VACINA||tipo===T_SEM_VACINACAO||tipo==="fechado_imprevisto"||tipo==="atend_suspenso")
-    ? "Vale até o fim do dia" : "Vale por 3h";
+  return VALE_O_DIA.includes(tipo) ? "Vale até o fim do dia" : "Vale por 3h";
 }
 function validadeDoAviso(a){
-  /* vacina em falta não volta no mesmo dia; unidade que fechou de imprevisto
-     ou suspendeu atendimento também não reabre (14/08 — era o 2º motivo de
-     viagem perdida na simulação: 40% do churn por cadastro desatualizado) */
-  if(a.type===T_VACINA || a.type===T_SEM_VACINACAO ||
-     a.type==="fechado_imprevisto" || a.type==="atend_suspenso"){
+  if(VALE_O_DIA.includes(a.type)){
     const d = new Date(a.ts);
     return new Date(d.getFullYear(), d.getMonth(), d.getDate()+1).getTime() - a.ts;
   }
@@ -2679,7 +2681,9 @@ function passaNosFiltros(h){
       if(!a.confirmado) return false;      /* falta não confirmada não esconde a unidade */
       if(a.vac && filters.item.includes(a.vac)) return true;                    /* vacina X em falta · equipamento X quebrado */
       if(a.type===T_SEM_VACINACAO && filters.cat==="basica") return true;
-      if(a.type===T_SEM_COLETA && filters.item.includes("Exame de sangue")) return true;
+      /* sem coleta = não colhe NADA: esconde para sangue E urina (14/08 —
+         antes só sangue; eletro não é coleta, segue aparecendo) */
+      if(a.type===T_SEM_COLETA && (filters.item.includes("Exame de sangue")||filters.item.includes("Exame de urina"))) return true;
       return false;
     })) return false;
     if(!filters.cat || filters.cat==="medico"){
@@ -4115,7 +4119,7 @@ const MEDAL_DEFS=[
   {id:"guard", nm:"Guardião do Bairro", ds:"25 contribuições (avisos e relatos)", test:s=>s.reports.filter(ehMeu).length+(s.alerts||[]).filter(ehMeu).length>=25},
   {id:"multi", nm:"Explorador", ds:"Relatos em 3 unidades diferentes", test:s=>new Set(s.reports.filter(ehMeu).map(r=>r.hid)).size>=3},
   {id:"night", nm:"Coruja", ds:"Relato entre meia-noite e 5h", test:s=>s.reports.filter(ehMeu).some(r=>{const h=new Date(r.ts).getHours(); return h>=0&&h<5})},
-  {id:"dawn", nm:"Madrugador", ds:"Relato de vacina antes das 8h", test:s=>s.reports.filter(ehMeu).some(r=>new Date(r.ts).getHours()<8)},
+  {id:"dawn", nm:"Madrugador", ds:"Relato antes das 8h", test:s=>s.reports.filter(ehMeu).some(r=>new Date(r.ts).getHours()<8)},
   {id:"alert", nm:"Vigilante", ds:"Publicou um aviso sobre uma unidade", test:s=>(s.alerts||[]).filter(ehMeu).length>=1},
   /* ESCADA DE AVISOS (14/08): o core do app é a falta avisada — a escada de
      conquistas agora premia o dado que protege o dia inteiro */
@@ -5252,8 +5256,18 @@ function alcancavelParaAviso(h){
    não serve — perto de qualquer lugar de BH há dezenas de unidades que
    vacinam, esse número nunca chega a zero e o aviso nunca dispararia.
    O que muda de estado, e importa para quem está esperando, é a FALTA. */
+/* cada tipo de pedido confere os avisos do SEU mundo (14/08): antes o pedido
+   genérico só olhava vacina — "me avise de exame, tanto faz qual" nunca
+   casava com "sem coleta", nem imagem com "equipamento quebrado" */
+const AVISOS_DO_PEDIDO = {
+  basica: [T_VACINA, T_SEM_VACINACAO],
+  lab:    [T_SEM_COLETA],
+  img:    [T_EQUIP],
+  upa:    [T_MEDICO, "fichas_acabaram"]
+};
 function faltasDoPedido(p){
   const itens = p.item ? [p.item] : null;
+  const tipos = AVISOS_DO_PEDIDO[p.tipo] || [T_VACINA, T_SEM_VACINACAO];
   const cabe = p.tipo==="basica" ? (h=>!!h.vac) : p.tipo==="lab" ? (h=>!!h.lab)
              : p.tipo==="img" ? (h=>!!h.img) : (h=>h.profile===p.tipo);
   const ids = [];
@@ -5261,7 +5275,7 @@ function faltasDoPedido(p){
     if(!cabe(h) || !alcancavelParaAviso(h)) return;
     const emFalta = activeAlerts(h).some(a=>a.confirmado && (
        (itens && a.vac && itens.includes(a.vac)) ||
-       (!itens && (a.type===T_VACINA || a.type===T_SEM_VACINACAO))));
+       (!itens && tipos.includes(a.type))));
     if(emFalta) ids.push(h.id);
   });
   return ids;
@@ -5294,7 +5308,8 @@ function mostrarAvisoDePedido(){
   const dono = r.pedido.quem ? ` (${r.pedido.quem})` : "";
   /* honestidade: o app NÃO sabe que chegou — sabe que o aviso de falta saiu do
      ar. Dizer "chegou a vacina" seria inventar, e é o que mataria a confiança. */
-  toast(`O aviso de falta de ${oque.toLowerCase()}${dono} em ${dispName(r.unidade)} não está mais valendo. Pode ter chegado — ligue antes de ir.`);
+  const fim = r.pedido.tipo==="basica" ? "Pode ter chegado" : "Pode ter voltado ao normal";
+  toast(`O aviso de falta de ${oque.toLowerCase()}${dono} em ${dispName(r.unidade)} não está mais valendo. ${fim} — ligue antes de ir.`);
 }
 function unidadesNoRaio(perfil, itens){
   /* usa os serviços oficiais, igual aos filtros */
@@ -5305,7 +5320,10 @@ function unidadesNoRaio(perfil, itens){
   return REG().hospitals.filter(h=>{
     if(!cabe(h) || !alcancavelParaAviso(h)) return false;
     /* se a pessoa disse o que precisa, não conta quem avisou que isso faltou */
-    if(itens && itens.length && activeAlerts(h).some(a=>a.confirmado && a.vac && itens.includes(a.vac))) return false;
+    const tiposP = AVISOS_DO_PEDIDO[perfil] || [];
+    if(activeAlerts(h).some(a=>a.confirmado && (
+       (itens && itens.length && a.vac && itens.includes(a.vac)) ||
+       (!(itens && itens.length) && tiposP.includes(a.type))))) return false;
     return true;
   }).length;
 }
