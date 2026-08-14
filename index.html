@@ -296,7 +296,9 @@
   .medal .st.on{color:var(--good)} .medal .st.off{color:var(--muted)}
   .impactline{background:var(--surface);border-radius:var(--r);padding:15px 16px;margin-top:12px;font-size:14px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow-sm)}
   .impactline b{color:var(--good);font-variant-numeric:tabular-nums}
-  .themebtn{display:inline-block;margin-top:8px;padding:12px 0;font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:underline}
+  /* 12px+12px+19,6 de linha dava 43,6 — meio pixel abaixo do alvo de 44 que o
+     app exige. Medido na auditoria de 13/08. */
+  .themebtn{display:inline-block;margin-top:8px;padding:12px 0;min-height:44px;font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:underline}
   .footnote{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:16px}
 
   /* ============ NAV flutuante c/ FAB ============ */
@@ -453,7 +455,10 @@
            no iPhone NUNCA dispara, então metade dos testadores nunca via nada.
            Aqui é um chip discreto na tela que abre primeiro, sem tapar o mapa,
            e some sozinho quando o app já está instalado. -->
-      <button class="protopill" id="instalarChip" style="display:none;align-self:flex-start;color:var(--brand);font-weight:800;border:none;cursor:pointer;gap:5px;align-items:center">
+      <!-- min-height 44: a auditoria de 13/08 pegou este chip com 23px, abaixo
+           do alvo mínimo de toque que o resto do app respeita. Foi criado no
+           dia anterior e escapou da régua. -->
+      <button class="protopill" id="instalarChip" style="display:none;align-self:flex-start;color:var(--brand);font-weight:800;border:none;cursor:pointer;gap:5px;align-items:center;min-height:44px;padding:0 14px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5z"/></svg>
         Botar o Ondiva na tela do celular
       </button>
@@ -948,7 +953,7 @@
       <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
            e sobrava só o link, torto — pego pelo Raphael no celular. A classe
            login-note já resolve a cor nos dois temas. -->
-      <div class="login-note" id="consentNote" style="margin-top:8px">Ao continuar, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:var(--good);font-weight:800;text-decoration:underline;cursor:pointer">Termos de Uso e a Política de Privacidade</span>.</div>
+      <div class="login-note" id="consentNote" style="margin-top:8px">Ao continuar, você concorda com os <span id="legalLinkSignup" role="button" tabindex="0" style="color:var(--good);font-weight:800;text-decoration:underline;cursor:pointer;display:inline-block;padding:8px 0;min-height:44px;line-height:28px">Termos de Uso e a Política de Privacidade</span>.</div>
       <!-- O BOTÃO DE US$ 300 MILHÕES (Spool). Uma loja tirou o cadastro
            obrigatório do caixa, trocou por "continuar sem conta", e as compras
            subiram 45%. Aqui era pior: a pessoa pode estar na rua com criança
