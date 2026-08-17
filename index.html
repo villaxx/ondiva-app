@@ -820,8 +820,8 @@
   <div class="sheet-inner">
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
-    <h2 style="padding-right:0">Me avise</h2>
-    <div class="herosub">Diga o que você precisa. Quando tiver numa unidade perto, o Ondiva te chama — para ninguém sair de casa à toa.<br><b>Emergência grave? Não espere aviso: use o SOS.</b></div>
+    <h2 style="padding-right:0">Me avise quando tiver</h2>
+    <div class="herosub">Diga o que você precisa. Se estiver <b>faltando</b> numa unidade perto, o Ondiva te chama <b>quando voltar a ter</b> — para ninguém sair de casa à toa.<br><b>Emergência grave? Não espere aviso: use o SOS.</b></div>
     <div id="avisoLista"></div>
     <p class="vtitle" id="avisoNovoTit">Novo aviso</p>
     <p class="vtitle" style="margin-top:10px">Para quem é?</p>
@@ -2781,13 +2781,12 @@ function renderChips(){
        aria-pressed fixo em true, o que o pintava de verde como se estivesse
        filtrando alguma coisa (achado do Raphael, 12/08). Verde só quando a
        pessoa muda do padrão (carro), aí sim é escolha dela. */
-    /* MODO NÃO É FILTRO (14/08, achado do Raphael: "Vou de carro fica preto e
-       não muda de cor como os outros"). A regra antiga pintava de verde quando
-       a pessoa saia do padrão "carro" — fazia sentido quando carro era o
-       padrão NÃO escolhido. Agora o onboarding PERGUNTA o modo: os três são
-       escolha dela e têm que ter o mesmo visual. Verde no app quer dizer
-       "filtro ligado"; preferência de transporte não filtra nada. */
-    + `<button class="chip" data-modo="1" aria-pressed="false">${MODOS[state.modo]}</button>`
+    /* MODO: VERDE NOS TRÊS (17/08). Primeiro só "carro" ficava preto e os
+       outros verdes (inconsistência); aí igualei tudo em neutro e criou-se
+       problema pior — o chip parecia não responder ao toque. O modo é escolha
+       ATIVA e sempre existe uma valendo: verde aqui quer dizer "está valendo",
+       e confirma o toque junto com a troca do rótulo. */
+    + `<button class="chip" data-modo="1" aria-pressed="true">${MODOS[state.modo]}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
     + `<button class="chip" data-x="open" aria-pressed="${filters.open}">Aberto agora</button>`;
   ["chipsMap","chipsList"].forEach(id=>{
@@ -6124,13 +6123,22 @@ function desenharPinosReais(){
        e o pino exibia a fila. No mapa cabe UMA informação por unidade, e a que
        decide "vale a pena ir?" é a falta. Prioridade: fechada → falta → fila.
        A fila continua no detalhe, para quem abrir. */
+    /* DUAS CORES, NÃO SEIS (17/08, achado do Raphael: "as cores não estão
+       representativas"). O mapa misturava duas linguagens: verde/amarelo/
+       vermelho do semáforo da FILA e âmbar/vermelho do alerta de FALTA — ou
+       seja, vermelho queria dizer "fila longa" E "falta do que procuro". Foi o
+       mesmo furo corrigido no detalhe ontem, e o mapa tinha ficado para trás.
+       Agora: NEUTRO = normal, ÂMBAR/VERMELHO = tem problema. E quando há falta
+       E fila, o pino mostra as DUAS ("⚠ 45") — ideia do Raphael; antes a fila
+       sumia e ele nunca via as duas juntas. */
+    const numero = w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h));
     const cor = fechada ? "#6E8A7B"
               : faltaAqui ? "#D9453D"
               : faltaQualquer ? "#B57415"
-              : (w.semDados ? "#4E6E59" : (totalMin(h)===null ? filaStatus(w.min).color : statusOf(totalMin(h)).color));
+              : "#2E4A3B";                       /* neutro: fila não pinta mais o pino */
     const rot = fechada ? "fechada"
-              : (faltaQualquer ? "⚠"
-              : (w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h))));
+              : (faltaQualquer ? ("⚠" + (numero ? " " + numero : ""))
+              : numero);
     const html = `<div style="transform:translate(-50%,-100%);text-align:center;white-space:nowrap">
         <div style="display:inline-block;background:${cor};color:#fff;font:800 11px system-ui;padding:2px 7px;border-radius:9px;border:${faltaAqui?"3px solid #D9453D":alarme?"2px solid #E0A040":"2px solid #fff"};box-shadow:0 1px 4px rgba(0,0,0,.4)">${rot || "•"}${alarme?" !":""}</div>
         ${faltaQualquer?`<div style="font:800 9.5px system-ui;color:#fff;background:${faltaAqui?"#D9453D":"#B57415"};border-radius:4px;padding:0 4px;margin-top:1px">${esc(alertLabelTxt(faltaQualquer).slice(0,22))}</div>`:""}
