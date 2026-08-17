@@ -2728,6 +2728,8 @@ function visibleHospitals(){
 const NOME_CAT = {medico:"Atendimento médico", basica:"Vacina", lab:"Laboratório", img:"Imagem"};
 function rotuloNecessidade(){
   if(!filters.cat) return "Todas as unidades";
+  if(filters.cat==="medico")
+    return filters.need!=="todos" ? "Atendimento médico · "+rotuloCaso().toLowerCase() : "Atendimento médico";
   if(!filters.item || !filters.item.length) return NOME_CAT[filters.cat];
   const r = filters.item.length<=2 ? filters.item.join(" + ") : filters.item.length+" itens";
   return NOME_CAT[filters.cat] + " · " + r;
@@ -2762,7 +2764,6 @@ function renderChips(){
        filtrando alguma coisa (achado do Raphael, 12/08). Verde só quando a
        pessoa muda do padrão (carro), aí sim é escolha dela. */
     + `<button class="chip" data-modo="1" aria-pressed="${state.modo!=="carro"}">${MODOS[state.modo]}</button>`
-    + `<button class="chip" data-caso="1" aria-pressed="${filters.need!=='todos'}">${rotuloCaso()}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
     + `<button class="chip" data-x="ped" aria-pressed="${filters.ped}">Infantil</button>`
     + `<button class="chip" data-x="open" aria-pressed="${filters.open}">Aberto agora</button>`;
@@ -2826,7 +2827,6 @@ function renderChips(){
       if(b.dataset.avise){ abrirMeAvise(); return; }
       if(b.dataset.modo){ const o=["carro","onibus","ape"]; state.modo=o[(o.indexOf(state.modo)+1)%3]; store.save(state); applyModoTexts(); }
       /* gravidade num chip só, alternando: qualquer → grave → leve → qualquer */
-      else if(b.dataset.caso){ filters.need = filters.need==="todos" ? "grave" : filters.need==="grave" ? "leve" : "todos"; }
       else if(b.dataset.x==="ped") filters.ped=!filters.ped;
       else filters.open=!filters.open;
       renderChips(); renderList(); renderMap();
@@ -4597,6 +4597,26 @@ function abrirNecessidade(){
   btnAny.onclick = ()=>{ filters.cat=""; filters.item=null; fechar(); };
   g.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
     filters.cat = b.dataset.c; filters.item = null;
+    /* "QUALQUER CASO" MOROU AQUI DENTRO (14/08, decisão do Raphael): o chip
+       era resquício da era-fila — caso grave já tem o SOS, e caso leve só faz
+       sentido DENTRO de Atendimento médico. A pergunta aparece na hora certa,
+       como vacina pergunta "qual vacina". Trocar de categoria zera o caso,
+       senão ele viraria filtro invisível sem chip para desligar. */
+    if(filters.cat!=="medico") filters.need = "todos";
+    if(filters.cat==="medico"){
+      document.getElementById("needTitle").textContent = "Que tipo de caso?";
+      g.style.gridTemplateColumns = "repeat(1,1fr)";
+      const ops=[["todos","Tanto faz — todo atendimento médico"],
+                 ["leve","Caso leve (dor, febre, machucado)"],
+                 ["grave","Caso grave — só pronto-socorro"]];
+      g.innerHTML = ops.map(o=>`<button class="minbtn ${filters.need===o[0]?'sel':''}" data-n="${o[0]}" style="font-size:12.5px">${o[1]}</button>`).join("");
+      btnAny.textContent = "Fechar";
+      btnAny.onclick = fechar;
+      g.querySelectorAll(".minbtn").forEach(x=>x.addEventListener("click",()=>{
+        filters.need = x.dataset.n; fechar();
+      }));
+      return;
+    }
     const cfg = ITENS[filters.cat];
     if(!cfg){ fechar(); return }
     /* segundo nível: qual vacina, qual exame.
