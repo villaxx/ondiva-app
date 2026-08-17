@@ -3395,10 +3395,20 @@ function renderMap(){
   const etiquetas = [], pequenos = [];
   hs.forEach(h=>{
     const w=currentWait(h);
+    /* MESMA REGRA DO PINO DE RUA (17/08): este é o mapa DESENHADO, o que
+       aparece quando o Leaflet não carrega — ele tinha ficado com a linguagem
+       antiga (cor de fila e "—"). Prioridade: fechada → falta (⚠) → fila. */
+    const fA = faltaDoFiltro(h), fQ = faltasConfirmadas(h)[0];
     const semDado = w.closed || w.semDados;
     const tt = semDado ? null : totalMin(h);
-    const col = semDado ? "var(--muted)" : (tt===null ? filaStatus(w.min).color : statusOf(tt).color);
-    const lbl = semDado ? "—" : fmtShort(tt===null ? w.min : tt);
+    const numTxt = semDado ? "" : fmtShort(tt===null ? w.min : tt);
+    const col = w.closed ? "var(--muted)"
+              : fA ? "var(--crit)"
+              : fQ ? "var(--warn)"
+              : semDado ? "var(--muted)" : "var(--ink2)";
+    const lbl = w.closed ? "—"
+              : fQ ? ("⚠" + (numTxt ? " " + numTxt : ""))
+              : (numTxt || "—");
     const p = pinXY(h);
     const cx = p.x, cy = p.y*sy + oy;
     const bw = Math.max(40, lbl.length*10 + 16);
@@ -3690,7 +3700,9 @@ function renderRail(hs){
   let recCard = "";
   if(rec){
     const rh=rec.h, rw=currentWait(rh), rtot=totalMin(rh);
-    const rs = rec.temRelato ? (rtot===null?filaStatus(rw.min):statusOf(rtot)) : null;
+    /* a recomendada nunca tem falta confirmada (ver recomendacao()), então
+       aqui basta tirar a cor de semáforo da fila (17/08) */
+    const rs = rec.temRelato ? {color:"#2E4A3B"} : null;
     const rnum = rec.temRelato ? fmtShort(rtot===null?rw.min:rtot) : kmBR(distOf(rh));
     const rrot = rec.temRelato ? (rtot===null?"fila":"total") : "km";
     recCard = `<button class="rcard" data-id="${rh.id}" style="border:2px solid var(--brand)">
@@ -3727,16 +3739,20 @@ function renderRail(hs){
     /* sem relato: a caixa mostra a DISTÂNCIA, não uma fila que não existe
        (fmtShort(undefined) dava "NaN" na tela) */
     const semRel = !!w.semDados;
-    const s = semRel ? {color:"#4E6E59"} : (tot===null ? filaStatus(w.min) : statusOf(tot));
-    const num = semRel ? kmBR(distOf(h)) : (tot===null ? fmtShort(w.min) : fmtShort(tot));
-    const rot = semRel ? "km" : (tot===null ? "fila" : "total");
+    /* o carrossel também seguia a cor de fila (17/08): com falta confirmada,
+       a caixa vira alerta; sem falta, a fila fica neutra, como no detalhe */
+    const cFal = faltaDoFiltro(h) || faltasConfirmadas(h)[0];
+    const s = cFal ? {color: faltaDoFiltro(h) ? "var(--crit)" : "var(--warn)"}
+            : semRel ? {color:"#4E6E59"} : {color:"#2E4A3B"};
+    const num = cFal ? "⚠" : (semRel ? kmBR(distOf(h)) : (tot===null ? fmtShort(w.min) : fmtShort(tot)));
+    const rot = cFal ? "falta" : (semRel ? "km" : (tot===null ? "fila" : "total"));
     /* mesmo princípio do cartão da lista: havendo aviso, ele ocupa a linha */
     const als = activeAlerts(h).sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0));
     const sub2 = als.length
       ? alertLine(als)
       : (tot===null
           ? `${kmBR(distOf(h))} km`
-          : `~${travelMin(h)} min de carro + ${w.min} min de fila`);
+          : `~${travelMin(h)} min ${MODO_TXT[state.modo]||"de carro"} + ${w.min} min de fila`);
     const subCor = als.length ? (als[0].confirmado
         ? ' style="color:var(--warn);font-weight:800"'
         : ' style="color:var(--muted);font-weight:700"') : "";
