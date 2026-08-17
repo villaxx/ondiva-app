@@ -3277,8 +3277,17 @@ function ajustarBarrasDoMapa(){
   const nav = document.querySelector("nav");
   const rail = document.getElementById("rail");
   if(!nav || !rail) return;
-  const altNav = Math.ceil(nav.getBoundingClientRect().height) || 80;
-  const base = 12 + altNav + 10;              /* 12 do rodapé + barra + folga */
+  const palco = rail.offsetParent || rail.parentElement;   /* de quem o rail depende */
+  if(!palco) return;
+  /* A PEGADINHA (14/08, 2ª tentativa): no CELULAR o nav é `fixed` e divide a
+     âncora com o palco; no DESKTOP (>=520px) ele vira `absolute` e se ancora no
+     DOCUMENTO, enquanto o rail se ancora no palco do mapa. Somar "12 + altura
+     do nav" só valia no celular — no desktop o cartão subia menos que a barra
+     e encavalava. Agora a conta usa a POSIÇÃO REAL dos dois na tela, o que
+     vale para qualquer âncora, zoom de página ou escala de fonte. */
+  const pr = palco.getBoundingClientRect();
+  const nr = nav.getBoundingClientRect();
+  const base = Math.max(12, Math.round(pr.bottom - nr.top) + 10);
   rail.style.bottom = base + "px";
   const altRail = Math.ceil(rail.getBoundingClientRect().height) || 96;
   const acima = (base + altRail + 10) + "px";
