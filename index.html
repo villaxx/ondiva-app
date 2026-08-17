@@ -973,15 +973,23 @@
            Ondiva vermelho é emergência (SOS, unidade fechada), e gastar
            vermelho aqui enfraquece o vermelho que salva vida. -->
       <div class="walert" style="margin:0 0 12px"><b>Invente um — não use seu nome verdadeiro.</b> Ele aparece nos seus relatos, para as outras pessoas.</div>
+      <!-- SORTEADO POR PADRÃO (14/08, pedido do Raphael: "para não correr risco
+           da pessoa colocar o nome dela"). O campo em branco convidava a
+           digitar, e o caminho mais curto de quem precisa inventar na hora é o
+           próprio nome — que fica pÚBLICO e não desce depois de subir. Agora a
+           tela abre com um apelido PRONTO; digitar existe, mas atrás de um
+           link, como exceção consciente. Fogg: desenhe para o erro não
+           acontecer, não confie no aviso. -->
       <div class="field" id="f-user">
-        <label for="inUser">Apelido no app</label>
-        <input id="inUser" autocapitalize="none" autocomplete="off" maxlength="20" placeholder="ex.: canario10">
+        <label for="inUser">Seu apelido no app</label>
+        <input id="inUser" autocapitalize="none" autocomplete="off" maxlength="20" placeholder="ex.: canario10" readonly>
         <div class="err">Use 3 a 20 letras ou números, sem espaços.</div>
       </div>
       <!-- FOGG: não confie no aviso, tire o trabalho. Quem precisa INVENTAR um
            apelido na hora pega o caminho mais curto — o próprio nome. Com um
            apelido pronto a um toque, o caminho mais curto passa a ser o certo. -->
-      <button class="cta sec" id="btnSortear" style="margin-top:0">Sortear um apelido para mim</button>
+      <button class="cta sec" id="btnSortear" style="margin-top:0">↻ Sortear outro</button>
+      <button class="themebtn" id="btnDigitar" style="margin-top:8px;color:var(--brand)">Prefiro escrever o meu</button>
       <button class="cta" id="btnSignup">Continuar</button>
       <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
            e sobrava só o link, torto — pego pelo Raphael no celular. A classe
@@ -994,7 +1002,10 @@
            qualquer coisa — inclusive o que vem do cadastro do Ministério da
            Saúde, que não depende de conta nenhuma para funcionar.
            Conta agora só quando for CONTRIBUIR. Para olhar, entra direto. -->
-      <button class="cta sec" id="btnVisitante" style="margin-top:10px">Só quero ver onde ir agora</button>
+      <!-- "Só quero ver onde ir agora" saiu em 14/08: virou o comportamento
+           PADRÃO do app (ver showLoginIfNeeded). Esta tela agora só aparece
+           quando a pessoa vai contribuir, e aí sair sem conta é "Agora não". -->
+      <button class="cta sec" id="btnVisitante" style="margin-top:10px">Agora não</button>
       <!-- o fundo desta caixa é branco fixo, então a cor do texto também é fixa:
      var(--brand-ink) é claro no tema claro e dava contraste 1 (invisível) -->
 <div class="login-note" id="loginMotivo" style="display:none;font-weight:800;color:#143D28;background:rgba(255,255,255,.92);border-radius:12px;padding:10px 12px;margin-top:12px"></div>
@@ -2764,7 +2775,13 @@ function renderChips(){
        aria-pressed fixo em true, o que o pintava de verde como se estivesse
        filtrando alguma coisa (achado do Raphael, 12/08). Verde só quando a
        pessoa muda do padrão (carro), aí sim é escolha dela. */
-    + `<button class="chip" data-modo="1" aria-pressed="${state.modo!=="carro"}">${MODOS[state.modo]}</button>`
+    /* MODO NÃO É FILTRO (14/08, achado do Raphael: "Vou de carro fica preto e
+       não muda de cor como os outros"). A regra antiga pintava de verde quando
+       a pessoa saia do padrão "carro" — fazia sentido quando carro era o
+       padrão NÃO escolhido. Agora o onboarding PERGUNTA o modo: os três são
+       escolha dela e têm que ter o mesmo visual. Verde no app quer dizer
+       "filtro ligado"; preferência de transporte não filtra nada. */
+    + `<button class="chip" data-modo="1" aria-pressed="false">${MODOS[state.modo]}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
     + `<button class="chip" data-x="open" aria-pressed="${filters.open}">Aberto agora</button>`;
   ["chipsMap","chipsList"].forEach(id=>{
@@ -4718,7 +4735,12 @@ function abrirEscolhaPlano(){
      por ele, com os dois equivale a "Ver todas". Sai da tela; segue existindo
      por baixo como o padrão de quem acabou de se cadastrar. */
   const doisPlanos = state.plans.length === PLANS.length;
-  const ops = PLANS.map(p=>[p, p==="SUS" ? "SUS / público" : p]).concat([["Todos","Ver todas"]]);
+  /* "Ver todas" era linguagem de FILTRO numa pergunta sobre a PESSOA ("como
+     você vai ser atendido?"). "Pelos dois" é a resposta de verdade — e o
+     Raphael achou que o botão "não clicava": ele já vinha marcado (quem tem os
+     dois planos cai nele), então o toque não mudava nada na tela. Agora o
+     toque sempre confirma e fecha, com retorno. */
+  const ops = PLANS.map(p=>[p, p==="SUS" ? "SUS / público" : p]).concat([["Todos","Pelos dois"]]);
   /* qual delas representa o estado atual, inclusive quando o filtro é "meus" */
   const equivale = o => filters.plan===o
     || (filters.plan==="meus" && (doisPlanos || !state.plans.length ? o==="Todos" : o===state.plans[0]));
@@ -4730,6 +4752,8 @@ function abrirEscolhaPlano(){
     filters.plan = b.dataset.p;
     fecharFolhas(); document.getElementById("backdrop").classList.remove("open");
     renderChips(); renderList(); renderMap();
+    toast(b.dataset.p==="Todos" ? "Mostrando as unidades dos dois tipos."
+          : "Mostrando quem atende " + (b.dataset.p==="SUS" ? "pelo SUS" : "convênio ou particular") + ".");
   }));
   document.getElementById("backdrop").classList.add("open");
   document.getElementById("needSheet").classList.add("open");
@@ -5615,7 +5639,7 @@ function toastComDesfazer(msg, aoDesfazer){
    e-mail e senha (11/08). O piloto roda com ZERO dado pessoal. */
 function setBad(id, bad){ document.getElementById(id).classList.toggle("bad", bad); return bad }
 document.getElementById("btnVisitante").addEventListener("click",()=>{
-  state.visitante = true;
+  state.visitante = true;   /* "Agora não": volta ao mapa, sem conta */
   /* sem conta não há convênio declarado: mostra tudo, para não esconder unidade
      de ninguém por causa de um filtro que a pessoa nunca escolheu */
   if(!state.plans.length) state.plans = PLANS.slice();
@@ -5623,7 +5647,7 @@ document.getElementById("btnVisitante").addEventListener("click",()=>{
   document.getElementById("login").classList.remove("show");
   const n = document.getElementById("loginMotivo"); if(n) n.style.display = "none";
   renderChips(); renderList(); renderMap(); renderProfile(); renderRankView();
-  toast("Pronto. Para avisar ou relatar, aí sim precisa de conta.");
+  toast("Sem problema — para avisar ou relatar, aí sim precisa de um apelido.");
   setTimeout(oferecerModo, 700);
 });
 /* ===== SORTEAR APELIDO =====
@@ -5640,7 +5664,15 @@ document.getElementById("btnSortear").addEventListener("click",()=>{
   const el = document.getElementById("inUser");
   el.value = sortearApelido();
   setBad("f-user", false);
-  el.focus();
+  if(!el.readOnly) el.focus();
+});
+/* já abre com um pronto: o caminho mais curto passa a ser o seguro */
+(function(){ const el=document.getElementById("inUser"); if(el && !el.value) el.value = sortearApelido() })();
+document.getElementById("btnDigitar").addEventListener("click",()=>{
+  const el = document.getElementById("inUser");
+  el.readOnly = false; el.value = ""; el.focus();
+  document.getElementById("btnDigitar").style.display = "none";
+  toast("Escreva um apelido inventado — ele aparece nos seus avisos, para as outras pessoas.");
 });
 document.getElementById("btnSignup").addEventListener("click",()=>{
   /* ZERO DADO PESSOAL (11/08): a conta do piloto é só um apelido inventado */
@@ -5767,10 +5799,20 @@ document.getElementById("btnPlansOk").addEventListener("click",()=>{
   requestGPS(true); /* pedido vem de um toque do usuário — iOS aceita melhor */
 });
 function showLoginIfNeeded(){
-  /* visitante entra direto: a camada do CNES — quem abre, o que faz, onde fica —
-     funciona sem conta e sem dado de ninguém. Trancar isso atrás de cadastro era
-     cobrar pedágio para entregar informação pública. */
-  if(!state.user && !state.visitante){ document.getElementById("login").classList.add("show"); return }
+  /* ===== O APP ABRE NO MAPA (14/08, decisão do Raphael) =====
+     A tela de apelido era a PRIMEIRA coisa que o convidado do piloto via: um
+     formulário como pedágio, antes de qualquer valor. E era pedágio à toa — a
+     camada do CNES (o que abre, o que faz, onde fica, telefone) funciona sem
+     conta e sem dado de ninguém; a conta só existe para CONTRIBUIR, e esse
+     caminho já estava pronto no pedirConta(). Agora quem chega entra direto:
+     vira visitante sozinho, vê o mapa, e só encontra a tela de apelido quando
+     for avisar uma falta ou relatar uma espera — com o motivo escrito.
+     (Spool: tirar o cadastro do caminho subiu as compras em 45%.) */
+  if(!state.user && !state.visitante){
+    state.visitante = true;
+    if(!state.plans.length) state.plans = PLANS.slice();  /* sem plano declarado, mostra tudo */
+    store.save(state);
+  }
   if(state.user && !state.plans.length) showPlanSetup();
 }
 /* ===== A CONTA SÓ NA HORA DE CONTRIBUIR =====
