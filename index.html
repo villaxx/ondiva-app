@@ -1043,34 +1043,34 @@ const PLANS = ["SUS","Convênio ou particular"];
    telefone, porque convênio muda e o site pode estar velho. */
 const CONVENIOS_REDE = [
   {re:/s[ãa]o marcos/i, data:"06/08/2026",
-   lista:["Unimed BH","Bradesco Saúde","Amil","SulAmérica","Hapvida","IPSEMG","Golden Cross","Cassi","Saúde Caixa","Porto Seguro","Notre Dame Intermédica","Mediservice","Postal Saúde","Vale/Pasa","Copass","Fundação Itaú","Stellantis/Fiat","Vitallis","e mais 23"],
+   mais:"e mais 23", lista:["Unimed BH","Bradesco Saúde","Amil","SulAmérica","Hapvida","IPSEMG","Golden Cross","Cassi","Saúde Caixa","Porto Seguro","Notre Dame Intermédica","Mediservice","Postal Saúde","Vale/Pasa","Copass","Fundação Itaú","Stellantis/Fiat","Vitallis"],
    excecao:"o site avisa que alguns convênios valem só em certas unidades"},
   {re:/hermes pardini/i, data:"06/08/2026",
    lista:["Unimed","Bradesco Saúde","Amil","SulAmérica","Caixa Saúde","Care Plus","Itaú Saúde"],
    excecao:"o site publica só os principais — pode aceitar outros"},
   {re:/axial/i, data:"06/08/2026",
-   lista:["Unimed","Bradesco","Amil","Cassi","Cemig Saúde","GEAP","Saúde Caixa","Casembrapa","Copasa","e mais de 350"],
+   mais:"e mais de 350", lista:["Unimed","Bradesco","Amil","Cassi","Cemig Saúde","GEAP","Saúde Caixa","Casembrapa","Copasa"],
    excecao:null},
   {re:/tomografia computadorizada/i, data:"06/08/2026",
-   lista:["Unimed","Bradesco Saúde","Amil","Cassi","Cemig Saúde","IPSEMG","IPSM (PMMG)","Saúde Caixa","GEAP","Copasa","Vale/Pasa","Usiminas","Saúde Petrobras","Postal Saúde","Fusex","Particular","e mais 20"],
+   mais:"e mais 20", lista:["Unimed","Bradesco Saúde","Amil","Cassi","Cemig Saúde","IPSEMG","IPSM (PMMG)","Saúde Caixa","GEAP","Copasa","Vale/Pasa","Usiminas","Saúde Petrobras","Postal Saúde","Fusex","Particular"],
    excecao:"NÃO atende Unimed Pleno nem Unifácil"},
   {re:/conrad/i, data:"06/08/2026",
-   lista:["Unimed","Cassi","Cemig Saúde/Forluz","Copasa","Correios","Vale/Pasa","Saúde Caixa","Saúde Petrobras","IPSM (Polícia Militar)","Amagis","Stellantis","e mais 15"],
+   mais:"e mais 15", lista:["Unimed","Cassi","Cemig Saúde/Forluz","Copasa","Correios","Vale/Pasa","Saúde Caixa","Saúde Petrobras","IPSM (Polícia Militar)","Amagis","Stellantis"],
    excecao:"NÃO atende Unimed Unifácil, Digital nem Pleno"},
   {re:/laborat[óo]rio s[ãa]o paulo/i, data:"06/08/2026",
    lista:["Unimed","IPSEMG","Bradesco Saúde","SulAmérica","Amil","PMMG","Saúde Caixa","FCA","Usiminas","GEAP","Copass","CASU","Sindeac","Pasa","Vale Saúde Sempre","Itaú Saúde","Metropax"],
    excecao:null},
   {re:/eccos/i, data:"06/08/2026",
-   lista:["Unimed","Bradesco Saúde","SulAmérica","Amil","IPSEMG","Cemig Saúde","Saúde Caixa","GEAP (Pame)","Golden Cross","Postal Saúde","Polícia Militar","Fusex","Copass","Mediservice","e mais 13"],
+   mais:"e mais 13", lista:["Unimed","Bradesco Saúde","SulAmérica","Amil","IPSEMG","Cemig Saúde","Saúde Caixa","GEAP (Pame)","Golden Cross","Postal Saúde","Polícia Militar","Fusex","Copass","Mediservice"],
    excecao:null},
   {re:/sonar/i, data:"06/08/2026",
-   lista:["Unimed","Bradesco","SulAmérica","Cassi","IPSEMG","IPSM","Cemig","Copasa","Saúde Caixa","GEAP","Postal Saúde","Petrobras","Porto Seguro","Mediservice","e mais 12"],
+   mais:"e mais 12", lista:["Unimed","Bradesco","SulAmérica","Cassi","IPSEMG","IPSM","Cemig","Copasa","Saúde Caixa","GEAP","Postal Saúde","Petrobras","Porto Seguro","Mediservice"],
    excecao:null},
   {re:/hospital s[ãa]o lucas/i, data:"06/08/2026",
-   lista:["Unimed","Bradesco Saúde","IPSEMG","IPSM","Cemig Saúde","Copasa","Saúde Caixa","GNDI","Mediservice","Amagis","Assefaz","Fusex","e mais 18"],
+   mais:"e mais 18", lista:["Unimed","Bradesco Saúde","IPSEMG","IPSM","Cemig Saúde","Copasa","Saúde Caixa","GNDI","Mediservice","Amagis","Assefaz","Fusex"],
    excecao:"a lista MUDA por serviço: internação, pronto atendimento e ambulatório têm coberturas diferentes"},
   {re:/hospital belo horizonte/i, data:"06/08/2026",
-   lista:["Unimed?","Bradesco Saúde","Amil","SulAmérica","Cassi","Cemig","Caixa Saúde","GEAP","IPSM/PMMG","Itaú Saúde","Golden Cross","Notre Dame Intermédica","Postal Saúde","Vale","Vitallis","e mais 34"],
+   mais:"e mais 34", lista:["Unimed?","Bradesco Saúde","Amil","SulAmérica","Cassi","Cemig","Caixa Saúde","GEAP","IPSM/PMMG","Itaú Saúde","Golden Cross","Notre Dame Intermédica","Postal Saúde","Vale","Vitallis"],
    excecao:"a Unimed não consta na lista publicada"},
   {re:/instituto de olhos de belo/i, data:"06/08/2026",
    lista:["Amil","Cassi","Gama Saúde","Notre Dame Intermédica","Saúde Caixa","SulAmérica"],
@@ -3895,6 +3895,22 @@ function openDetail(id){
         + `<a href="tel:+55${esc(h.fone)}" style="font-weight:800;color:var(--brand)">(${esc(h.fone.slice(0,2))}) ${esc(h.fone.slice(2,-4))}-${esc(h.fone.slice(-4))}</a>`;
     } else dT.style.display="none";
   }
+  else if(faltasConfirmadas(h).length){
+    /* O CÁLCULO NÃO PODE PROMETER O QUE FALTA (17/08, achado do Raphael: o pino
+       dizia "⚠ 1h37" e o detalhe, logo abaixo, "1h37 até ser ATENDIDO").
+       Mesmo erro do "Fila curta" verde corrigido no dia anterior — só que ele
+       morreu na manchete e sobreviveu AQUI, que é outro pedaço de código.
+       Com falta confirmada, o bloco informa sem prometer, e entrega o
+       telefone, que é o que resolve. */
+    dT.style.display="";
+    const t=travelMin(h), fal=faltaDoFiltro(h)||faltasConfirmadas(h)[0];
+    const tel = (h.fone && !state.demo)
+      ? ` Vale ligar antes: <a href="tel:+55${esc(h.fone)}" style="font-weight:800;color:var(--brand)">(${esc(h.fone.slice(0,2))}) ${esc(h.fone.slice(2,-4))}-${esc(h.fone.slice(-4))}</a>`
+      : "";
+    dT.innerHTML = (t!==null ? `São <b>~${t} min</b> ${MODO_TXT[state.modo]||"de carro"} até aqui` : `Fica a <b>${kmBR(distOf(h))} km</b>`)
+      + (w.real ? `, e a fila relatada é de <b>${w.min} min</b>` : "")
+      + ` — <b style="color:var(--warn)">mas avisaram que ${esc(alertLabelTxt(fal).toLowerCase())}</b>.` + tel;
+  }
   else{
     dT.style.display="";
     const t=travelMin(h), tot=totalMin(h);
@@ -3944,11 +3960,12 @@ function openDetail(id){
     + h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("")
     + (cv ? `<div style="margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--ink2);font-weight:600">
          ${cv.lista.length ? `<b>Aceita:</b> ${cv.lista.map(esc).join(" · ")}` : "<b>Não trabalha com convênio</b> — atendimento particular."}
+         ${cv.mais ? `<div style="color:var(--muted);margin-top:4px">O site da unidade lista <b>${esc(cv.mais.replace("e mais ",""))}</b> convênios além destes, que não coletamos — confirme por telefone.</div>` : ""}
          ${cv.excecao ? `<div style="color:var(--warn);font-weight:800;margin-top:4px">Atenção: ${esc(cv.excecao)}</div>` : ""}
          <div style="font-size:11px;color:var(--muted);margin-top:4px">Informado pelo site da unidade em ${esc(cv.data)} — confirme por telefone antes de ir.</div>
        </div>` : "")
     + (ans ? `<div style="margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--ink2);font-weight:600">
-         <b>Consta na ANS como credenciada de:</b> ${ans.p.map(esc).join(" · ")}${restoAns ? ` <span style="color:var(--muted)">e mais ${restoAns} operadora${restoAns>1?"s":""}</span>` : ""}
+         <b>Consta na ANS como credenciada de:</b> ${ans.p.map(esc).join(" · ")}${restoAns ? `<div style="color:var(--muted);margin-top:4px">A ANS registra <b>mais ${restoAns} operadora${restoAns>1?"s":""}</b> aqui, cujos nomes o app não traz — confirme por telefone ou no site da sua operadora.</div>` : ""}
          <div style="color:var(--warn);font-weight:800;margin-top:4px">Esta lista NÃO inclui IPSEMG, IPSM, Fusex, Copasa e outros regimes próprios — eles não entram no cadastro da ANS. Não estar aqui não quer dizer que a unidade não aceita.</div>
          <div style="font-size:11px;color:var(--muted);margin-top:4px">Cadastro da ANS, competência 07/2026 — confirme por telefone antes de ir.</div>
        </div>` : "");
