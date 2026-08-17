@@ -3242,7 +3242,14 @@ function renderList(){
     } else if(w.semDados){
       pill="aberto";
       const t=travelMin(h);
-      linha2 = (t!=null ? `~${t} min ${MODO_TXT[state.modo]||""} · ` : "") + `sem informação de hoje — seja o primeiro a avisar`
+      /* mesma regra do detalhe (17/08): com movimento no dia e nenhum aviso de
+         falta, a ausência vira notícia boa; sem ninguém por lá, segue o convite */
+      const hj = new Date().toDateString();
+      const viram = (state.reports||[]).filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hj).length
+                  + (state.alerts||[]).filter(a=>a.hid===h.id && !a.revisar && new Date(a.ts).toDateString()===hj).length;
+      linha2 = (t!=null ? `~${t} min ${MODO_TXT[state.modo]||""} · ` : "")
+        + (viram>=2 ? `<span style="color:var(--good);font-weight:800">ninguém avisou falta hoje</span>`
+                    : `sem informação de hoje — seja o primeiro a avisar`)
         + (w.antigo ? `<br><span style="opacity:.8">Último relato: há ${w.antigo.txt}, ${fmtWaitTxt(w.antigo.min)}</span>` : "");
     } else {
       pill="aberto";
@@ -3881,8 +3888,23 @@ function openDetail(id){
     dW.innerHTML = "Aberta agora"; dW.style.color = "var(--good)"; dW.style.fontSize = "31px";
     dP.style.background = "var(--good-bg)"; dP.style.color = "var(--good)";
     dP.textContent = h.h24 ? "24 horas" : "até " + h.fe + "h";
-    dSub.textContent = "Ninguém confirmou fila nem falta aqui hoje."
-      + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
+    /* ===== SILÊNCIO COM TESTEMUNHAS VALE; SILÊNCIO VAZIO, NÃO (17/08) =====
+       O Raphael perguntou se não dava para dizer que "não está faltando nada".
+       NÃO dá: o app não sabe — pode estar faltando e ninguém ter avisado, e
+       afirmar isso seria a mesma mentira da fila inventada. O que ele PODE
+       dizer é um fato sobre os avisos: "ninguém avisou falta hoje". E a força
+       disso depende de quanta gente olhou — mesma lógica do 1 relato ("não
+       confirmado") contra 2 ("confirmado"): com movimento no dia, a ausência
+       de aviso é notícia boa; sem ninguém por lá, não prova nada. */
+    const hojeStr2 = new Date().toDateString();
+    const olharam = (state.reports||[]).filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hojeStr2).length
+                  + (state.alerts||[]).filter(a=>a.hid===h.id && !a.revisar && new Date(a.ts).toDateString()===hojeStr2).length;
+    if(olharam >= 2){
+      dSub.innerHTML = `<b style="color:var(--good)">Ninguém avisou falta aqui hoje</b> — ${olharam} pessoas informaram sobre esta unidade.`;
+    } else {
+      dSub.textContent = "Ninguém confirmou fila nem falta aqui hoje."
+        + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
+    }
   }
   const dT=document.getElementById("dTotal");
   /* NINGUÉM CONFIRMOU HOJE — LIGUE ANTES (14/08/2026). O maior motivo de
