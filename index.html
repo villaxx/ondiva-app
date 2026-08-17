@@ -668,7 +668,7 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0" id="needTitle">O que você precisa?</h2>
-    <div class="herosub">O app tira da lista quem acabou de avisar que está faltando justamente isso.</div>
+    <div class="herosub">Onde avisaram falta do que você procura, aparece <b>marcado em vermelho</b> — nunca é recomendado, mas nunca some. Quem decide é você.</div>
     <div class="grid-min" id="needGrid" style="grid-template-columns:repeat(3,1fr)"></div>
     <button class="cta sec" id="needAny" style="margin-top:12px">Tanto faz — mostrar todas</button>
   </div>
@@ -679,7 +679,7 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">Avisar quem está indo</h2>
-    <div class="herosub">Escolha o aviso — dá para marcar mais de um. Vacina em falta vale até o fim do dia; os demais valem 3 horas. Quando outra pessoa confirma, aparece com força para todo mundo.</div>
+    <div class="herosub">Escolha o aviso — dá para marcar mais de um. Avisos de falta valem <b>até o fim do dia</b>; só "sistema fora do ar" vale 3 horas. Quando outra pessoa confirma, aparece com força para todo mundo.</div>
     <div id="alertOpts"></div>
     <div id="vacPick" style="display:none">
       <p class="vtitle" id="vacTitle">Qual vacina está em falta?</p>
@@ -2655,12 +2655,13 @@ function passaNosFiltros(h){
     if(filters.plan==="meus"){
       if(state.plans.length && !h.plans.some(p=>state.plans.includes(p))) return false;
     } else if(filters.plan!=="Todos" && !h.plans.includes(filters.plan)) return false;
-    /* "Infantil" some quase tudo, e é honesto que some: a marca `inf` só existe
-       quando o NOME oficial da unidade diz "infantil" — 5 das 746. É o que o
-       CNES prova; inventar "atende criança" seria adivinhar. Mas o filtro
-       ficava indistinguível de um app quebrado, então ele avisa (ver o texto
-       em renderList) em vez de só devolver uma lista vazia. */
-    if(filters.ped && !h.inf) return false;
+    /* O CHIP "INFANTIL" SAIU (14/08, decisão do Raphael): a marca `inf` só
+       existe quando o NOME oficial diz "infantil" — 8 unidades na metrópole.
+       O filtro escondia 740 que atendem criança normalmente: honesto no
+       mecanismo, enganoso no efeito. A pergunta real da mãe — "tem pediatra
+       lá HOJE?" — é respondida pela camada de falta (aviso "sem pediatra",
+       vale o dia). A marca `inf` fica na base, dormente, para o dia em que
+       houver fonte real de "atende pediatria". */
     if(filters.open && currentWait(h).closed) return false;
     if(filters.falta && !activeAlerts(h).length) return false; /* "Faltando agora" */
     /* categorias: atendimento médico (padrão), vacinação, exames */
@@ -2765,7 +2766,6 @@ function renderChips(){
        pessoa muda do padrão (carro), aí sim é escolha dela. */
     + `<button class="chip" data-modo="1" aria-pressed="${state.modo!=="carro"}">${MODOS[state.modo]}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
-    + `<button class="chip" data-x="ped" aria-pressed="${filters.ped}">Infantil</button>`
     + `<button class="chip" data-x="open" aria-pressed="${filters.open}">Aberto agora</button>`;
   ["chipsMap","chipsList"].forEach(id=>{
     const el=document.getElementById(id);
@@ -2827,7 +2827,6 @@ function renderChips(){
       if(b.dataset.avise){ abrirMeAvise(); return; }
       if(b.dataset.modo){ const o=["carro","onibus","ape"]; state.modo=o[(o.indexOf(state.modo)+1)%3]; store.save(state); applyModoTexts(); }
       /* gravidade num chip só, alternando: qualquer → grave → leve → qualquer */
-      else if(b.dataset.x==="ped") filters.ped=!filters.ped;
       else filters.open=!filters.open;
       renderChips(); renderList(); renderMap();
     }));
@@ -3141,15 +3140,10 @@ function renderList(){
       <span style="font-weight:600;opacity:.9">Informação que ontem não existia — e que já está valendo na lista abaixo.</span>
     </div>` : "";
   if(!hs.length){
-    /* lista vazia tem que dizer POR QUE está vazia — senão parece app quebrado.
-       O caso do "Infantil" é o mais traiçoeiro: só 5 das 746 unidades têm a
-       marca, porque ela vem do nome oficial dizer "infantil" (é o que o CNES
-       prova). Sem esta explicação, o filtro parecia um bug. */
+    /* lista vazia tem que dizer POR QUE está vazia — senão parece app quebrado */
     const motivo = filters.falta
       ? "Nenhuma unidade com aviso ativo agora."
-      : filters.ped
-        ? "<b>Só 5 unidades em BH têm 'infantil' no nome oficial</b> — e é só isso que o cadastro do Ministério da Saúde prova.<br>Mas posto e UPA atendem criança normalmente: desligue o filtro <b>Infantil</b> para ver todas."
-        : "Nenhuma unidade com esses filtros.<br>Tente tirar um deles.";
+      : "Nenhuma unidade com esses filtros.<br>Tente tirar um deles.";
     el.innerHTML = bConf + bFalta + bNov + `<div class="empty">${motivo}</div>`;
     ligarBFalta(); if(conf) ligarConferir(el, conf); if(pRel) ligarPromptRelato(el, pRel); return;
   }
@@ -3212,9 +3206,6 @@ function renderList(){
     </button>`;
   }).join("")
   + (todas.length>hs.length ? `<div class="empty">Mostrando as ${hs.length} mais próximas, de ${todas.length} unidades na região.</div>` : "")
-  /* o filtro Infantil sempre se explica, mesmo achando alguma coisa: mostrar
-     5 de 746 sem dizer por quê faz a pessoa achar que o app perdeu o resto */
-  + (filters.ped ? `<div class="empty" style="text-align:left">Filtro <b>Infantil</b> ligado: só aparecem as unidades cujo nome oficial diz "infantil" — são 5 em BH, e é só isso que o cadastro do Ministério da Saúde prova.<br><b>Posto e UPA atendem criança normalmente.</b> Desligue o filtro para ver todas.</div>` : "");
   el.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openDetail(c.dataset.id)));
   const rb = el.querySelector("[data-rec]");
   if(rb) rb.addEventListener("click",()=>openDetail(rb.dataset.rec));
@@ -5937,17 +5928,33 @@ function desenharPinosReais(){
   camadaPinos.clearLayers();
   const todasFiltradas = unidadesMetropolitanas();
   const hs = todasFiltradas.filter(h=>h.lat!==undefined && vista.contains([h.lat,h.lon]));
+  /* ===== O MAPA DESTACA, NÃO REMOVE (14/08, regra do Raphael: "aparecer,
+     não desaparecer"). Filtrar serviço apagava a cidade e parecia app
+     quebrado. Agora quem NÃO faz o que a pessoa procura vira um pontinho
+     apagado — ainda clivável — e quem faz salta em tamanho normal. É o
+     padrão Waze/Google Maps: buscar posto não apaga a cidade. Só desenha
+     contexto quando há filtro ativo (sem filtro, tudo já é destaque). */
+  const idsDestaque = new Set(todasFiltradas.map(h=>h.id));
+  const metro = REGIONS.filter(r=>!r.soon).reduce((a,r)=>a.concat(r.hospitals||[]),[]);
+  const contexto = idsDestaque.size < metro.length
+    ? metro.filter(h=>h.lat!==undefined && !idsDestaque.has(h.id) && vista.contains([h.lat,h.lon])).slice(0,200)
+    : [];
+  contexto.forEach(h=>{
+    L.marker([h.lat,h.lon], {icon: L.divIcon({
+      html:`<div style="transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:#7E948B;opacity:.55;border:1.5px solid rgba(255,255,255,.65)"></div>`,
+      className:"", iconSize:null}), keyboard:false})
+      .addTo(camadaPinos)
+      .on("click", ()=>openDetail(h.id));
+  });
   /* O MAPA EXPLICA POR QUE ESVAZIOU (14/08, achado do Raphael com o filtro
      Infantil): a lista dizia o motivo, o mapa ficava mudo — parecia app
      quebrado. Com filtro ativo e quase nada passando, uma faixa diz o porquê
      e oferece limpar. */
   const fx = document.getElementById("mapVazio");
   if(fx){
-    const filtroAtivo = filters.cat || (filters.item&&filters.item.length) || filters.ped || filters.falta || filters.open;
-    if(filtroAtivo && todasFiltradas.length <= (filters.ped ? 12 : 5)){
-      fx.innerHTML = (filters.ped
-        ? `Só ${todasFiltradas.length} unidades têm “infantil” no nome oficial — é o que o cadastro do Ministério prova. Posto e UPA atendem criança mesmo sem o nome.`
-        : "Quase nada passa nos filtros escolhidos.")
+    const filtroAtivo = filters.cat || (filters.item&&filters.item.length) || filters.falta || filters.open;
+    if(filtroAtivo && todasFiltradas.length <= 5){
+      fx.innerHTML = "Quase nada faz o que você filtrou — os pontinhos apagados são as demais unidades da cidade."
         + ' <span style="color:var(--brand);text-decoration:underline">Toque para limpar os filtros.</span>';
       fx.style.display = "";
     } else fx.style.display = "none";
