@@ -841,6 +841,12 @@
     <div id="avisoRegBox" style="display:none;margin-top:10px">
       <div class="grid-min" id="avisoReg" style="grid-template-columns:repeat(2,1fr)"></div>
     </div>
+    <!-- ESCOLHER UNIDADES (17/08, pedido do Raphael): as favoritas dela
+         primeiro, depois as mais perto pelo GPS — só as que fazem o que ela
+         pediu. Marca quantas quiser. -->
+    <div id="avisoUniBox" style="display:none;margin-top:10px">
+      <div id="avisoUni"></div>
+    </div>
     <p class="vtitle">Por quanto tempo devo avisar?</p>
     <div class="grid-min" id="avisoPrazo" style="grid-template-columns:repeat(3,1fr)"></div>
     <button class="cta" id="avisoOk" style="margin-top:14px">Criar aviso</button>
@@ -3149,14 +3155,20 @@ function renderList(){
      esperando X: N unidades perto têm hoje, sem aviso de falta" — e um toque
      leva até elas. Serve com base pequena; a notificação continua lá para
      quando a densidade chegar. */
-  const meuPed = pedidos()[0];
+  /* o mais recente, não o mais antigo: quem acabou de criar um pedido espera
+     ver ELE no topo da lista (17/08) */
+  const meuPed = pedidos().slice().sort((a,b)=>(b.ts||0)-(a.ts||0))[0];
   const bPedido = (meuPed && !filters.cat)
-    ? (()=>{ const nUn = unidadesNoRaio(meuPed.tipo, meuPed.item ? [meuPed.item] : null);
+    ? (()=>{ const esc2 = meuPed.unidades && meuPed.unidades.length ? meuPed.unidades : null;
+        const nUn = unidadesNoRaio(meuPed.tipo, meuPed.item ? [meuPed.item] : null, esc2);
+        const onde = esc2 ? (esc2.length===1 ? "a sua unidade tem" : "das suas " + esc2.length + " unidades têm") : null;
         return `<button class="walert" id="bPedido" style="display:block;width:100%;text-align:left;margin:0 0 10px;background:var(--surface2);color:var(--ink)">
          <b>Você está esperando: ${esc(textoPedido(meuPed))}</b><br>
          <span style="font-weight:600;opacity:.9">${nUn
-            ? nUn + " unidade" + (nUn>1?"s":"") + " perto têm hoje, sem aviso de falta · toque para ver"
-            : "nenhuma unidade perto tem agora — avisamos se alguém informar que voltou"}</span>
+            ? (esc2 ? (esc2.length===1 ? "a sua unidade tem hoje" : nUn + " das suas " + esc2.length + " unidades têm hoje")
+                    : nUn + " unidade" + (nUn>1?"s":"") + " perto têm hoje") + ", sem aviso de falta · toque para ver"
+            : (esc2 ? "nenhuma das suas unidades tem agora — avisamos quando voltar"
+                    : "nenhuma unidade perto tem agora — avisamos se alguém informar que voltou")}</span>
        </button>` })()
     : "";
   const ligarBPedido = ()=>{
@@ -5464,7 +5476,10 @@ function faltasDoPedido(p){
              : p.tipo==="img" ? (h=>!!h.img) : (h=>h.profile===p.tipo);
   const ids = [];
   REG().hospitals.forEach(h=>{
-    if(!cabe(h) || !alcancavelParaAviso(h)) return;
+    /* pedido com unidades escolhidas: só elas contam (17/08) */
+    if(p.unidades && p.unidades.length){ if(!p.unidades.includes(h.id)) return }
+    else if(!alcancavelParaAviso(h)) return;
+    if(!cabe(h)) return;
     const emFalta = activeAlerts(h).some(a=>a.confirmado && (
        (itens && a.vac && itens.includes(a.vac)) ||
        (!itens && tipos.includes(a.type))));
@@ -5503,14 +5518,17 @@ function mostrarAvisoDePedido(){
   const fim = r.pedido.tipo==="basica" ? "Pode ter chegado" : "Pode ter voltado ao normal";
   toast(`O aviso de falta de ${oque.toLowerCase()}${dono} em ${dispName(r.unidade)} não está mais valendo. ${fim} — ligue antes de ir.`);
 }
-function unidadesNoRaio(perfil, itens){
+function unidadesNoRaio(perfil, itens, escolhidas){
   /* usa os serviços oficiais, igual aos filtros */
   const cabe = perfil==="basica" ? (h=>!!h.vac)
              : perfil==="lab"    ? (h=>!!h.lab)
              : perfil==="img"    ? (h=>!!h.img)
              : (h=>h.profile===perfil);
   return REG().hospitals.filter(h=>{
-    if(!cabe(h) || !alcancavelParaAviso(h)) return false;
+    if(!cabe(h)) return false;
+    /* pedido com unidades escolhidas: o alcance são elas (17/08) */
+    if(escolhidas && escolhidas.length){ if(!escolhidas.includes(h.id)) return false }
+    else if(!alcancavelParaAviso(h)) return false;
     /* se a pessoa disse o que precisa, não conta quem avisou que isso faltou */
     const tiposP = AVISOS_DO_PEDIDO[perfil] || [];
     if(activeAlerts(h).some(a=>a.confirmado && (
@@ -5585,13 +5603,40 @@ function renderAviso(){
      vacinar perto de casa, em Venda Nova. Sem esta pergunta o aviso chega da
      região errada, e a contagem de demanda aponta para o bairro errado. */
   const o=document.getElementById("avisoOnde");
-  o.innerHTML = [["aqui","Onde eu estiver"],["fixo","Um lugar fixo"]]
-    .map(([k,l])=>`<button class="minbtn ${avisoTmp.onde===k?'sel':''}" data-o="${k}" style="font-size:12.5px">${l}</button>`).join("");
+  o.style.gridTemplateColumns = "repeat(3,1fr)";
+  o.innerHTML = [["aqui","Onde eu estiver"],["fixo","Um lugar fixo"],["unidades","Escolher unidades"]]
+    .map(([k,l])=>`<button class="minbtn ${avisoTmp.onde===k?'sel':''}" data-o="${k}" style="font-size:11.5px">${l}</button>`).join("");
   o.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
     avisoTmp.onde=b.dataset.o;
     if(avisoTmp.onde==="fixo" && !avisoTmp.reg) avisoTmp.reg = state.region;
+    if(avisoTmp.onde!=="unidades") avisoTmp.unidades = null;
     renderAviso();
   }));
+  /* ===== ESCOLHER UNIDADES (17/08) =====
+     "Onde eu estiver" continua o padrão (cobertura máxima). Quem escolhe
+     unidades ganha precisão e perde frequência — o aviso só dispara naquelas.
+     Vale para quem sabe onde vai: "me avise quando O MEU posto tiver". */
+  const ub = document.getElementById("avisoUniBox");
+  if(avisoTmp.onde==="unidades"){
+    const cabe = avisoTmp.tipo==="basica" ? (h=>!!h.vac) : avisoTmp.tipo==="lab" ? (h=>!!h.lab)
+               : avisoTmp.tipo==="img" ? (h=>!!h.img) : (h=>h.profile===avisoTmp.tipo);
+    const cand = REG().hospitals.filter(h=>!avisoTmp.tipo || cabe(h));
+    const favs = cand.filter(ehFav).sort((a,b)=>distOf(a)-distOf(b));
+    const perto = cand.filter(h=>!ehFav(h)).sort((a,b)=>distOf(a)-distOf(b)).slice(0, favs.length?8:10);
+    const sel = avisoTmp.unidades || [];
+    const linha = (h,fav)=>`<button class="minbtn ${sel.includes(h.id)?'sel':''}" data-u="${esc(h.id)}"
+        style="font-size:12px;text-align:left;width:100%;margin-bottom:6px">${fav?"★ ":""}${esc(dispName(h))} · ${kmBR(distOf(h))} km</button>`;
+    document.getElementById("avisoUni").innerHTML =
+        (favs.length ? `<p class="vtitle" style="margin-top:0">Suas unidades</p>` + favs.map(h=>linha(h,true)).join("") : "")
+      + (perto.length ? `<p class="vtitle">Mais perto de você</p>` + perto.map(h=>linha(h,false)).join("") : "")
+      + (!favs.length && !perto.length ? `<div class="empty">Nenhuma unidade desse tipo por perto.</div>` : "");
+    document.getElementById("avisoUni").querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
+      const id=b.dataset.u; const s2=(avisoTmp.unidades||[]).slice();
+      avisoTmp.unidades = s2.includes(id) ? s2.filter(x=>x!==id) : s2.concat(id);
+      renderAviso();
+    }));
+    ub.style.display="";
+  } else ub.style.display="none";
   const rb=document.getElementById("avisoRegBox");
   if(avisoTmp.onde==="fixo"){
     const gr=document.getElementById("avisoReg");
@@ -5607,10 +5652,20 @@ function renderAviso(){
   const r=document.getElementById("avisoRaio");
   if(r){
     if(avisoTmp.tipo){
-      const n = unidadesNoRaio(avisoTmp.tipo, avisoTmp.itens);
-      r.innerHTML = n
-        ? `Só aviso de unidades perto: até <b>800 metros a pé</b> ou <b>15 minutos de carro</b> — hoje são <b>${n}</b>. Mais longe que isso, a fila muda antes de você chegar.`
-        : `Nenhuma unidade desse tipo perto de você (800 m a pé ou 15 min de carro). O aviso não teria como ajudar.`;
+      const escolhidas = avisoTmp.onde==="unidades" ? (avisoTmp.unidades||[]) : null;
+      const n = unidadesNoRaio(avisoTmp.tipo, avisoTmp.itens, escolhidas);
+      /* o texto tem que falar do que a pessoa ESCOLHEU (17/08): dizer "800 m a
+         pé ou 15 min de carro" para quem marcou duas unidades é falar de uma
+         regra que não vale mais para ela */
+      if(escolhidas){
+        r.innerHTML = escolhidas.length
+          ? `Vou avisar só sobre <b>${escolhidas.length} unidade${escolhidas.length>1?"s":""}</b> que você escolheu${n?` — ${n===1?"1 tem":n+" têm"} o que você precisa hoje.`:", sem aviso de falta hoje."}`
+          : `Marque as unidades que te interessam — o aviso vale só para elas.`;
+      } else {
+        r.innerHTML = n
+          ? `Só aviso de unidades perto: até <b>800 metros a pé</b> ou <b>15 minutos de carro</b> — hoje são <b>${n}</b>. Mais longe que isso, a fila muda antes de você chegar.`
+          : `Nenhuma unidade desse tipo perto de você (800 m a pé ou 15 min de carro). O aviso não teria como ajudar.`;
+      }
       r.style.display="";
     } else r.style.display="none";
   }
@@ -5643,6 +5698,7 @@ document.getElementById("avisoOk").addEventListener("click",()=>{
        com o mesmo id, e aí o ✕ de um apagava os dois. Medido no teste. */
     const novo = {id:"p"+Date.now()+"-"+(seqPedido++), quem:avisoTmp.quem||null, tipo:avisoTmp.tipo,
                   item, prazo:avisoTmp.prazo, onde:avisoTmp.onde,
+                  unidades: (avisoTmp.onde==="unidades" && (avisoTmp.unidades||[]).length) ? avisoTmp.unidades.slice() : null,
                   reg:regAviso, ts:Date.now()};
     /* mesmo item, mesma pessoa, mesma região: é o mesmo pedido feito duas vezes.
        Substitui em vez de empilhar, senão a lista enche de repetido e a contagem
