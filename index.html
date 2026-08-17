@@ -6087,13 +6087,27 @@ function desenharPinosReais(){
     /* vermelho de verdade quando a falta confirmada é DO QUE a pessoa procura;
        ambar quando há falta confirmada de outra coisa (14/08) */
     const faltaAqui = faltaDoFiltro(h);
-    const alarme = faltasConfirmadas(h).length > 0;
+    const faltaQualquer = faltasConfirmadas(h)[0];
+    const alarme = !!faltaQualquer;
     const fechada = !abertoAgora(h);
-    const cor = fechada ? "#6E8A7B" : (w.semDados ? "#4E6E59" : (totalMin(h)===null ? filaStatus(w.min).color : statusOf(totalMin(h)).color));
-    const rot = fechada ? "fechada" : (w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h)));
+    /* ===== O PINO SEGUE A MESMA REGRA DO DETALHE (14/08, achado do Raphael:
+       "não vi nenhum apresentando falta de algo e fila") =====
+       O detalhe virou falta-primeiro de manhã, mas o pino ficou para trás: ele
+       mostrava SEMPRE o número da fila, e a falta confirmada era só uma borda
+       fininha — o Laboratel tinha "sistema fora do ar confirmado por 2 pessoas"
+       e o pino exibia a fila. No mapa cabe UMA informação por unidade, e a que
+       decide "vale a pena ir?" é a falta. Prioridade: fechada → falta → fila.
+       A fila continua no detalhe, para quem abrir. */
+    const cor = fechada ? "#6E8A7B"
+              : faltaAqui ? "#D9453D"
+              : faltaQualquer ? "#B57415"
+              : (w.semDados ? "#4E6E59" : (totalMin(h)===null ? filaStatus(w.min).color : statusOf(totalMin(h)).color));
+    const rot = fechada ? "fechada"
+              : (faltaQualquer ? "⚠"
+              : (w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h))));
     const html = `<div style="transform:translate(-50%,-100%);text-align:center;white-space:nowrap">
         <div style="display:inline-block;background:${cor};color:#fff;font:800 11px system-ui;padding:2px 7px;border-radius:9px;border:${faltaAqui?"3px solid #D9453D":alarme?"2px solid #E0A040":"2px solid #fff"};box-shadow:0 1px 4px rgba(0,0,0,.4)">${rot || "•"}${alarme?" !":""}</div>
-        ${faltaAqui?`<div style="font:800 9.5px system-ui;color:#fff;background:#D9453D;border-radius:4px;padding:0 4px;margin-top:1px">${esc(alertLabelTxt(faltaAqui).slice(0,22))}</div>`:""}
+        ${faltaQualquer?`<div style="font:800 9.5px system-ui;color:#fff;background:${faltaAqui?"#D9453D":"#B57415"};border-radius:4px;padding:0 4px;margin-top:1px">${esc(alertLabelTxt(faltaQualquer).slice(0,22))}</div>`:""}
         ${mostraNome?`<div style="font:700 10px system-ui;color:#0E241A;background:rgba(255,255,255,.85);border-radius:4px;padding:0 3px;margin-top:1px">${esc(dispName(h).slice(0,24))}</div>`:""}
       </div>`;
     L.marker([h.lat,h.lon], {icon: L.divIcon({html, className:"", iconSize:null})})
