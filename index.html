@@ -3267,6 +3267,28 @@ function renderBrazilPins(pins){
     enterRegion(c.regions.includes(state.region) ? state.region : c.regions[0]);
   }));
 }
+/* O CARROSSEL EM CIMA DA BARRA — MEDIDO, NÃO CHUTADO (14/08, foto do
+   Raphael: os cartões entravam por baixo da navegação "em ambos"). O CSS
+   usava 104px fixos para a altura da barra; com fonte/escala maior a barra
+   cresce e engole o cartão. Agora: mede a barra real e empilha carrossel →
+   zoom → faixa de baixar em cadeia, no carregamento, no resize e sempre que
+   o carrossel redesenha. */
+function ajustarBarrasDoMapa(){
+  const nav = document.querySelector("nav");
+  const rail = document.getElementById("rail");
+  if(!nav || !rail) return;
+  const altNav = Math.ceil(nav.getBoundingClientRect().height) || 80;
+  const base = 12 + altNav + 10;              /* 12 do rodapé + barra + folga */
+  rail.style.bottom = base + "px";
+  const altRail = Math.ceil(rail.getBoundingClientRect().height) || 96;
+  const acima = (base + altRail + 10) + "px";
+  const z = document.querySelector(".mapzoom");
+  if(z) z.style.bottom = acima;
+  const fx = document.getElementById("instalarFaixa");
+  if(fx) fx.style.bottom = acima;
+}
+window.addEventListener("resize", ajustarBarrasDoMapa);
+
 function renderMap(){
   /* filtro mudou = pino muda JÁ: sem isto o mapa real levava até 60 s para
      acompanhar (o cache dos pinos só invalidava pelo relógio) */
@@ -3646,6 +3668,7 @@ function renderRail(hs){
     </button>`;
   }).join("");
   document.getElementById("rail").querySelectorAll(".rcard").forEach(c=>c.addEventListener("click",()=>openDetail(c.dataset.id)));
+  ajustarBarrasDoMapa();
 }
 
 /* ================= DETALHE ================= */
@@ -6088,6 +6111,8 @@ requestGPS(false); /* tenta a localização real; sem permissão, segue no ponto
 renderChips();
 renderList();
 renderMap();
+ajustarBarrasDoMapa();
+setTimeout(ajustarBarrasDoMapa, 450);
 renderReport();
 renderRankView();
 renderProfile();
