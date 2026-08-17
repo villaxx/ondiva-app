@@ -3753,70 +3753,74 @@ function openDetail(id){
     }).join("");
   const w = currentWait(h);
   const dW=document.getElementById("dWait"), dP=document.getElementById("dPill");
-  if(w.semDados){
-    dW.innerHTML="—"; dW.style.color="var(--muted)"; dW.style.fontSize="";
-    /* --muted aqui dava 4,34 no tema escuro, abaixo dos 4,5 exigidos */
-    dP.style.background="var(--surface2)"; dP.style.color="var(--ink2)"; dP.textContent="sem informação de hoje";
-    document.getElementById("dSub").textContent = (activeAlerts(h).length ? "Ninguém relatou a fila daqui nas últimas 3 horas." : "Ninguém relatou fila nem falta daqui hoje.")
-      + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
-  } else if(w.closed){
-    dW.innerHTML="Fechada"; dW.style.color="var(--muted)"; dW.style.fontSize="";
-    dP.style.background="var(--surface2)"; dP.style.color="var(--muted)";
+  /* ===== A MANCHETE É A PIOR NOTÍCIA VERDADEIRA (14/08) =====
+     Reescrito depois do teste pegar o furo: a checagem de falta vinha DEPOIS
+     do "sem relato de fila", então unidade com falta e sem fila — que é o caso
+     MAIS comum — mostrava "Aberta agora" e escondia a falta. A prioridade
+     agora é explícita, do pior para o melhor:
+       1. fechada  2. falta confirmada  3. fila relatada  4. aberta, sem nada
+     FORMA distingue falta de fila (a cor sozinha não aguentava dois trabalhos:
+     laranja era "fila média" E "falta de outra coisa"): falta leva ⚠ e pílula
+     com BORDA grossa; fila fica com número neutro e pílula suave sem borda. */
+  const faltaAqui = faltaDoFiltro(h);
+  const manchete  = faltaAqui || faltasConfirmadas(h)[0];
+  const dSub = document.getElementById("dSub");
+  dP.style.border = "none";
+  if(w.closed){
+    dW.innerHTML = "Fechada agora"; dW.style.color = "var(--muted)"; dW.style.fontSize = "31px";
+    dP.style.background = "var(--surface2)"; dP.style.color = "var(--muted)";
     dP.textContent = "Abre às " + h.ab + "h";
-    document.getElementById("dSub").textContent = "Horário declarado no cadastro oficial: " + h.turno.toLowerCase() + ".";
-  } else {
-    /* ===== A MANCHETE É A PIOR NOTÍCIA VERDADEIRA (14/08, achado do Raphael
-       nas fotos do demo) =====
-       O número da fila tinha 48px e o aviso de falta 12,5px: o bônus com quatro
-       vezes o palco do core. Pior, o app gritava "19 min · Fila curta" em VERDE
-       numa unidade onde faltava justamente o que a pessoa procurava — não é
-       ruído, é convite errado. Agora, com falta confirmada, a MANCHETE é a
-       falta; a fila desce para uma linha e perde a cor de status (verde numa
-       escolha ruim mente duas vezes). Sem falta, a fila segue sendo manchete —
-       é a única notícia que existe ali. */
-    const faltaAqui = faltaDoFiltro(h);
-    const faltaQualquer = faltasConfirmadas(h)[0];
-    const manchete = faltaAqui || faltaQualquer;
-    if(manchete){
-      const doFiltro = !!faltaAqui;
-      const cor = doFiltro ? "var(--crit)" : "var(--warn)";
-      dW.innerHTML = esc(alertLabelTxt(manchete));
-      dW.style.color = cor;
-      dW.style.fontSize = doFiltro ? "31px" : "26px";
-      dP.style.background = doFiltro ? "var(--crit-bg)" : "var(--warn-bg)";
-      dP.style.color = cor;
-      dP.textContent = manchete.confirmado
-        ? "confirmado por " + manchete.nAutores + " pessoas"
-        : "1 relato, não confirmado";
-      /* a fila continua visível — uma linha, neutra, com a hora do relato */
-      document.getElementById("dSub").textContent =
-        "Fila relatada: " + fmtWaitTxt(w.min) + " · " + (w.n===1
-          ? "1 relato há " + w.ago + " min"
-          : w.n + " relatos, o mais recente há " + w.ago + " min")
-        + (doFiltro ? " — mas avisaram que falta o que você procura." : "");
-    } else {
-    dW.style.fontSize="";
-    const s=filaStatus(w.min);
-    dW.innerHTML=fmtWait(w.min); dW.style.color=s.color;
-    dP.style.background=s.bg; dP.style.color=s.color; dP.textContent=s.pill;
+    dSub.textContent = w.aviso
+      ? "Avisado por quem esteve lá — vale até o fim do dia."
+      : "Horário declarado no cadastro oficial: " + h.turno.toLowerCase() + ".";
+  } else if(manchete){
+    const doFiltro = !!faltaAqui;
+    const cor = doFiltro ? "var(--crit)" : "var(--warn)";
+    dW.innerHTML = "⚠ " + esc(alertLabelTxt(manchete));
+    dW.style.color = cor;
+    dW.style.fontSize = doFiltro ? "31px" : "26px";
+    /* borda em vez de fundo sólido: no tema escuro --crit é rosa claro e texto
+       branco em cima seria ilegível — o app tem auditoria de contraste */
+    dP.style.background = doFiltro ? "var(--crit-bg)" : "var(--warn-bg)";
+    dP.style.color = cor;
+    dP.style.border = "2px solid " + cor;
+    dP.textContent = manchete.confirmado
+      ? "confirmado por " + manchete.nAutores + " pessoas"
+      : "1 relato, não confirmado";
+    dSub.textContent = (w.real
+        ? "Fila relatada: " + fmtWaitTxt(w.min) + " · " + (w.n===1
+            ? "1 relato há " + w.ago + " min"
+            : w.n + " relatos, o mais recente há " + w.ago + " min")
+        : "Ninguém relatou fila aqui nas últimas 3 horas.")
+      + (doFiltro ? " Avisaram que falta justamente o que você procura." : "");
+  } else if(w.real){
+    dW.style.fontSize = "";
+    const s = filaStatus(w.min);
+    /* número neutro: o vermelho/laranja de alerta é exclusivo da falta */
+    dW.innerHTML = fmtWait(w.min); dW.style.color = "var(--ink)";
+    dP.style.background = s.bg; dP.style.color = s.color; dP.textContent = s.pill;
     const conf = w.n===1
       ? `1 relato de quem esteve aqui, há ${w.ago} min`
       : `${w.n} relatos de quem esteve aqui · o mais recente há ${w.ago} min`;
     const gu = giveupsToday(h);
-    /* PROVA SOCIAL (Cialdini): quantas pessoas cuidaram desta unidade hoje. O
-       número existia e não aparecia — e é ele que mostra que o dado é coletivo,
-       não palpite de uma pessoa só. */
+    /* PROVA SOCIAL (Cialdini): quantas pessoas cuidaram desta unidade hoje */
     const hojeStr = new Date().toDateString();
     const nHoje = (state.reports||[]).filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hojeStr).length
                 + (state.alerts||[]).filter(a=>a.hid===h.id && !a.revisar && new Date(a.ts).toDateString()===hojeStr).length;
-    /* PROGRESSO PERCEBIDO na frente de tudo: saber que a fila está andando muda
-       mais a decisão do que saber o tamanho dela parada. */
+    /* PROGRESSO PERCEBIDO: saber que a fila anda muda mais a decisão que o tamanho dela */
     const tend = textoTendencia(tendenciaFila(h));
-    document.getElementById("dSub").textContent =
-      (tend ? tend + " " : "")
-           + conf + (gu>0 ? ` · ${gu} ${gu===1?"pessoa desistiu":"pessoas desistiram"} da fila hoje` : "")
-           + (nHoje>1 ? ` · ${nHoje} pessoas informaram sobre esta unidade hoje` : "");
-    }
+    dSub.textContent = (tend ? tend + " " : "")
+      + conf + (gu>0 ? ` · ${gu} ${gu===1?"pessoa desistiu":"pessoas desistiram"} da fila hoje` : "")
+      + (nHoje>1 ? ` · ${nHoje} pessoas informaram sobre esta unidade hoje` : "");
+  } else {
+    /* nada avisado, nada relatado: a melhor notícia verdadeira é que ela ABRIU.
+       Antes aqui havia um travessão cinza de 48px anunciando a ausência de um
+       dado que quase nunca existe (foto do Raphael, 14/08). */
+    dW.innerHTML = "Aberta agora"; dW.style.color = "var(--good)"; dW.style.fontSize = "31px";
+    dP.style.background = "var(--good-bg)"; dP.style.color = "var(--good)";
+    dP.textContent = h.h24 ? "24 horas" : "até " + h.fe + "h";
+    dSub.textContent = "Ninguém confirmou fila nem falta aqui hoje."
+      + (w.antigo ? ` Último relato: há ${w.antigo.txt}, espera de ${fmtWaitTxt(w.antigo.min)}.` : "");
   }
   const dT=document.getElementById("dTotal");
   /* NINGUÉM CONFIRMOU HOJE — LIGUE ANTES (14/08/2026). O maior motivo de
