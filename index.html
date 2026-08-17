@@ -3765,6 +3765,36 @@ function openDetail(id){
     dP.textContent = "Abre às " + h.ab + "h";
     document.getElementById("dSub").textContent = "Horário declarado no cadastro oficial: " + h.turno.toLowerCase() + ".";
   } else {
+    /* ===== A MANCHETE É A PIOR NOTÍCIA VERDADEIRA (14/08, achado do Raphael
+       nas fotos do demo) =====
+       O número da fila tinha 48px e o aviso de falta 12,5px: o bônus com quatro
+       vezes o palco do core. Pior, o app gritava "19 min · Fila curta" em VERDE
+       numa unidade onde faltava justamente o que a pessoa procurava — não é
+       ruído, é convite errado. Agora, com falta confirmada, a MANCHETE é a
+       falta; a fila desce para uma linha e perde a cor de status (verde numa
+       escolha ruim mente duas vezes). Sem falta, a fila segue sendo manchete —
+       é a única notícia que existe ali. */
+    const faltaAqui = faltaDoFiltro(h);
+    const faltaQualquer = faltasConfirmadas(h)[0];
+    const manchete = faltaAqui || faltaQualquer;
+    if(manchete){
+      const doFiltro = !!faltaAqui;
+      const cor = doFiltro ? "var(--crit)" : "var(--warn)";
+      dW.innerHTML = esc(alertLabelTxt(manchete));
+      dW.style.color = cor;
+      dW.style.fontSize = doFiltro ? "31px" : "26px";
+      dP.style.background = doFiltro ? "var(--crit-bg)" : "var(--warn-bg)";
+      dP.style.color = cor;
+      dP.textContent = manchete.confirmado
+        ? "confirmado por " + manchete.nAutores + " pessoas"
+        : "1 relato, não confirmado";
+      /* a fila continua visível — uma linha, neutra, com a hora do relato */
+      document.getElementById("dSub").textContent =
+        "Fila relatada: " + fmtWaitTxt(w.min) + " · " + (w.n===1
+          ? "1 relato há " + w.ago + " min"
+          : w.n + " relatos, o mais recente há " + w.ago + " min")
+        + (doFiltro ? " — mas avisaram que falta o que você procura." : "");
+    } else {
     dW.style.fontSize="";
     const s=filaStatus(w.min);
     dW.innerHTML=fmtWait(w.min); dW.style.color=s.color;
@@ -3786,6 +3816,7 @@ function openDetail(id){
       (tend ? tend + " " : "")
            + conf + (gu>0 ? ` · ${gu} ${gu===1?"pessoa desistiu":"pessoas desistiram"} da fila hoje` : "")
            + (nHoje>1 ? ` · ${nHoje} pessoas informaram sobre esta unidade hoje` : "");
+    }
   }
   const dT=document.getElementById("dTotal");
   /* NINGUÉM CONFIRMOU HOJE — LIGUE ANTES (14/08/2026). O maior motivo de
