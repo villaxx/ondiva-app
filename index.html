@@ -390,6 +390,20 @@
          onde a rede externa é bloqueada (claude.ai) ele não aparece e o mapa
          desenhado continua valendo como reserva. -->
     <div id="mapReal" style="position:absolute;inset:0;z-index:1;display:none"></div>
+    <!-- BAIXAR O ONDIVA — FAIXA NA BASE DO MAPA (14/08, pedido do Raphael:
+         o chip pequeno ficava "meio escondido"; a faixa embaixo, com baixar
+         ou agora-não, é o formato que ele aprovou). Some ao instalar e
+         respeita o "agora não" por 7 dias. -->
+    <div id="instalarFaixa" style="display:none;position:absolute;left:12px;right:12px;bottom:14px;z-index:500;background:var(--surface);border:1.5px solid var(--brand);border-radius:14px;padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.22);align-items:center;gap:10px">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--brand);flex:none;display:flex;align-items:center;justify-content:center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 3h14v2H5v-2z"/></svg>
+      </div>
+      <div style="flex:1;font:700 12.5px system-ui;color:var(--ink);line-height:1.35">Deixe o Ondiva na tela do celular<br><span style="font-weight:600;color:var(--ink2)">Abre com um toque, sem loja.</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:none">
+        <button id="instFxSim" class="cta" style="margin:0;padding:8px 12px;font-size:12.5px">Baixar</button>
+        <button id="instFxNao" class="themebtn" style="font-size:11.5px">Agora não</button>
+      </div>
+    </div>
     <button id="mapVazio" style="display:none;position:absolute;left:12px;right:12px;top:12px;z-index:500;background:var(--surface);color:var(--ink);border:1.5px solid var(--warn);border-radius:12px;padding:10px 12px;font:700 12.5px system-ui;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.18)"></button>
     <svg id="mapSvg" viewBox="0 0 400 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa de hospitais próximos">
       <g id="regionLayer">
@@ -456,13 +470,6 @@
            no iPhone NUNCA dispara, então metade dos testadores nunca via nada.
            Aqui é um chip discreto na tela que abre primeiro, sem tapar o mapa,
            e some sozinho quando o app já está instalado. -->
-      <!-- min-height 44: a auditoria de 13/08 pegou este chip com 23px, abaixo
-           do alvo mínimo de toque que o resto do app respeita. Foi criado no
-           dia anterior e escapou da régua. -->
-      <button class="protopill" id="instalarChip" style="display:none;align-self:flex-start;color:var(--brand);font-weight:800;border:none;cursor:pointer;gap:5px;align-items:center;min-height:44px;padding:0 14px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align:-1px"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5z"/></svg>
-        Botar o Ondiva na tela do celular
-      </button>
     </div>
 
     <div class="mapzoom">
@@ -5738,16 +5745,15 @@ function podeOferecerInstalar(){
    ninguém: fica quieto num canto até alguém querer. É o que garante que o
    iPhone (onde o popup automático nunca dispara) tenha um caminho visível. */
 function atualizarChipInstalar(){
-  const c = document.getElementById("instalarChip");
+  /* A FAIXA NA BASE DO MAPA (14/08) substituiu o chip pequeno. Mesma regra do
+     Android igual ao iPhone (12/08): não espera o `beforeinstallprompt` —
+     aparece sempre que dá para instalar; com prompt automático usa, sem ele
+     mostra o passo a passo. "Agora não" cala por 7 dias. */
+  const c = document.getElementById("instalarFaixa");
   if(!c) return;
-  /* ANDROID IGUAL AO IPHONE (12/08, pedido do Raphael): o chip NÃO espera o
-     evento `beforeinstallprompt`. No Android ele às vezes demora, às vezes nem
-     dispara (se a pessoa já dispensou uma vez) — e aí o convite sumia justo no
-     aparelho mais comum do piloto. Agora o chip aparece sempre que dá para
-     instalar; se o navegador oferecer a instalação automática, ele usa; se
-     não, mostra o passo a passo do próprio aparelho. */
-  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO;
-  c.style.display = dá ? "inline-flex" : "none";
+  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO
+    && !(state.faixaInstDepois && Date.now()-state.faixaInstDepois < 7*24*3600e3);
+  c.style.display = dá ? "flex" : "none";
 }
 function oferecerInstalar(){
   atualizarChipInstalar();
@@ -5782,10 +5788,14 @@ function oferecerInstalar(){
   };
 }
 
-/* o chip do mapa também ignora o silêncio: quem TOCA nele quer instalar agora */
+/* a faixa do mapa também ignora o silêncio do popup: quem TOCA quer agora */
 (function(){
-  const c = document.getElementById("instalarChip");
+  const c = document.getElementById("instFxSim");
   if(!c) return;
+  document.getElementById("instFxNao").addEventListener("click", ()=>{
+    state.faixaInstDepois = Date.now(); store.save(state);
+    atualizarChipInstalar();
+  });
   c.addEventListener("click", ()=>{
     if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
     /* sem instalação automática (iPhone sempre; Android quando o navegador não
