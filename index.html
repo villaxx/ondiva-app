@@ -494,7 +494,7 @@
 
   <!-- ============ INFORMAR ============ -->
   <section class="view page" id="v-report">
-    <div class="pagehead"><h2>Informar</h2><button class="closex" id="repBack" aria-label="Voltar ao mapa" style="position:static;flex:none">✕</button></div>
+    <div class="pagehead"><h2>Avisar</h2><button class="closex" id="repBack" aria-label="Voltar ao mapa" style="position:static;flex:none">✕</button></div>
     <div class="panel">
       <label for="repHosp">Em qual unidade você está?</label>
       <select id="repHosp"></select>
@@ -538,8 +538,12 @@
   <!-- ============ PERFIL ============ -->
   <section class="view page" id="v-profile">
     <div class="pagehead"><h2>Seu perfil</h2></div>
+    <!-- O QUE VOCÊ FEZ vem antes do placar (17/08): o cânone do app diz
+         "competência, não pontuação", a tela do bairro já seguia isso e o
+         perfil abria com pontos. Aviso na frente do relato, como no resto. -->
     <div class="profcard">
       <div class="lvl" id="pLvl">Iniciante</div>
+      <div id="pFeitos" style="font-size:13.5px;font-weight:700;opacity:.95;margin:6px 0 10px;line-height:1.45"></div>
       <div class="pts"><span id="pPts">0</span> pts</div>
       <div class="bar"><i id="pBar" style="width:0%"></i></div>
       <div class="next" id="pNext"></div>
@@ -907,7 +911,7 @@
   </button>
   <button class="tab" data-v="rank" aria-current="false">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 5M17 6h3a3 3 0 0 1-3 5"/></svg>
-    Ranking
+    Meu bairro
   </button>
   <button class="tab" data-v="profile" aria-current="false">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-3.8 4.2-6 8-6s6.8 2.2 8 6"/></svg>
@@ -2013,7 +2017,9 @@ const REGIONS = [
 ];
 
 
-const LEVELS = [[0,"Iniciante"],[100,"Colaborador"],[300,"Guardião da Fila"],[700,"Sentinela"],[1500,"Lenda do Bairro"]];
+/* "Guardião da Fila" era herança de quando o app era sobre fila (as medalhas
+   já tinham sido corrigidas em 14/08; os níveis ficaram para trás) */
+const LEVELS = [[0,"Iniciante"],[100,"Colaborador"],[300,"Guardião do Bairro"],[700,"Sentinela"],[1500,"Lenda do Bairro"]];
 
 /* ================= ESTADO ================= */
 const store = {
@@ -4129,7 +4135,9 @@ function submitReport(){
   const meuRelato = state.reports[state.reports.length-1];
   const desfazer = ()=>{
     state.reports = state.reports.filter(r=>r!==meuRelato);
-    state.pts -= 50; store.save(state);
+    /* 30, não 50: quando o relato passou a valer 30 (14/08) este desfazer ficou
+       tirando 50 — quem relatava e desfazia PERDIA 20 pontos do nada */
+    state.pts -= 30; store.save(state);
     renderReport(); renderList(); renderRankView(); renderProfile();
   };
   /* FAXINA 05/08: saiu o "o app mostrava X min e você esperou Y" — era a
@@ -4170,16 +4178,16 @@ function renderCobertura(){
      menos que vazio mudo). O verde volta quando há notícia de verdade. */
   el.innerHTML = (c.n===0
     ? `<div class="panel acct" style="padding:16px 18px">
-        <div style="font-weight:800;font-size:15px">Ninguém contou nada por aqui ainda.</div>
+        <div style="font-weight:800;font-size:15px">Ninguém avisou nada por aqui ainda.</div>
         <div style="font-size:13px;color:var(--ink2);margin-top:6px;font-weight:600;line-height:1.45">A primeira notícia de hoje pode ser sua: passou por um posto ou laboratório, conte o que viu. Leva 10 segundos — e quem sair de casa depois de você não perde a viagem.</div>
       </div>`
     : `<div class="profcard" style="border-radius:var(--r)">
-      <div class="lvl">Notícia fresca perto de você</div>
+      <div class="lvl">Unidades com notícia de hoje perto de você</div>
       <div class="pts">${c.n} <span style="font-size:18px;opacity:.85">de ${c.total} unidades</span></div>
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="next">${c.n===c.total
         ? "As " + c.total + " mais próximas têm notícia de hoje. Isso é você e seus vizinhos."
-        : `${c.total-c.n} ainda sem notícia hoje. Passou por uma? Conte — quem sai de casa confere aqui antes.`}</div>
+        : `${c.total-c.n} ainda sem notícia hoje. Passou por uma? <b>Avisar uma falta protege o dia inteiro</b> — quem sai de casa confere aqui antes.`}</div>
     </div>`)
     + (faltam.length ? `<p class="vtitle">Esperando a primeira notícia de hoje</p><div class="panel acct">`
         + faltam.map(h=>`<button class="row" data-cob="${esc(h.id)}" style="width:100%;min-height:44px;text-align:left;background:none">
@@ -4380,6 +4388,22 @@ function exportarCsv(){
   toast("Arquivo gerado com "+(linhas.length-1)+" registros.");
 }
 function renderProfile(){
+  /* COMPETÊNCIA ANTES DE PONTUAÇÃO (17/08): a tela do bairro já seguia o
+     cânone ("o que você fez", não "quantos pontos tem") e o perfil tinha
+     ficado para trás, abrindo com placar. O que a pessoa fez vem primeiro,
+     com o AVISO na frente do relato — a mesma hierarquia do resto do app. */
+  (function(){
+    const el = document.getElementById("pFeitos"); if(!el) return;
+    const nA = (state.alerts||[]).filter(ehMeu).length;
+    const nR = (state.reports||[]).filter(ehMeu).length;
+    const nEv = state.evitadas || 0;
+    const f = [];
+    if(nA)  f.push(`<b>${nA}</b> ${nA===1?"aviso publicado":"avisos publicados"}`);
+    if(nEv) f.push(`<b>${nEv}</b> ${nEv===1?"viagem evitada":"viagens evitadas"}`);
+    if(nR)  f.push(`<b>${nR}</b> ${nR===1?"relato de fila":"relatos de fila"}`);
+    el.innerHTML = f.length ? f.join(" · ")
+      : "Seu primeiro aviso de falta já protege o dia de alguém do bairro.";
+  })();
   document.getElementById("pPts").textContent = state.pts;
   const {cur,next}=levelOf(state.pts);
   document.getElementById("pLvl").textContent = cur[1];
@@ -4879,7 +4903,9 @@ function submitAlert(type, vac, escrito){
   }
   toastComDesfazer(msg, ()=>{
     state.alerts = state.alerts.filter(a=>!meus.includes(a));
-    state.pts -= 30; store.save(state);
+    /* 50, não 30: o aviso passou a valer 50 e este desfazer devolvia só 30 —
+       quem avisava e desfazia GANHAVA 20 de graça */
+    state.pts -= 50; store.save(state);
     renderList(); renderMap(); renderRankView(); renderProfile();
     if(currentDetail && currentDetail.id===hid) openDetail(hid);
   });
