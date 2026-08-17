@@ -3140,6 +3140,34 @@ function renderList(){
          <span style="font-weight:600;opacity:.9">${filters.falta ? "Mostrando só elas · toque para ver todas" : "Toque para conferir antes de sair de casa"}</span>
        </button>`
     : "";
+  /* ===== O PEDIDO VIRA ATALHO, NÃO SÓ PROMESSA (17/08) =====
+     O Raphael perguntou se o "Me avise" tinha ficado inútil. Como NOTIFICAÇÃO,
+     quase: sem push ele só fala quando a pessoa abre o app, e ainda depende de
+     uma falta CONFIRMADA ter acabado — na simulação da Serra (90 dias, 111
+     ativos) isso aconteceu ZERO vezes. Mas o pedido guarda algo útil hoje: o
+     que a pessoa precisa. Então ele passa a responder na hora — "você está
+     esperando X: N unidades perto têm hoje, sem aviso de falta" — e um toque
+     leva até elas. Serve com base pequena; a notificação continua lá para
+     quando a densidade chegar. */
+  const meuPed = pedidos()[0];
+  const bPedido = (meuPed && !filters.cat)
+    ? (()=>{ const nUn = unidadesNoRaio(meuPed.tipo, meuPed.item ? [meuPed.item] : null);
+        return `<button class="walert" id="bPedido" style="display:block;width:100%;text-align:left;margin:0 0 10px;background:var(--surface2);color:var(--ink)">
+         <b>Você está esperando: ${esc(textoPedido(meuPed))}</b><br>
+         <span style="font-weight:600;opacity:.9">${nUn
+            ? nUn + " unidade" + (nUn>1?"s":"") + " perto têm hoje, sem aviso de falta · toque para ver"
+            : "nenhuma unidade perto tem agora — avisamos se alguém informar que voltou"}</span>
+       </button>` })()
+    : "";
+  const ligarBPedido = ()=>{
+    const b = el.querySelector("#bPedido");
+    if(b) b.addEventListener("click",()=>{
+      filters.cat = meuPed.tipo;
+      filters.item = meuPed.item ? [meuPed.item] : null;
+      renderChips(); renderList(); renderMap();
+      toast("Mostrando quem tem " + textoPedido(meuPed).toLowerCase() + " perto de você.");
+    });
+  };
   const ligarBFalta = ()=>{
     const b = el.querySelector("#bFalta");
     if(b) b.addEventListener("click",()=>{ filters.falta = !filters.falta; renderList(); renderChips(); });
@@ -3166,8 +3194,8 @@ function renderList(){
     const motivo = filters.falta
       ? "Nenhuma unidade com aviso ativo agora."
       : "Nenhuma unidade com esses filtros.<br>Tente tirar um deles.";
-    el.innerHTML = bConf + bFalta + bNov + `<div class="empty">${motivo}</div>`;
-    ligarBFalta(); if(conf) ligarConferir(el, conf); if(pRel) ligarPromptRelato(el, pRel); return;
+    el.innerHTML = bConf + bPedido + bFalta + bNov + `<div class="empty">${motivo}</div>`;
+    ligarBFalta(); ligarBPedido(); if(conf) ligarConferir(el, conf); if(pRel) ligarPromptRelato(el, pRel); return;
   }
   /* GATILHO (Berger): a campanha é o lembrete que existe no mundo lá fora — é
      ela que faz a pessoa lembrar do app sem precisar de anúncio. Estava
@@ -3187,7 +3215,7 @@ function renderList(){
      verdadeiro e a soma dava um mural de reclamação.
      Agora: recomendação, depois o pedido de um toque (que é curto e vem logo
      após a pessoa ter recebido algo), e só então campanha, faltas e novidades. */
-  el.innerHTML = (rec ? htmlRec(rec) : "") + bConf + faixa + bFalta + bNov + hs.map(h=>{
+  el.innerHTML = (rec ? htmlRec(rec) : "") + bConf + bPedido + faixa + bFalta + bNov + hs.map(h=>{
     const w = currentWait(h);
     /* CARD VIRADO PELA TESE (faxina 05/08): o destaque de cada card é o que
        decide "vale a pena ir?" — a DISTÂNCIA e se está ABERTA. O tempo de fila
@@ -3235,7 +3263,7 @@ function renderList(){
   el.querySelectorAll("[data-abrir]").forEach(b=>b.addEventListener("click",ev=>{
     ev.stopPropagation(); openDetail(b.dataset.abrir);
   }));
-  ligarBFalta();
+  ligarBFalta(); ligarBPedido();
   if(conf) ligarConferir(el, conf);
   if(pRel) ligarPromptRelato(el, pRel);
 }
