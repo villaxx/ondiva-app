@@ -390,6 +390,7 @@
          onde a rede externa é bloqueada (claude.ai) ele não aparece e o mapa
          desenhado continua valendo como reserva. -->
     <div id="mapReal" style="position:absolute;inset:0;z-index:1;display:none"></div>
+    <button id="mapVazio" style="display:none;position:absolute;left:12px;right:12px;top:12px;z-index:500;background:var(--surface);color:var(--ink);border:1.5px solid var(--warn);border-radius:12px;padding:10px 12px;font:700 12.5px system-ui;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.18)"></button>
     <svg id="mapSvg" viewBox="0 0 400 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa de hospitais próximos">
       <g id="regionLayer">
         <!-- MAPA CONTÍNUO: o chão cobre TODA a área alcançável. Fora do desenho
@@ -2611,6 +2612,10 @@ function ordemDasUnidades(a,b){
   const fa=currentWait(a), fb=currentWait(b);
   if(fa.closed && fb.closed) return distOf(a)-distOf(b);
   if(fa.closed) return 1; if(fb.closed) return -1;
+  /* falta confirmada DO QUE A PESSOA PROCURA: nunca some, mas desce para o
+     fim das abertas — ninguém é recomendado a ir onde avisaram que falta */
+  const ga=!!faltaDoFiltro(a), gb=!!faltaDoFiltro(b);
+  if(ga!==gb) return ga ? 1 : -1;
   /* MINHAS UNIDADES primeiro (14/08): entre as abertas, as que a pessoa salvou
      vêm antes — é o que faz a volta depois de semanas ser instantânea */
   const favA=(state.favs||[]).indexOf(a.id)>=0, favB=(state.favs||[]).indexOf(b.id)>=0;
@@ -2672,20 +2677,14 @@ function passaNosFiltros(h){
        Agora sem categoria = TODAS; quem quer só hospital/UPA escolhe
        "Atendimento médico", que virou uma opção explícita (cat="medico"). */
     if(filters.cat==="medico" && isExam(h)) return false;
-    /* O QUE VOCÊ PRECISA: tira quem acabou de avisar que falta justamente isso.
-       É o que transforma o catálogo de faltas em decisão. */
-    /* filters.item é LISTA (multi-seleção 06/08): quem precisa de gripe E tétano
-       não pode ser mandado a um posto sem uma das duas. Esconde a unidade se
-       QUALQUER item escolhido está em falta confirmada. */
-    if(filters.item && filters.item.length && activeAlerts(h).some(a=>{
-      if(!a.confirmado) return false;      /* falta não confirmada não esconde a unidade */
-      if(a.vac && filters.item.includes(a.vac)) return true;                    /* vacina X em falta · equipamento X quebrado */
-      if(a.type===T_SEM_VACINACAO && filters.cat==="basica") return true;
-      /* sem coleta = não colhe NADA: esconde para sangue E urina (14/08 —
-         antes só sangue; eletro não é coleta, segue aparecendo) */
-      if(a.type===T_SEM_COLETA && (filters.item.includes("Exame de sangue")||filters.item.includes("Exame de urina"))) return true;
-      return false;
-    })) return false;
+    /* FALTA CONFIRMADA NÃO ESCONDE MAIS — SINALIZA (14/08, decisão do
+       Raphael). Sumir era a pior forma de mostrar uma falta: a pessoa não via
+       "está em falta", via "o posto do meu bairro não existe no app" — e o
+       dado mais valioso da comunidade ficava invisível. Agora a unidade FICA:
+       desce para o fim da lista com o motivo escrito, e no mapa ganha borda
+       vermelha. Quem decide é a pessoa, vendo o aviso — não o app escondendo.
+       A função faltaDoFiltro() é quem diz se a falta confirmada bate com o
+       que a pessoa procura. */
     if(!filters.cat || filters.cat==="medico"){
       const nv = nivelOf(h);
       if(filters.need==="grave" && !h.ps) return false;
@@ -2693,6 +2692,18 @@ function passaNosFiltros(h){
     }
     return true;
   }).length > 0;
+}
+function faltaDoFiltro(h){
+  /* a falta confirmada que bate com O QUE a pessoa está procurando agora */
+  const als = faltasConfirmadas(h);
+  if(!als.length) return null;
+  return als.find(a=>{
+    if(a.vac && filters.item && filters.item.length && filters.item.includes(a.vac)) return true;
+    if(a.type===T_SEM_VACINACAO && filters.cat==="basica") return true;
+    if(a.type===T_SEM_COLETA && filters.item && filters.item.length &&
+       (filters.item.includes("Exame de sangue")||filters.item.includes("Exame de urina"))) return true;
+    return false;
+  }) || null;
 }
 function visibleHospitals(){
   /* A DIVISA NÃO PODE CUSTAR VIAGEM (14/08/2026). A simulação de 2.500 pessoas
@@ -3261,6 +3272,10 @@ function renderBrazilPins(pins){
   }));
 }
 function renderMap(){
+  /* filtro mudou = pino muda JÁ: sem isto o mapa real levava até 60 s para
+     acompanhar (o cache dos pinos só invalidava pelo relógio) */
+  _pinosChave = "";
+  if(typeof mapaReal !== "undefined" && mapaReal) desenharPinosReais();
   const pins=document.getElementById("pins");
   document.getElementById("regionLayer").style.display = mapMode==="brasil" ? "none" : "";
   document.getElementById("brLayer").style.display = mapMode==="brasil" ? "" : "none";
@@ -5844,8 +5859,10 @@ function iniciarMapaReal(){
   const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
   const escuroBase = ESRI+"World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
   const escuroNomes = ESRI+"World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
-  const noEscuro = ()=> (document.documentElement.getAttribute("data-theme") ||
-      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light")) === "dark";
+  /* O MAPA SEGUE O SOL, NÃO O TEMA (14/08, pedido do Raphael): claro de dia,
+     escuro à noite — como o Waze. 6h–17h59 claro; 18h–5h59 escuro. O tema do
+     APP continua sendo escolha da pessoa; só o mapa acompanha o horário. */
+  const noEscuro = ()=>{ const hh = new Date().getHours(); return hh >= 18 || hh < 6 };
   const ATR_CLARO = '&copy; OpenStreetMap';
   const ATR_ESCURO = 'Esri, HERE, Garmin, &copy; OpenStreetMap';
   camadaBase = L.tileLayer(noEscuro() ? escuroBase : claro, {
@@ -5865,6 +5882,12 @@ function iniciarMapaReal(){
     } else if(camadaNomes){ mapaReal.removeLayer(camadaNomes) }
   };
   camadaPinos = L.layerGroup().addTo(mapaReal);
+  const fxBtn = document.getElementById("mapVazio");
+  if(fxBtn) fxBtn.addEventListener("click", ()=>{
+    filters = {plan:filters.plan, ped:false, open:false, need:"todos", cat:"", falta:false, item:null};
+    renderChips(); renderList(); renderMap();
+    toast("Filtros limpos — mostrando tudo de novo.");
+  });
   mapaReal.on("moveend zoomend", desenharPinosReais);
   desenharPinosReais();
 }
@@ -5884,17 +5907,37 @@ function desenharPinosReais(){
   if(chave===_pinosChave && idxPorHid()===_pinosIdx) return;
   _pinosChave = chave; _pinosIdx = idxPorHid();
   camadaPinos.clearLayers();
-  const hs = unidadesMetropolitanas().filter(h=>h.lat!==undefined && vista.contains([h.lat,h.lon]));
+  const todasFiltradas = unidadesMetropolitanas();
+  const hs = todasFiltradas.filter(h=>h.lat!==undefined && vista.contains([h.lat,h.lon]));
+  /* O MAPA EXPLICA POR QUE ESVAZIOU (14/08, achado do Raphael com o filtro
+     Infantil): a lista dizia o motivo, o mapa ficava mudo — parecia app
+     quebrado. Com filtro ativo e quase nada passando, uma faixa diz o porquê
+     e oferece limpar. */
+  const fx = document.getElementById("mapVazio");
+  if(fx){
+    const filtroAtivo = filters.cat || (filters.item&&filters.item.length) || filters.ped || filters.falta || filters.open;
+    if(filtroAtivo && todasFiltradas.length <= (filters.ped ? 12 : 5)){
+      fx.innerHTML = (filters.ped
+        ? `Só ${todasFiltradas.length} unidades têm “infantil” no nome oficial — é o que o cadastro do Ministério prova. Posto e UPA atendem criança mesmo sem o nome.`
+        : "Quase nada passa nos filtros escolhidos.")
+        + ' <span style="color:var(--brand);text-decoration:underline">Toque para limpar os filtros.</span>';
+      fx.style.display = "";
+    } else fx.style.display = "none";
+  }
   const zoom = mapaReal.getZoom();
   const mostraNome = zoom >= 15;
   hs.slice(0, 300).forEach(h=>{
     const w = currentWait(h);
+    /* vermelho de verdade quando a falta confirmada é DO QUE a pessoa procura;
+       ambar quando há falta confirmada de outra coisa (14/08) */
+    const faltaAqui = faltaDoFiltro(h);
     const alarme = faltasConfirmadas(h).length > 0;
     const fechada = !abertoAgora(h);
     const cor = fechada ? "#6E8A7B" : (w.semDados ? "#4E6E59" : (totalMin(h)===null ? filaStatus(w.min).color : statusOf(totalMin(h)).color));
     const rot = fechada ? "fechada" : (w.semDados ? "" : fmtShort(totalMin(h)===null ? w.min : totalMin(h)));
     const html = `<div style="transform:translate(-50%,-100%);text-align:center;white-space:nowrap">
-        <div style="display:inline-block;background:${cor};color:#fff;font:800 11px system-ui;padding:2px 7px;border-radius:9px;border:2px solid ${alarme?"#E0A040":"#fff"};box-shadow:0 1px 4px rgba(0,0,0,.4)">${rot || "•"}${alarme?" !":""}</div>
+        <div style="display:inline-block;background:${cor};color:#fff;font:800 11px system-ui;padding:2px 7px;border-radius:9px;border:${faltaAqui?"3px solid #D9453D":alarme?"2px solid #E0A040":"2px solid #fff"};box-shadow:0 1px 4px rgba(0,0,0,.4)">${rot || "•"}${alarme?" !":""}</div>
+        ${faltaAqui?`<div style="font:800 9.5px system-ui;color:#fff;background:#D9453D;border-radius:4px;padding:0 4px;margin-top:1px">${esc(alertLabelTxt(faltaAqui).slice(0,22))}</div>`:""}
         ${mostraNome?`<div style="font:700 10px system-ui;color:#0E241A;background:rgba(255,255,255,.85);border-radius:4px;padding:0 3px;margin-top:1px">${esc(dispName(h).slice(0,24))}</div>`:""}
       </div>`;
     L.marker([h.lat,h.lon], {icon: L.divIcon({html, className:"", iconSize:null})})
@@ -5991,6 +6034,8 @@ nuvemFlush();
 nuvemPuxar();
 /* em segundo plano não puxa (bateria e dados); ao voltar, atualiza na hora */
 setInterval(()=>{ if(document.hidden) return; nuvemFlush(); nuvemPuxar(); }, 60000);
+setInterval(()=>{ if(!document.hidden && trocarBaseDoMapa) trocarBaseDoMapa(); }, 600000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && trocarBaseDoMapa) trocarBaseDoMapa(); });
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ nuvemFlush(); nuvemPuxar(); } });
 requestGPS(false); /* tenta a localização real; sem permissão, segue no ponto padrão */
 renderChips();
