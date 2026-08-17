@@ -5963,6 +5963,18 @@ function desenharPinosReais(){
   const mostraNome = zoom >= 15;
   hs.slice(0, 300).forEach(h=>{
     const w = currentWait(h);
+    /* FECHADA DE LONGE E' UM PONTINHO (14/08, foto do Raphael as 6h: trezentas
+       etiquetas "fechada" empilhadas viravam um bolo cinza). De madrugada quase
+       tudo esta fechado — o que importa e' o que esta ABERTO saltar. Fechada
+       ganha etiqueta so no zoom de rua (>=15), onde ha espaco para ler. */
+    if(!abertoAgora(h) && zoom < 15){
+      L.marker([h.lat,h.lon], {icon: L.divIcon({
+        html:`<div style="transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#6E8A7B;opacity:.75;border:1.5px solid rgba(255,255,255,.8)"></div>`,
+        className:"", iconSize:null}), keyboard:false})
+        .addTo(camadaPinos)
+        .on("click", ()=>openDetail(h.id));
+      return;
+    }
     /* vermelho de verdade quando a falta confirmada é DO QUE a pessoa procura;
        ambar quando há falta confirmada de outra coisa (14/08) */
     const faltaAqui = faltaDoFiltro(h);
