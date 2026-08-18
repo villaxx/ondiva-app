@@ -1745,6 +1745,25 @@ const REGIONS = [
     {id:"u2695723", cnes:2695723, soEncam:true, lat:-19.9150156, lon:-43.9765249, name:"URS Padre Eustáquio", type:"Público", plans:["SUS"], profile:"basica", region:"Padre Eustáquio", addr:"Rua Padre Eustáquio, 1951", dist:5.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
     {id:"u22942", cnes:22942, soEncam:true, lat:-19.907945, lon:-43.927950, name:"URS Sagrada Família", type:"Público", plans:["SUS"], profile:"basica", region:"Sagrada Família", addr:"Rua Joaquim Felício, 101", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
     {id:"u22985", cnes:22985, soEncam:true, lat:-19.9039653, lon:-43.9058568, name:"URS Saudade", type:"Público", plans:["SUS"], profile:"basica", region:"Esplanada", addr:"Rua 28 de Setembro, 372", dist:4.8, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
+    /* URS CENTRO SUL e URS CAMPOS SALES (18/08/2026, tarde) — mesmo critério das
+       três de cima, aprovado no Console.
+       Endereço e horário conferidos na página oficial da PBH (Atenção Secundária
+       > URS): Centro Sul, Rua Paraíba 890, Funcionários, 7h às 21h, telefones
+       3277-5312/5350/9528; Campos Sales, Rua Campos Sales 472, Calafate, 7h às
+       19h, telefones 3277-7089/7033 (o 7089 bate com o do CNES).
+       Coordenada por SEGUNDA FONTE (OpenStreetMap): o ponto do CNES da Centro
+       Sul cai no lote de nº 890 da Rua Paraíba, com o MESMO CEP declarado
+       (30130-141), a 32 m — confirmação no nível do lote. O da Campos Sales cai
+       sobre a Rua Campos Sales, no Calafate declarado; o OSM não tem o nº 472,
+       então a confirmação é de rua e bairro, como foi a do Padre Eustáquio.
+       Levam soEncam:true pelo mesmo motivo das outras: ambulatório de
+       especialidade, porta fechada para quem chega sem encaminhamento.
+       O CTA HIPERCENTRO (CNES 9140204) NÃO entrou junto, de propósito: a PBH
+       confirma que ele atende SEM agendamento — logo não é soEncam —, mas só faz
+       teste de IST, e nenhum dos quatro perfis do app diz isso. Entrar como
+       "exames" faria o app pedir "pedido do exame" e prometer diagnóstico geral
+       a quem chegasse. Está devolvido no Console esperando decisão. */    {id:"u22810", cnes:22810, soEncam:true, lat:-19.9343006, lon:-43.9330387, name:"URS Centro Sul", type:"Público", plans:["SUS"], profile:"basica", region:"Funcionarios", addr:"Rua Paraíba, 890", dist:0.3, ab:7, fe:21, turno:"Manhã, tarde e noite", fone:"3132775312", sus:true},
+    {id:"u2777312", cnes:2777312, soEncam:true, lat:-19.9274344, lon:-43.9777109, name:"URS Campos Sales", type:"Público", plans:["SUS"], profile:"basica", region:"Calafate", addr:"Rua Campos Sales, 472", dist:4.6, ab:7, fe:19, turno:"Manhã e tarde", fone:"3132777089", sus:true},
     {id:"u9112596", cnes:9112596, lat:-19.949073, lon:-43.91999, name:"Clínica de Radiodiaginostico Mangabeiras", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Serra", addr:"Praca da Bandeira, 200", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125573279"},
     {id:"u9149589", cnes:9149589, lat:-19.92939, lon:-43.928849, name:"Axial Centro de Imagem", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Av Bernardo Monteiro, 1235", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3136159444", sus:true, vac:true, lab:true, img:true},
     {id:"u9169970", cnes:9169970, lat:-19.844267, lon:-43.971459, name:"Instituto Hermes Pardini Santa Amelia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Jardim Atlantico", addr:"Avenida Portugal, 3287", dist:11.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042"},
