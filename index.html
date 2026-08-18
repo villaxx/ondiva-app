@@ -1600,7 +1600,12 @@ const REGIONS = [
     {id:"u3351424", cnes:3351424, lat:-19.938869, lon:-43.94197, name:"Ecoar", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Lourdes", addr:"Avenida do Contorno, 6760", dist:0.8, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3136298042", sus:true, lab:true, img:true},
     {id:"u3382109", cnes:3382109, lat:-19.80949, lon:-43.96975, name:"Laboratório Regional Norte Venda Nova", type:"Público", plans:["SUS"], profile:"exames", region:"Candelaria", addr:"Rua Padre Pedro Pinto, 2277", dist:14.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775459", sus:true, lab:true},
     {id:"u3389383", cnes:3389383, lat:-19.930507, lon:-43.929254, name:"Laboratório São Marcos", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Avenida Bernardo Monteiro, 918", dist:0.9, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132246361", sus:true},
-    {id:"u3397041", cnes:3397041, lat:-19.911352, lon:-43.938448, name:"Laboratório Ap Patologia Cirurgica", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Colegio Batista", addr:"Rua Pouso Alegre, 110", dist:2.9, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3131137553"},
+    {id:"u3397041", cnes:3397041, lat:-19.911352, lon:-43.938448, name:"Laboratório Ap Patologia Cirurgica", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Colegio Batista", addr:"Rua Pouso Alegre, 110", dist:2.9, ab:8, fe:18, turno:"Manhã e tarde", fone:"3131137553"}
+    /* horário corrigido em 18/08: dizia 7h-22h e o CNES declara "manhã e tarde".
+       O site da empresa (apanalys.com.br) diz "horário comercial", e a unidade
+       irmã da Av. Bernardo Monteiro aparece em diretório como 8h-18h. A hora de
+       ABERTURA não foi provada para ESTE endereço — 8h vem do "comercial". O que
+       está provado é que não vai até as 22h. */,
     {id:"u3409872", cnes:3409872, lat:-19.976467, lon:-44.013803, name:"Vision", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barreiro", addr:"Rua José Brandao, 315", dist:9.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133844248", img:true},
     {id:"u3456145", cnes:3456145, lat:-19.92256, lon:-43.923168, name:"Sermig Serv Radiologia e Ultra Sonografia de Minas Gerais L", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Rua Maranhao, 90", dist:2.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132416795", img:true},
     {id:"u3485404", cnes:3485404, lat:-19.92892, lon:-43.923962, name:"Clínica Céu", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Avenida Francisco Sales, 1656", dist:1.4, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132890500", img:true},
@@ -1728,6 +1733,18 @@ const REGIONS = [
     {id:"u9037691", cnes:9037691, apoio:true, lat:-19.9272, lon:-43.928136, name:"Instituto de Nefropatologia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Avenida Bernardo Monteiro, 971", dist:1.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136587310"},
     {id:"u9067175", cnes:9067175, lat:-19.91838, lon:-43.93855, name:"Laboratório Cris", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Rua Rio de Janeiro, 462", dist:2.1, ab:7, fe:18, turno:"Manhã e tarde"},
     {id:"u9105670", cnes:9105670, lat:-19.976385, lon:-44.017263, name:"Cdi Clínica de Imagem", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barreiro", addr:"Rua Alcindo Vieira, 139", dist:9.7, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132358700", img:true},
+    /* ===== UNIDADES DE REFERÊNCIA SECUNDÁRIA (18/08/2026) =====
+       Achadas pelo unidades-novas.ps1: existiam no CNES e não no app. Todas da
+       Prefeitura de BH, SUS, manhã e tarde.
+       Coordenada de cada uma conferida por segunda fonte (OpenStreetMap):
+       Sagrada Família 51 m, Saudade 44 m, Padre Eustáquio 114-202 m por CEP.
+       Levam soEncam:true — são ambulatório de ESPECIALIDADE, só atendem quem foi
+       encaminhado por um posto. Sem essa marca, o app mandaria alguém direto
+       para uma porta que não abre, que é exatamente perder a viagem.
+       profile "basica" é só para o filtro; o selo na tela vem do soEncam. */
+    {id:"u2695723", cnes:2695723, soEncam:true, lat:-19.9150156, lon:-43.9765249, name:"URS Padre Eustáquio", type:"Público", plans:["SUS"], profile:"basica", region:"Padre Eustáquio", addr:"Rua Padre Eustáquio, 1951", dist:5.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
+    {id:"u22942", cnes:22942, soEncam:true, lat:-19.907945, lon:-43.927950, name:"URS Sagrada Família", type:"Público", plans:["SUS"], profile:"basica", region:"Sagrada Família", addr:"Rua Joaquim Felício, 101", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
+    {id:"u22985", cnes:22985, soEncam:true, lat:-19.9039653, lon:-43.9058568, name:"URS Saudade", type:"Público", plans:["SUS"], profile:"basica", region:"Esplanada", addr:"Rua 28 de Setembro, 372", dist:4.8, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
     {id:"u9112596", cnes:9112596, lat:-19.949073, lon:-43.91999, name:"Clínica de Radiodiaginostico Mangabeiras", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Serra", addr:"Praca da Bandeira, 200", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125573279"},
     {id:"u9149589", cnes:9149589, lat:-19.92939, lon:-43.928849, name:"Axial Centro de Imagem", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Av Bernardo Monteiro, 1235", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3136159444", sus:true, vac:true, lab:true, img:true},
     {id:"u9169970", cnes:9169970, lat:-19.844267, lon:-43.971459, name:"Instituto Hermes Pardini Santa Amelia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Jardim Atlantico", addr:"Avenida Portugal, 3287", dist:11.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042"},
@@ -1767,7 +1784,11 @@ const REGIONS = [
        especializados: levam espec:true, ficam FORA do SOS. A coordenada do
        CNES para as tres esta 10 km errada (centroide de Nova Lima); o nº 220
        veio do predio no OpenStreetMap, o nº 310 esta no nivel da rua. */
-    {id:"u3030733", cnes:3030733, lat:-19.981607, lon:-43.945460, name:"Hospital de Olhos Dr Ricardo Guimarães", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Rua da Paisagem, 220", dist:5.1, ab:7, fe:19, turno:"Manhã, tarde e noite", fone:"3132892030", espec:true, cir:true, intern:true},
+    {id:"u3030733", cnes:3030733, lat:-19.981607, lon:-43.945460, name:"Hospital de Olhos Dr Ricardo Guimarães", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Rua da Paisagem, 220", dist:5.1, ab:7.5, fe:18, turno:"Manhã e tarde, de segunda a sexta", fone:"3132892030", espec:true, cir:true, intern:true}
+    /* horário corrigido em 18/08: dizia 7h-19h. O site oficial (holhos.com.br)
+       diz 7h30 às 18h, DE SEGUNDA A SEXTA, e o CNES confirma "manhã e tarde".
+       A coordenada NÃO foi tocada: o CNES devolve o centroide de Nova Lima
+       (-19.9839, -43.8496), 10 km fora — aqui o app está certo e a fonte errada. */,
     {id:"u9621903", cnes:9621903, lat:-19.980821, lon:-43.945348, name:"Oncobio Serviços de Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Rua da Paisagem, 310", dist:5.1, ab:7, fe:19, turno:"Manhã, tarde e noite", fone:"3133088043", espec:true, intern:true},
     {id:"u4579771", cnes:4579771, lat:-19.980900, lon:-43.945300, name:"Instituto Materno Infantil de Minas Gerais", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Rua da Paisagem, 310", dist:5.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3130888000", espec:true, h24:true, obst:true, intern:true},
   ]},
@@ -2581,6 +2602,11 @@ function nivelOf(h){
   return h.ps ? "grave" : "completo";
 }
 function nivelBadge(h){
+  /* SÓ COM ENCAMINHAMENTO vem antes de tudo (18/08). As URS entraram nesta data
+     e nenhum dos quatro perfis descreve o que elas são — ambulatório de consulta
+     especializada, com porta fechada para quem chega sem encaminhamento. Usar o
+     selo de "atendimento básico" seria afirmar o que a unidade não faz. */
+  if(h.soEncam) return '<span class="badge" style="background:var(--crit-bg);color:var(--crit)">Só com encaminhamento</span>';
   if(h.profile==="basica") return '<span class="badge ped">Vacinas e atendimento básico</span>';
   if(h.profile==="exames") return '<span class="badge ped">Exames</span>';
   if(h.profile==="upa") return '<span class="badge ped">Casos leves e urgências</span>';
@@ -4006,7 +4032,13 @@ function openDetail(id){
      porta. Vai em vermelho e no topo do bloco porque é a informação que decide
      a viagem — e, no caso dos que têm pronto-socorro, decide numa emergência. */
   const soPlano = h.soPlano ? `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800;margin:0 0 8px">Atende SOMENTE quem tem o plano desta rede. Sem esse plano, não é atendido aqui — nem em emergência.</div>` : "";
-  document.getElementById("dPlans").innerHTML = soPlano
+  /* SÓ POR ENCAMINHAMENTO (18/08). A marca soEncam existia desde 12/08 mas só
+     tirava do SOS — não dizia nada na tela. Quem chegasse pela lista normal ia
+     até lá e era mandado embora por não ter encaminhamento, que é exatamente
+     perder a viagem. Mesmo tratamento do soPlano: vermelho e no topo, porque é a
+     informação que decide se vale sair de casa. */
+  const soEncam = h.soEncam ? `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800;margin:0 0 8px">Só atende com <b>encaminhamento</b> de outra unidade. Chegando sem, você não é atendido — procure primeiro o posto do seu bairro.</div>` : "";
+  document.getElementById("dPlans").innerHTML = soPlano + soEncam
     + h.plans.map(p=>`<span class="chip" style="cursor:default;box-shadow:none;background:var(--surface2)">${p}</span>`).join("")
     + (cv ? `<div style="margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--ink2);font-weight:600">
          ${cv.lista.length ? `<b>Aceita:</b> ${cv.lista.map(esc).join(" · ")}` : "<b>Não trabalha com convênio</b> — atendimento particular."}
