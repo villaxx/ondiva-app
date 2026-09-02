@@ -726,7 +726,11 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">Termos de uso e privacidade</h2>
-    <div class="herosub">Resumo. A versão completa fica disponível no site do Ondiva.</div>
+    <!-- 02/09/2026: dizia "a versão completa fica disponível no site do Ondiva".
+         Não ficava — o repositório público só tem o app. Prometer documento que
+         não existe é pior que assumir que é minuta. Trocar de volta quando os
+         dois forem publicados (e aí sim apontar o endereço). -->
+    <div class="herosub">Resumo do que vale hoje. Os termos completos estão em revisão jurídica — quando publicados, o endereço aparece aqui.</div>
 
     <div class="walert" style="background:var(--crit-bg);color:var(--crit)">
       <b>Em risco de vida, ligue 192.</b> O Ondiva informa filas — não presta atendimento médico, não faz triagem e não substitui o pronto-socorro. Casos graves têm prioridade na triagem e não dependem da fila mostrada aqui.
@@ -745,6 +749,10 @@
       Só um <b>apelido inventado</b>, escolhido por você, e os convênios que você usa, se quiser informar. <b>Não pedimos nome, e-mail nem senha</b> — não existe login neste app. <b>Não pedimos CPF, documento, dados bancários,
       carteirinha de plano, sintomas ou diagnóstico.</b> A localização é usada enquanto você usa o app, só com a sua
       permissão, e pode ser desativada a qualquer momento.
+      <!-- 02/09/2026: o registro de presença estava só na Política em .md, que
+           ninguém lê — a folha da tela, que é o que a pessoa vê, não contava.
+           Coleta que existe e o usuário não vê é o item 2 da auditoria. -->
+      <br><br>Uma vez por dia, o app registra que foi usado — <b>um código aleatório, seu apelido (se você tiver escolhido um) e a data</b>. Serve só para contarmos quantas pessoas usam por semana. Não registra o que você viu, buscou nem onde estava.
     </div>
 
     <p class="vtitle">O que fazemos com os relatos</p>
@@ -891,6 +899,12 @@
     <div class="herosub">Em risco de vida, <b>não compare filas</b>. Casos graves têm prioridade na triagem e passam na frente — a fila do app vale para casos leves.</div>
     <a class="cta crit" href="tel:192">Ligar 192 — SAMU</a>
     <a class="cta sec" href="tel:193">Ligar 193 — Bombeiros</a>
+    <!-- CVV: entrou em 02/09/2026. O app é de emergência de saúde e não tinha
+         o 188 em lugar nenhum — quem chega aqui em sofrimento emocional não
+         achava o único número que existe para ele. O SOS já estava certo no
+         encaminhamento (manda para PS geral, nunca para hospital psiquiátrico,
+         que é o correto para tentativa de autolesão); o que faltava era o canal. -->
+    <a class="cta sec" href="tel:188">Ligar 188 — CVV, apoio emocional 24h</a>
     <p class="vtitle" style="margin-top:18px">Hospitais de plantão 24h que você alcança mais rápido:</p>
     <div id="sosList"></div>
     <div class="login-note" style="text-align:left">Tempo de carro estimado pelo trânsito típico deste horário — é conta, não medição; na versão final vem de dados reais de trânsito. Vá de preferência acompanhado — e em dúvida, ligue 192.</div>

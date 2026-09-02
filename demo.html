@@ -454,7 +454,7 @@
         <button class="sosbtn" id="sosBtn" aria-label="Emergência grave — SOS">SOS</button>
       </div>
       <div class="filterwrap"><div class="filters" id="chipsMap"></div></div>
-      <span class="protopill" id="protoPill" style="background:var(--brand);color:#fff">Demo 18/08 04:09 · unidades reais, filas de exemplo</span>
+      <span class="protopill" id="protoPill" style="background:var(--brand);color:#fff">Demonstração pública · nomes fictícios · filas simuladas</span>
       <!-- INSTALAR NO MAPA (12/08, pedido do Raphael): o convite existia só no
            Perfil e num popup que depende do evento `beforeinstallprompt` — que
            no iPhone NUNCA dispara, então metade dos testadores nunca via nada.
@@ -718,7 +718,11 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">Termos de uso e privacidade</h2>
-    <div class="herosub">Resumo. A versão completa fica disponível no site do Ondiva.</div>
+    <!-- 02/09/2026: dizia "a versão completa fica disponível no site do Ondiva".
+         Não ficava — o repositório público só tem o app. Prometer documento que
+         não existe é pior que assumir que é minuta. Trocar de volta quando os
+         dois forem publicados (e aí sim apontar o endereço). -->
+    <div class="herosub">Resumo do que vale hoje. Os termos completos estão em revisão jurídica — quando publicados, o endereço aparece aqui.</div>
 
     <div class="walert" style="background:var(--crit-bg);color:var(--crit)">
       <b>Em risco de vida, ligue 192.</b> O Ondiva informa filas — não presta atendimento médico, não faz triagem e não substitui o pronto-socorro. Casos graves têm prioridade na triagem e não dependem da fila mostrada aqui.
@@ -737,6 +741,10 @@
       Só um <b>apelido inventado</b>, escolhido por você, e os convênios que você usa, se quiser informar. <b>Não pedimos nome, e-mail nem senha</b> — não existe login neste app. <b>Não pedimos CPF, documento, dados bancários,
       carteirinha de plano, sintomas ou diagnóstico.</b> A localização é usada enquanto você usa o app, só com a sua
       permissão, e pode ser desativada a qualquer momento.
+      <!-- 02/09/2026: o registro de presença estava só na Política em .md, que
+           ninguém lê — a folha da tela, que é o que a pessoa vê, não contava.
+           Coleta que existe e o usuário não vê é o item 2 da auditoria. -->
+      <br><br>Uma vez por dia, o app registra que foi usado — <b>um código aleatório, seu apelido (se você tiver escolhido um) e a data</b>. Serve só para contarmos quantas pessoas usam por semana. Não registra o que você viu, buscou nem onde estava.
     </div>
 
     <p class="vtitle">O que fazemos com os relatos</p>
@@ -883,6 +891,12 @@
     <div class="herosub">Em risco de vida, <b>não compare filas</b>. Casos graves têm prioridade na triagem e passam na frente — a fila do app vale para casos leves.</div>
     <a class="cta crit" href="tel:192">Ligar 192 — SAMU</a>
     <a class="cta sec" href="tel:193">Ligar 193 — Bombeiros</a>
+    <!-- CVV: entrou em 02/09/2026. O app é de emergência de saúde e não tinha
+         o 188 em lugar nenhum — quem chega aqui em sofrimento emocional não
+         achava o único número que existe para ele. O SOS já estava certo no
+         encaminhamento (manda para PS geral, nunca para hospital psiquiátrico,
+         que é o correto para tentativa de autolesão); o que faltava era o canal. -->
+    <a class="cta sec" href="tel:188">Ligar 188 — CVV, apoio emocional 24h</a>
     <p class="vtitle" style="margin-top:18px">Hospitais de plantão 24h que você alcança mais rápido:</p>
     <div id="sosList"></div>
     <div class="login-note" style="text-align:left">Tempo de carro estimado pelo trânsito típico deste horário — é conta, não medição; na versão final vem de dados reais de trânsito. Vá de preferência acompanhado — e em dúvida, ligue 192.</div>
@@ -1737,6 +1751,25 @@ const REGIONS = [
     {id:"u2695723", cnes:2695723, soEncam:true, lat:-19.9150156, lon:-43.9765249, name:"URS Padre Eustáquio", type:"Público", plans:["SUS"], profile:"basica", region:"Padre Eustáquio", addr:"Rua Padre Eustáquio, 1951", dist:5.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
     {id:"u22942", cnes:22942, soEncam:true, lat:-19.907945, lon:-43.927950, name:"URS Sagrada Família", type:"Público", plans:["SUS"], profile:"basica", region:"Sagrada Família", addr:"Rua Joaquim Felício, 101", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
     {id:"u22985", cnes:22985, soEncam:true, lat:-19.9039653, lon:-43.9058568, name:"URS Saudade", type:"Público", plans:["SUS"], profile:"basica", region:"Esplanada", addr:"Rua 28 de Setembro, 372", dist:4.8, ab:7, fe:18, turno:"Manhã e tarde", sus:true},
+    /* URS CENTRO SUL e URS CAMPOS SALES (18/08/2026, tarde) — mesmo critério das
+       três de cima, aprovado no Console.
+       Endereço e horário conferidos na página oficial da PBH (Atenção Secundária
+       > URS): Centro Sul, Rua Paraíba 890, Funcionários, 7h às 21h, telefones
+       3277-5312/5350/9528; Campos Sales, Rua Campos Sales 472, Calafate, 7h às
+       19h, telefones 3277-7089/7033 (o 7089 bate com o do CNES).
+       Coordenada por SEGUNDA FONTE (OpenStreetMap): o ponto do CNES da Centro
+       Sul cai no lote de nº 890 da Rua Paraíba, com o MESMO CEP declarado
+       (30130-141), a 32 m — confirmação no nível do lote. O da Campos Sales cai
+       sobre a Rua Campos Sales, no Calafate declarado; o OSM não tem o nº 472,
+       então a confirmação é de rua e bairro, como foi a do Padre Eustáquio.
+       Levam soEncam:true pelo mesmo motivo das outras: ambulatório de
+       especialidade, porta fechada para quem chega sem encaminhamento.
+       O CTA HIPERCENTRO (CNES 9140204) NÃO entrou junto, de propósito: a PBH
+       confirma que ele atende SEM agendamento — logo não é soEncam —, mas só faz
+       teste de IST, e nenhum dos quatro perfis do app diz isso. Entrar como
+       "exames" faria o app pedir "pedido do exame" e prometer diagnóstico geral
+       a quem chegasse. Está devolvido no Console esperando decisão. */    {id:"u22810", cnes:22810, soEncam:true, lat:-19.9343006, lon:-43.9330387, name:"URS Centro Sul", type:"Público", plans:["SUS"], profile:"basica", region:"Funcionarios", addr:"Rua Paraíba, 890", dist:0.3, ab:7, fe:21, turno:"Manhã, tarde e noite", fone:"3132775312", sus:true},
+    {id:"u2777312", cnes:2777312, soEncam:true, lat:-19.9274344, lon:-43.9777109, name:"URS Campos Sales", type:"Público", plans:["SUS"], profile:"basica", region:"Calafate", addr:"Rua Campos Sales, 472", dist:4.6, ab:7, fe:19, turno:"Manhã e tarde", fone:"3132777089", sus:true},
     {id:"u9112596", cnes:9112596, lat:-19.949073, lon:-43.91999, name:"Clínica de Radiodiaginostico Mangabeiras", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Serra", addr:"Praca da Bandeira, 200", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125573279"},
     {id:"u9149589", cnes:9149589, lat:-19.92939, lon:-43.928849, name:"Axial Centro de Imagem", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Av Bernardo Monteiro, 1235", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3136159444", sus:true, vac:true, lab:true, img:true},
     {id:"u9169970", cnes:9169970, lat:-19.844267, lon:-43.971459, name:"Instituto Hermes Pardini Santa Amelia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Jardim Atlantico", addr:"Avenida Portugal, 3287", dist:11.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042"},
@@ -2090,7 +2123,7 @@ const store = {
 };
 /* v: versão do formato guardado — o ponto único para migração futura (hoje só
    carimba; quando o formato mudar, o "if(s.v<2){...}" mora aqui, não espalhado) */
-let state = Object.assign({v:1, pts:0, reports:[], giveups:[], alerts:[], fixes:[], pendentes:[], medals:[], waitlist:[], plans:[], idas:[], procuras:[], favs:[], onb:0, region:"bh", demo:false, big:false, modo:"carro", avisos:null, visitante:false}, store.load());
+let state = Object.assign({v:1, pts:0, reports:[], giveups:[], alerts:[], fixes:[], pendentes:[], medals:[], waitlist:[], plans:[], idas:[], procuras:[], favs:[], onb:0, region:"bh", demo:true, big:false, modo:"carro", avisos:null, visitante:false}, store.load());
 state.v = state.v || 1;
 /* ===================== DEMONSTRAÇÃO =====================
    Este arquivo é uma cópia do app com relatos de exemplo já carregados,
@@ -5306,7 +5339,7 @@ function applyModoTexts(){
 function applyDemoTexts(){
   document.getElementById("protoPill").textContent = state.demo
     ? "Demonstração pública · nomes fictícios · filas simuladas"
-    : "Demo 18/08 04:09 · unidades reais, filas de exemplo";
+    : "Demonstração pública · nomes fictícios · filas simuladas";
   document.getElementById("demoBtn").textContent = state.demo
     ? "Desativar nomes fictícios (voltar aos reais)"
     : "Ativar nomes fictícios (demonstração pública)";
