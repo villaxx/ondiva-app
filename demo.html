@@ -4701,9 +4701,46 @@ function renderProfile(){
       </div>
       <button class="logout" id="btnTrocarApelido" style="color:var(--brand)">Trocar meu apelido</button>
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
-      <button class="logout" id="btnLogout">Sair da conta</button>`;
+      <button class="logout" id="btnLogout">Sair da conta</button>
+      <!-- APAGAR MEUS DADOS (02/09/2026). Os Termos, seção 13, prometiam
+           "encerrar sua conta a qualquer momento pelo aplicativo" e o app só
+           tinha "Sair da conta" — que esconde, não apaga. Promessa que o
+           documento faz e o código não cumpre é exatamente o que gerou as
+           ações contra o app Tea (a política prometia apagar o documento e o
+           app guardava). Ver PESQUISA-PROCESSOS-APPS.md.
+           O que este botão faz de verdade: apaga TUDO deste aparelho e abre o
+           e-mail já preenchido para pedir a exclusão do que foi publicado —
+           que o app não tem como apagar sozinho (o banco não aceita DELETE de
+           ninguém, por desenho anti-abuso). Honesto nos dois lados. -->
+      <button class="logout" id="btnApagarTudo" style="color:var(--crit)">Apagar meus dados</button>`;
     document.getElementById("btnTrocarApelido").addEventListener("click",abrirTrocaApelido);
     document.getElementById("btnEditPlans").addEventListener("click",showPlanSetup);
+    document.getElementById("btnApagarTudo").addEventListener("click",()=>{
+      const quem = (state.user && state.user.nome) ? state.user.nome : "(sem apelido)";
+      const ok = confirm(
+        "Apagar meus dados\n\n" +
+        "Some deste aparelho, agora: apelido, convênios, pontos, medalhas, " +
+        "favoritos, pedidos de aviso e o histórico das suas idas.\n\n" +
+        "O que você já publicou (relatos e avisos) fica no servidor — o app não " +
+        "tem como apagar sozinho, porque ninguém pode apagar o que outra pessoa " +
+        "escreveu. Vou abrir um e-mail pronto para você pedir a exclusão.\n\n" +
+        "Apelido: " + quem + "\n\nApagar?"
+      );
+      if(!ok) return;
+      const corpo =
+        "Quero a exclusao dos meus relatos e avisos no Ondiva.%0D%0A%0D%0A" +
+        "Apelido: " + encodeURIComponent(quem) + "%0D%0A" +
+        "Pedido feito pelo proprio aplicativo, botao Apagar meus dados.%0D%0A%0D%0A" +
+        "(A LGPD, art. 18, da 15 dias para a resposta.)";
+      try{ window.open("mailto:ondiva01@gmail.com?subject=" +
+        encodeURIComponent("Apagar meus dados — Ondiva") + "&body=" + corpo, "_blank"); }catch(e){}
+      /* apaga o armazenamento inteiro do app, não só os campos conhecidos:
+         campo novo que alguém acrescentar depois some junto, sem manutenção */
+      try{ localStorage.removeItem("pronto-v1"); }catch(e){}
+      try{ localStorage.removeItem("ondiva-demo-v1"); }catch(e){}
+      try{ sessionStorage.clear(); }catch(e){}
+      location.reload();
+    });
     document.getElementById("btnLogout").addEventListener("click",()=>{
       /* Sair da conta tem que limpar os convênios também. Sem isto a tela de
          entrada reaparecia com as opções já marcadas e o botão já liberado —
