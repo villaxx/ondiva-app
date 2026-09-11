@@ -9,16 +9,6 @@
 <title>Ondiva — demonstração</title>
 </head>
 <body>
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
 
 <style>
   /* ============ TOKENS — verde farmácia europeia ============ */
@@ -548,7 +538,9 @@
     <div class="panel acct">
       <div class="row"><span class="k">Unidades de saúde</span><span class="v">CNES / Ministério da Saúde</span></div>
       <div class="row"><span class="k">Tempos de fila</span><span class="v">Informados por quem esteve lá</span></div>
-      <div class="row"><span class="k">Dados coletados</span><span class="v">Nome, usuário, e-mail</span></div>
+      <!-- auditoria 09/2026: dizia "Nome, usuário, e-mail" — coleta que não existe
+           desde 11/08, e contradizia a folha legal duas linhas abaixo -->
+      <div class="row"><span class="k">Dados coletados</span><span class="v">Só um apelido inventado (e convênios, se quiser)</span></div>
       <div class="row"><span class="k">Localização</span><span class="v">Só com sua permissão</span></div>
       <button class="logout" id="btnLegal" style="color:var(--brand)">Ler os termos de uso e a privacidade</button>
       <!-- lar PERMANENTE da instalação: o convite passageiro pode ser dispensado
@@ -642,7 +634,7 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:0">O que está errado?</h2>
-    <div class="herosub">Seu aviso vai para a revisão da base. Os dados vêm do cadastro oficial do Ministério da Saúde e podem estar desatualizados.</div>
+    <div class="herosub">Os dados vêm do cadastro oficial do Ministério da Saúde e podem estar desatualizados. Ao escolher, abre um e-mail já preenchido para <b>ondiva01@gmail.com</b> — é assim que a correção chega até nós.</div>
     <div id="fixOpts"></div>
   </div>
 </div>
@@ -809,7 +801,7 @@
          o eixo virou FALTA — e quem acabou de sair da unidade é justamente
          quem sabe o que faltou lá dentro. É a informação mais valiosa do app,
          e ninguém estava pedindo. -->
-    <div class="login-note" style="text-align:left">Vacina em falta, sem pediatra, fichas acabaram, equipamento quebrado — é o que evita a viagem perdida de quem vem depois.<br>No app instalado, esta tela abre sozinha ao tocar na notificação.</div>
+    <div class="login-note" style="text-align:left">Vacina em falta, sem pediatra, fichas acabaram, equipamento quebrado — é o que evita a viagem perdida de quem vem depois.</div>
   </div>
 </div>
 
@@ -827,8 +819,11 @@
   <div class="sheet-inner">
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
-    <h2 style="padding-right:0">Me avise quando tiver</h2>
-    <div class="herosub">Diga o que você precisa. Se estiver <b>faltando</b> numa unidade perto, o Ondiva te chama <b>quando voltar a ter</b> — para ninguém sair de casa à toa.<br><b>Emergência grave? Não espere aviso: use o SOS.</b></div>
+    <!-- auditoria 09/2026: dizia "quando tiver" / "quando voltar a ter". O app
+         NÃO sabe que voltou — ninguém relata "tem". O que ele sabe é que o aviso
+         de falta deixou de valer. O toast final já era honesto; o título não. -->
+    <h2 style="padding-right:0">Me avise quando a falta sair do ar</h2>
+    <div class="herosub">Diga o que você precisa. Se estiver <b>faltando</b> numa unidade perto, o Ondiva te avisa <b>quando o aviso de falta deixar de valer</b> — aí você liga antes de ir.<br><b>Emergência grave? Não espere aviso: use o SOS.</b></div>
     <div id="avisoLista"></div>
     <p class="vtitle" id="avisoNovoTit">Novo aviso</p>
     <p class="vtitle" style="margin-top:10px">Para quem é?</p>
@@ -857,7 +852,10 @@
     <p class="vtitle">Por quanto tempo devo avisar?</p>
     <div class="grid-min" id="avisoPrazo" style="grid-template-columns:repeat(3,1fr)"></div>
     <button class="cta" id="avisoOk" style="margin-top:14px">Criar aviso</button>
-    <div class="login-note" style="text-align:left">No app instalado, o aviso chega mesmo com o celular no bolso. No máximo 2 por dia por aviso, e só de unidades que você alcança em <b>15 minutos de carro</b> ou <b>800 metros a pé</b> — mais longe, a fila muda antes de você chegar.</div>
+    <!-- auditoria 09/2026: prometia "chega mesmo com o celular no bolso" e
+         "no máximo 2 por dia". Não há push; o aviso aparece quando a pessoa
+         abre o app, e não há contador diário. Push é Bloco 2/3 do plano. -->
+    <div class="login-note" style="text-align:left">Por enquanto o aviso aparece <b>quando você abre o Ondiva</b> — abra antes de sair de casa. Só de unidades que você alcança em <b>15 minutos de carro</b> ou <b>800 metros a pé</b>; mais longe, a situação muda antes de você chegar.</div>
   </div>
 </div>
 
@@ -1399,7 +1397,7 @@ const REGIONS = [
     {id:"u4841069", cnes:4841069, soPlano:true, lat:-19.850804, lon:-43.963024, name:"Hospital Medsenior Pampulha", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"São Luiz", addr:"Avenida Presidente Antônio Carlos, 8000", dist:10.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26727", cnes:26727, lat:-19.925671, lon:-43.931945, name:"Hospital Semper", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Al Ezequiel Dias, 389", dist:1.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3135191680", h24:true, cir:true, intern:true, ps:true, img:true},
     {id:"u26808", cnes:26808, lat:-19.939931, lon:-43.912842, name:"Hospital Evangélico de Belo Horizonte", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Serra", addr:"Dr Alipio Goulart, 25", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132733926", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
-    {id:"u26824", cnes:26824, lat:-19.91786, lon:-43.951836, name:"Hospital Socor", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Avenida do Contorno, 10500", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"03133303179", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
+    {id:"u26824", cnes:26824, lat:-19.91786, lon:-43.951836, name:"Hospital Socor", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Avenida do Contorno, 10500", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133303179", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26840", cnes:26840, lat:-19.90064, lon:-43.933481, name:"Complexo Hospitalar São Francisco", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Concordia", addr:"Itamaraca, 535", dist:4.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3121261500", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26921", cnes:26921, lat:-19.927042, lon:-43.932165, name:"Hospital João XXIII", type:"Público", plans:["SUS"], profile:"hospital", region:"Santa Efigênia", addr:"Av Prof Alfredo Balena, 400", dist:1.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132399228", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26964", cnes:26964, lat:-19.911485, lon:-43.989243, name:"Hospital Alberto Cavalcanti", type:"Público", plans:["SUS"], profile:"hospital", region:"Padre Eustáquio", addr:"Rua Camilo de Brito, 636", dist:6.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134691812", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
@@ -1415,10 +1413,10 @@ const REGIONS = [
     {id:"u379808", cnes:379808, lat:-19.958612, lon:-43.913226, name:"Instituto Orizonti", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Mangabeiras", addr:"Avenida José do Patrocinio Pontes, 1355", dist:3.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132991300", h24:true, cir:true, intern:true, ps:true, img:true},
     {id:"u2181770", cnes:2181770, lat:-19.986856, lon:-43.986751, name:"Hospital Eduardo de Menezes", type:"Público", plans:["SUS"], profile:"hospital", region:"Bom Sucesso", addr:"Rua Doutor Cristiano de Resende, 2213", dist:7.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133285000", sus:true, h24:true, cir:true, intern:true, ps:true, vac:true, lab:true, img:true},
     {id:"u2192896", cnes:2192896, lat:-19.904252, lon:-43.946761, name:"Hospital Metropolitano Odilon Behrens", type:"Público", plans:["SUS"], profile:"hospital", region:"São Cristovao", addr:"Rua Formiga, 50", dist:3.9, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132776181", sus:true, h24:true, cir:true, obst:true, intern:true, ps:true, vac:true, lab:true, img:true},
-    {id:"u2200422", cnes:2200422, lat:-19.943112, lon:-43.95778, name:"Hospital Madre Teresa", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Raja Gabaglia, 1002", dist:2.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"03133398000", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
+    {id:"u2200422", cnes:2200422, lat:-19.943112, lon:-43.95778, name:"Hospital Madre Teresa", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Raja Gabaglia, 1002", dist:2.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133398000", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u2200457", cnes:2200457, lat:-19.95058, lon:-43.95855, name:"Associação Mario Penna", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Luxemburgo", addr:"Joaquim Candido Filho, 91", dist:2.9, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133309101", sus:true, h24:true, cir:true, intern:true, espec:true, lab:true, img:true},
     {id:"u2695324", cnes:2695324, lat:-19.926893, lon:-43.897992, name:"Hospital da Baleia", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Saudade", addr:"Rua Juramento, 1464", dist:4.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134891555", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
-    {id:"u2695375", cnes:2695375, lat:-19.869616, lon:-43.951535, name:"Clínica de Transição Paulo de Tarso", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"São Fransisco", addr:"Rua Estoril, 207", dist:7.7, ab:7, fe:18, turno:"Turnos intermitentes", fone:"3134485300", sus:true, cir:true, intern:true, lab:true, img:true},
+    {id:"u2695375", cnes:2695375, lat:-19.869616, lon:-43.951535, name:"Clínica de Transição Paulo de Tarso", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"São Fransisco", addr:"Rua Estoril, 207", dist:7.7, ab:7, fe:18, turno:"Turnos intermitentes", semHorario:true, fone:"3134485300", sus:true, cir:true, intern:true, lab:true, img:true},
     {id:"u2695634", cnes:2695634, lat:-19.981093, lon:-43.945278, name:"Biocor Instituto", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Alameda Oscar Niemeyer, 217", dist:5.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132895000", sus:true, h24:true, cir:true, intern:true, espec:true, lab:true, img:true},
     {id:"u3314014", cnes:3314014, lat:-19.934962, lon:-43.924591, name:"Lifecenter Sistema de Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Funcionarios", addr:"Av do Contorno, 4747", dist:1.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132804000", h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u3536963", cnes:3536963, lat:-19.918372, lon:-43.95178, name:"Ecocenter", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Rua dos Tupis, 1578", dist:2.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132952007"},
@@ -1437,12 +1435,12 @@ const REGIONS = [
     {id:"u6049443", cnes:6049443, lat:-19.928521, lon:-43.954855, name:"Hospital Forma", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santo Antônio", addr:"Rua Alvarenga Peixoto, 1465", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133356611", h24:true, cir:true, intern:true },
     {id:"u6163165", cnes:6163165, lat:-19.926912, lon:-43.9324, name:"Angiosemper", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Alameda Ezequiel Dias, 389", dist:1.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132483176", h24:true, cir:true, intern:true, espec:true},
     {id:"u6575560", cnes:6575560, soPlano:true, lat:-19.923458, lon:-43.931311, name:"Bh Hospital Governador Israel Pinheiro", type:"Público", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Alameda Ezequiel Dias, 225", dist:1.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132372400", h24:true, cir:true, obst:true, intern:true, ps:true, vac:true, lab:true, img:true},
-    {id:"u7166966", cnes:7166966, lat:-19.925522, lon:-43.926108, name:"Hospital São Lucas", type:"Filantrópico", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av Francisco Sales, 1186", dist:1.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"03132388405", h24:true, cir:true, obst:true, intern:true, ps:true, lab:true, img:true},
+    {id:"u7166966", cnes:7166966, lat:-19.925522, lon:-43.926108, name:"Hospital São Lucas", type:"Filantrópico", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Av Francisco Sales, 1186", dist:1.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132388405", h24:true, cir:true, obst:true, intern:true, ps:true, lab:true, img:true},
     {id:"u7684878", cnes:7684878, lat:-19.926796, lon:-43.957973, name:"Hospital Mater Dei Unidade Contorno", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Avenida do Contorno, 9090", dist:2.7, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133399000", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u7866801", cnes:7866801, soEncam:true, lat:-19.985747, lon:-44.006430, name:"Hospital Metropolitano Doutor Celio de Castro", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Milionários Barreir", addr:"Dona Luiza, 311", dist:9.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3134724136", sus:true, h24:true, cir:true, intern:true, ps:true, lab:true, img:true},
     {id:"u26972", cnes:26972, lat:-19.924069, lon:-43.957676, name:"Maternidade Odete Valadares", type:"Público", plans:["SUS"], profile:"hospital", region:"Prado", addr:"Avenida do Contorno, 9494", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132986002", sus:true, h24:true, cir:true, obst:true, intern:true, espec:true, vac:true, lab:true, img:true},
     {id:"u27774", cnes:27774, lat:-19.974304, lon:-44.016922, name:"Santa Maria Centro de Atenção em Psiquiatria", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barreiro", addr:"Joaquim de Figueiredo, 140", dist:9.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3130294878", h24:true, intern:true, espec:true},
-    {id:"u27782", cnes:27782, lat:-19.933574, lon:-43.92952, name:"Instituto de Otorrinolaringologia de Minas Gerais", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cruzeiro", addr:"Afonso Pena, 2928", dist:0.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"03131940050", h24:true, cir:true, intern:true, espec:true},
+    {id:"u27782", cnes:27782, lat:-19.933574, lon:-43.92952, name:"Instituto de Otorrinolaringologia de Minas Gerais", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cruzeiro", addr:"Afonso Pena, 2928", dist:0.6, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3131940050", h24:true, cir:true, intern:true, espec:true},
     {id:"u26999", cnes:26999, lat:-19.92209, lon:-43.9192, name:"Instituto Raul Soares", type:"Público", plans:["SUS"], profile:"hospital", region:"Santa Efigênia", addr:"Avenida do Contorno, 3017", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132399901", sus:true, h24:true, espec:true, lab:true},
     {id:"u26719", cnes:26719, lat:-19.921834, lon:-43.943623, name:"Centro Oftalmológico de Minas Gerais", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Lourdes", addr:"Rua Santa Catarina, 941", dist:1.9, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132324100", sus:true, h24:true, cir:true, intern:true, espec:true, img:true},
     {id:"u26794", cnes:26794, lat:-19.836147, lon:-43.914946, name:"Hospital Sofia Feldman", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Tupi", addr:"Rua Antônio Bandeira, 1060", dist:11.4, ab:0, fe:24, turno:"24 horas, todos os dias", sus:true, h24:true, cir:true, obst:true, intern:true, espec:true, vac:true, lab:true, img:true},
@@ -1455,7 +1453,7 @@ const REGIONS = [
     {id:"u3004791", cnes:3004791, lat:-19.93244, lon:-43.9879, name:"Sarah Belo Horizonte", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Gameleira", addr:"Amazonas, 5953", dist:5.6, ab:7, fe:22, turno:"Manhã, tarde e noite", sus:true, cir:true, intern:true, espec:true, lab:true, img:true},
     {id:"u4850033", cnes:4850033, lat:-19.922742, lon:-43.957027, name:"Neocenter Utip", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Barro Preto", addr:"Av do Contorno, 9530", dist:2.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3139727241", h24:true, intern:true, espec:true},
     {id:"u7424345", cnes:7424345, lat:-19.935358, lon:-43.924745, name:"Proplastica Lifecenter", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Funcionarios", addr:"Avenida do Contorno, 4747", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132822339", cir:true, intern:true, espec:true},
-    {id:"u9590676", cnes:9590676, lat:-19.941878, lon:-43.927714, name:"Neocenter Maternidade", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cruzeiro", addr:"Rua Martinho Campos, 25", dist:0.9, ab:7, fe:18, turno:"Turnos intermitentes", fone:"3132414843", obst:true, intern:true, espec:true, img:true},
+    {id:"u9590676", cnes:9590676, lat:-19.941878, lon:-43.927714, name:"Neocenter Maternidade", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Cruzeiro", addr:"Rua Martinho Campos, 25", dist:0.9, ab:7, fe:18, turno:"Turnos intermitentes", semHorario:true, fone:"3132414843", obst:true, intern:true, espec:true, img:true},
     {id:"u644870", cnes:644870, soPlano:true, lat:-19.932979, lon:-43.954476, name:"Pronto Socorro Medsenior", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Gutierrez", addr:"Avenida do Contorno, 8477", dist:2.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"2730255500", h24:true, lab:true, img:true},
     {id:"u23582", cnes:23582, lat:-19.820014, lon:-43.953257, name:"Unidade de Pronto Atendimento Venda Nova", type:"Público", plans:["SUS"], profile:"upa", region:"São João Batista", addr:"Rua Padre Pedro Pinto, 175", dist:13.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132778909", sus:true, h24:true, lab:true, img:true},
     {id:"u9114378", cnes:9114378, lat:-19.927806, lon:-43.934677, name:"Doutor Agora", type:"Privado", plans:["Convênio ou particular"], profile:"upa", region:"Boa Viagem", addr:"Rua dos Timbiras, 1228", dist:1.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3138898910", vac:true},
@@ -1466,7 +1464,7 @@ const REGIONS = [
     {id:"u27618", cnes:27618, lat:-19.905587, lon:-43.896790, name:"Unidade de Pronto Atendimento Leste", type:"Público", plans:["SUS"], profile:"upa", region:"Vera Cruz", addr:"Avenida dos Andradas, 7260", dist:1.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132771101", sus:true, h24:true, lab:true, img:true},
     {id:"u2695111", cnes:2695111, lat:-19.870625, lon:-44.001092, name:"Unidade de Pronto Atendimento Pampulha", type:"Público", plans:["SUS"], profile:"upa", region:"Itatiaia", addr:"Avenida Santa Terezinha, 515", dist:10.1, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132778447", sus:true, h24:true, lab:true, img:true},
     {id:"u5027144", cnes:5027144, lat:-19.829313, lon:-43.972072, name:"Servcor", type:"Privado", plans:["Convênio ou particular"], profile:"upa", region:"Santa Monica", addr:"Rua José do Patrocinio, 522", dist:12.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3134393000", img:true},
-    {id:"u6210902", cnes:6210902, lat:-19.922051, lon:-43.925352, name:"Unidade de Pronto Atendimento Centro Sul", type:"Público", plans:["SUS"], profile:"upa", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 488", dist:1.9, ab:7, fe:18, turno:"Turnos intermitentes", fone:"3132385900", sus:true, lab:true, img:true},
+    {id:"u6210902", cnes:6210902, lat:-19.922051, lon:-43.925352, name:"Unidade de Pronto Atendimento Centro Sul", type:"Público", plans:["SUS"], profile:"upa", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 488", dist:1.9, ab:7, fe:18, turno:"Turnos intermitentes", semHorario:true, fone:"3132385900", sus:true, lab:true, img:true},
     {id:"u9068279", cnes:9068279, lat:-19.816997, lon:-43.955934, name:"Unidade de Pronto Atendimento Noroeste II", type:"Público", plans:["SUS"], profile:"upa", region:"São Cristovao", addr:"Rua João Carvalhais de Paiva, 85", dist:13.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132776181", sus:true, h24:true, lab:true, img:true},
     {id:"u546879", cnes:546879, lat:-19.935637, lon:-43.946414, name:"Vaccine Castelo Bh", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Santo Antônio", addr:"Avenida do Contorno, 7527", dist:1.3, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3130701320", vac:true},
     {id:"u552941", cnes:552941, lat:-19.925373, lon:-43.927251, name:"Imunizar Clínica de Alergia e Imunologia", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Santa Efigênia", addr:"Rua dos Otoni, 742", dist:1.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3134517003", vac:true},
@@ -1474,7 +1472,7 @@ const REGIONS = [
     {id:"u32581", cnes:32581, lat:-19.933333, lon:-43.935833, name:"Prevacin Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Funcionarios", addr:"Afonso Pena, 2541", dist:0.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132344301", vac:true},
     {id:"u51608", cnes:51608, lat:-19.9476, lon:-43.96085, name:"Maximune", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Gutierrez", addr:"Avenida Raja Gabaglia, 1580", dist:3.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3133791924", vac:true},
     {id:"u317799", cnes:317799, lat:-19.934901, lon:-43.952772, name:"Vacine Se", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Cidade Jardim", addr:"Avenida Raja Gabaglia, 665", dist:1.9, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133373124", vac:true},
-    {id:"u3286347", cnes:3286347, lat:-19.921756, lon:-43.924821, name:"Centro de Referência de Imunobiológicos Especiais", type:"Público", plans:["Convênio ou particular"], profile:"basica", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 488", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775301", vac:true},
+    {id:"u3286347", cnes:3286347, lat:-19.921756, lon:-43.924821, name:"Centro de Referência de Imunobiológicos Especiais", type:"Público", plans:["SUS"], profile:"basica", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 488", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775301", sus:true, vac:true},
     {id:"u4121058", cnes:4121058, lat:-19.95723, lon:-43.931973, name:"Mundo da Vacina Servicos de Imunização", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Comiteco", addr:"Avenida dos Bandeirantes, 1678", dist:2.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132130924", vac:true},
     {id:"u4828682", cnes:4828682, lat:-19.968764, lon:-43.960939, name:"Af Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Buritis", addr:"R Senador Lima Guimaraes, 178", dist:4.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"31984776770", vac:true},
     {id:"u4870263", cnes:4870263, lat:-19.935183, lon:-43.925738, name:"Vacine Bh", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Funcionarios", addr:"Rua Claudio Manoel, 48", dist:0.9, ab:7, fe:18, turno:"Manhã e tarde", fone:"31991084717", espec:true, vac:true},
@@ -1517,13 +1515,13 @@ const REGIONS = [
     {id:"u7662548", cnes:7662548, lat:-19.843658, lon:-43.92455, name:"Instituto Hermes Pardini Guarani", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Guarani", addr:"Av Waldomiro Lobo, 620", dist:10.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042"},
     {id:"u7662564", cnes:7662564, lat:-19.984331, lon:-44.007658, name:"Instituto Hermes Pardini Milionários", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Milionários", addr:"R Caetano Pirri, 228", dist:9.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042"},
     {id:"u7559305", cnes:7559305, lat:-19.938802, lon:-43.938994, name:"Laboratório São Marcos Unidade Savassi", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Savassi", addr:"Rua Fernandes Tourinho, 457", dist:0.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"31982959456", vac:true},
-    {id:"u6172407", cnes:6172407, lat:-19.915099, lon:-43.970693, name:"Posto de Coleta Especializado Noroeste", type:"Público", plans:["Convênio ou particular"], profile:"exames", region:"Padre Eustáquio", addr:"Rua Padre Eustáquio, 1951", dist:4.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779263"},
+    {id:"u6172407", cnes:6172407, lat:-19.915099, lon:-43.970693, name:"Posto de Coleta Especializado Noroeste", type:"Público", plans:["SUS"], profile:"exames", region:"Padre Eustáquio", addr:"Rua Padre Eustáquio, 1951", dist:4.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779263", sus:true},
     {id:"u3543838", cnes:3543838, lat:-19.975663, lon:-44.013985, name:"Cdi Clínica de Imagem", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Barreiro", addr:"Avenida Sinfronio Brochado, 487", dist:9.4, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3133895779", sus:true, img:true},
     {id:"u7995040", cnes:7995040, lat:-19.904594, lon:-44.075932, name:"Laboratório São Marcos Unidade Mangabeiras", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Serra", addr:"Praca da Bandeira, 120", dist:15.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"31982959456", vac:true},
     {id:"u2695650", cnes:2695650, lat:-19.937447, lon:-43.926666, name:"Centro Avancado de Endoscopia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Buritis", addr:"Rua José Hemeterio Andrade, 390", dist:0.8, ab:7, fe:18, turno:"Manhã e tarde", fone:"3184108414"},
-    {id:"u6172342", cnes:6172342, lat:-19.945877, lon:-44.005363, name:"Posto de Coleta Especializado Oeste", type:"Público", plans:["Convênio ou particular"], profile:"exames", region:"Madre Gertrudes", addr:"Rua Frei Gaspar, 7", dist:7.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775459"},
-    {id:"u6172350", cnes:6172350, lat:-19.809228, lon:-43.96976, name:"Posto de Coleta Especializado Venda Nova", type:"Público", plans:["Convênio ou particular"], profile:"exames", region:"Candelaria", addr:"Rua Padre Pedro Pinto, 2277", dist:14.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779109"},
-    {id:"u6172385", cnes:6172385, lat:-19.90727, lon:-43.927813, name:"Posto de Coleta Especializado Leste", type:"Público", plans:["Convênio ou particular"], profile:"exames", region:"Sagrada Família", addr:"Rua Bicas, 58", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775700"},
+    {id:"u6172342", cnes:6172342, lat:-19.945877, lon:-44.005363, name:"Posto de Coleta Especializado Oeste", type:"Público", plans:["SUS"], profile:"exames", region:"Madre Gertrudes", addr:"Rua Frei Gaspar, 7", dist:7.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775459", sus:true},
+    {id:"u6172350", cnes:6172350, lat:-19.809228, lon:-43.96976, name:"Posto de Coleta Especializado Venda Nova", type:"Público", plans:["SUS"], profile:"exames", region:"Candelaria", addr:"Rua Padre Pedro Pinto, 2277", dist:14.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779109", sus:true},
+    {id:"u6172385", cnes:6172385, lat:-19.90727, lon:-43.927813, name:"Posto de Coleta Especializado Leste", type:"Público", plans:["SUS"], profile:"exames", region:"Sagrada Família", addr:"Rua Bicas, 58", dist:3.4, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132775700", sus:true},
     {id:"u7326939", cnes:7326939, lat:-19.892311, lon:-43.928665, name:"Laboratório São Marcos Unidade Silveira", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Silveira", addr:"Avenida Cristiano Machado, 1731", dist:5.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"31982959456", vac:true},
     {id:"u7696671", cnes:7696671, lat:-19.941604, lon:-43.948747, name:"Laboratório São Marcos Unidade Prudente", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santo Antônio", addr:"Avenida Prudente de Morais, 585", dist:1.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"31982959456", vac:true},
     {id:"u8028621", cnes:8028621, lat:-19.924017, lon:-43.937292, name:"Laboratório Helixgen", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Rua da Bahia, 1032", dist:1.5, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3131663505", lab:true},
@@ -1544,7 +1542,7 @@ const REGIONS = [
     {id:"u7265840", cnes:7265840, lat:-19.817098, lon:-43.956127, name:"Lustosa Unidade Sagrada Família", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Sagrada Família", addr:"Rua Conselheiro Lafaiete, 714", dist:13.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3121041252"},
     {id:"u778923", cnes:778923, lat:-19.903266, lon:-43.899335, name:"Hermes Pardini Novamed", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Tereza", addr:"Av dos Andradas, 3325", dist:5.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298016", img:true},
     {id:"u880329", cnes:880329, lat:-19.919522, lon:-43.959776, name:"Laboratório Interlab", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Prado", addr:"Rua Paraguassu, 83", dist:3.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"31991182999", sus:true},
-    {id:"u881139", cnes:881139, lat:-19.817, lon:-43.956, name:"Laboratório Lapecco Barreiro", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barreiro", addr:"Ave Sinfronio Brochado, 305", dist:13.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3131956099"},
+    {id:"u881139", cnes:881139, lat:-19.9755032, lon:-44.0132999, name:"Laboratório Lapecco Barreiro", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barreiro", addr:"Ave Sinfronio Brochado, 305", dist:13.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3131956099"},
     {id:"u9785221", cnes:9785221, lat:-19.922905, lon:-43.921402, name:"Cedus Hospitalar", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Rua Maranhao, 152", dist:2.1, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132355723", sus:true, img:true},
     {id:"u22500", cnes:22500, lat:-19.916259, lon:-43.96798, name:"Laboratório Municipal de Referência", type:"Público", plans:["SUS"], profile:"exames", region:"Carlos Prates", addr:"Rua Frederico Bracher Junior, 103", dist:4.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779275", sus:true, lab:true},
     {id:"u23299", cnes:23299, lat:-19.947155, lon:-44.0071, name:"Laboratório Regional Oeste Barreiro", type:"Público", plans:["SUS"], profile:"exames", region:"Madre Gertrudes", addr:"Avenida Amazonas, 8889", dist:7.7, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132779109", sus:true, lab:true},
@@ -1603,7 +1601,7 @@ const REGIONS = [
     {id:"u3273393", cnes:3273393, lat:-19.918203, lon:-43.939394, name:"Instituto de Radiografias Dentarias J Ribamar Simao", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Avenida Afonso Pena, 526", dist:2.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132014417", img:true},
     {id:"u3282260", cnes:3282260, lat:-19.92846, lon:-43.92246, name:"Imrad Diagnósticos", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Rua Padre Rolim, 101", dist:1.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3131151900", img:true},
     {id:"u3282406", cnes:3282406, lat:-19.935373, lon:-43.953269, name:"Lab Rede", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Gutierrez", addr:"Avenida Raja Gabaglia, 182", dist:2.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3131232858", lab:true},
-    {id:"u3286029", cnes:3286029, lat:-19.817, lon:-43.956, name:"Servico de Imagem Diagnostica", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 587", dist:13.5, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132181904", img:true},
+    {id:"u3286029", cnes:3286029, lat:-19.9226092, lon:-43.9264350, name:"Servico de Imagem Diagnostica", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Rua Domingos Vieira, 587", dist:1.2, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132181904", img:true},
     {id:"u3291820", cnes:3291820, lat:-19.922497, lon:-43.953, name:"Incorminas", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Barro Preto", addr:"Rua dos Aimores, 2896", dist:2.5, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3133350482", sus:true, img:true},
     {id:"u3297012", cnes:3297012, lat:-19.92484, lon:-43.928382, name:"Scanner", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Av Contorno, 4989", dist:1.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132732122", img:true},
     {id:"u3302555", cnes:3302555, lat:-19.928128, lon:-43.930078, name:"Clínica Radiologica Javert Barros", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Rua Rio Grande do Norte, 63", dist:1.1, ab:7, fe:18, turno:"Manhã e tarde", fone:"3132242085", img:true},
@@ -1644,7 +1642,7 @@ const REGIONS = [
     {id:"u4585011", cnes:4585011, lat:-19.920428, lon:-43.940947, name:"Labicon Laboratório", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Av Amazonas, 687", dist:2.0, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125655769"},
     {id:"u4592425", cnes:4592425, apoio:true, lat:-19.89662, lon:-43.947287, name:"Red8 Rede Excelencia", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Cachoeirinha", addr:"Av Presidente Antônio Carlos, 1694", dist:4.7, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"1141345544", h24:true, lab:true},
     {id:"u4642295", cnes:4642295, lat:-19.925659, lon:-43.934931, name:"Labicon Laboratório Centro", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"Av Afonso Pena, 1500", dist:1.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3125596558"},
-    {id:"u4665023", cnes:4665023, lat:-19.92066, lon:-43.92207, name:"Spx Servicos de Imagem", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Avenida do Contorno, 2787", dist:2.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"01120958000", h24:true, img:true},
+    {id:"u4665023", cnes:4665023, lat:-19.92066, lon:-43.92207, name:"Spx Servicos de Imagem", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Santa Efigênia", addr:"Avenida do Contorno, 2787", dist:2.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"1120958000", h24:true, img:true},
     {id:"u4689011", cnes:4689011, lat:-19.932989, lon:-43.932734, name:"Locus", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Funcionarios", addr:"Paraiba, 330", dist:0.5, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3133088000"},
     {id:"u4717309", cnes:4717309, lat:-19.926448, lon:-43.937962, name:"Laboratório Quality", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Lourdes", addr:"Rua da Bahia, 1352", dist:1.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"31984493895", lab:true},
     {id:"u4732278", cnes:4732278, lat:-19.92435, lon:-43.95013, name:"Mg Metodos Graficos", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Barro Preto", addr:"R dos Timbiras, 2887", dist:2.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"3199879240"},
@@ -1806,7 +1804,7 @@ const REGIONS = [
        sem ela, não entram. */
     {id:"u2115891", cnes:2115891, lat:-19.979252, lon:-43.94278, name:"Nova Lima Hospital Vila da Serra", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Alameda Oscar Niemeyer, 499", dist:4.8, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132288146", cir:true, obst:true, intern:true, inf:true, lab:true, img:true},
     {id:"u4585690", cnes:4585690, lat:-19.982821, lon:-43.946058, name:"Hospital Mater Dei Nova Lima", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Vila da Serra", addr:"Oscar Niemeyer, 61", dist:5.2, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133399221", h24:true, cir:true, obst:true, intern:true, ps:true, vac:true, lab:true, img:true},
-    {id:"u8061637", cnes:8061637, lat:-19.984944, lon:-43.9463, name:"Sala de Vacina Regional Norte", type:"Público", plans:["Convênio ou particular"], profile:"basica", region:"Vale do Sereno", addr:"Rodovia Januario Carneiro, 8625", dist:5.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"31995307748", vac:true},
+    {id:"u8061637", cnes:8061637, lat:-19.984944, lon:-43.9463, name:"Sala de Vacina Regional Norte", type:"Público", plans:["SUS"], profile:"basica", region:"Vale do Sereno", addr:"Rodovia Januario Carneiro, 8625", dist:5.5, ab:7, fe:18, turno:"Manhã e tarde", fone:"31995307748", sus:true, vac:true},
     {id:"u5791162", cnes:5791162, lat:-19.986412, lon:-43.943613, name:"Maxi Vacina", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Vale do Sereno", addr:"Das Acacias, 297", dist:5.6, ab:7, fe:18, turno:"Manhã e tarde", fone:"3133791924", vac:true},
     {id:"u4419332", cnes:4419332, lat:-19.98325, lon:-43.946471, name:"Vacinar Com Amor", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Vale do Sereno", addr:"Oscar Niemeyer, 500", dist:5.3, ab:7, fe:18, turno:"Manhã e tarde", fone:"3190856933", vac:true},
     {id:"u5655269", cnes:5655269, lat:-19.983553, lon:-43.946536, name:"Geneticenter", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Vale do Sereno", addr:"Oscar Niemeyer, 500", dist:5.3, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3132927400"},
@@ -1909,7 +1907,7 @@ const REGIONS = [
     {id:"u2189860", cnes:2189860, lat:-19.838333, lon:-44.147957, name:"Unidade de Pronto Atendimento Vargem das Flores Upa", type:"Público", plans:["SUS"], profile:"upa", region:"Retiro", addr:"Rua Retiro dos Imigrantes, 80", dist:17.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3131986251", sus:true, h24:true, lab:true, img:true},
     {id:"u2189879", cnes:2189879, lat:-19.886612, lon:-44.030751, name:"Unidade de Pronto Atendimento Ressaca Upa", type:"Público", plans:["SUS"], profile:"upa", region:"Guanabara", addr:"Praca 21 de Abril Guanabara", dist:6.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133576002", sus:true, h24:true, lab:true, img:true},
     {id:"u2190125", cnes:2190125, lat:-19.93051, lon:-44.113628, name:"Unidade de Pronto Atendimento Petrolandia Upa", type:"Público", plans:["SUS"], profile:"upa", region:"Petrolandia", addr:"Rua Refinaria União, 137", dist:9.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133525312", sus:true, h24:true, lab:true, img:true},
-    {id:"u4133374", cnes:4133374, lat:-19.939835, lon:-44.04412, name:"Notre Dame Intermedica Minas Gerais Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"upa", region:"Eldorado", addr:"Casuarinas, 64", dist:2.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"1131552000", h24:true, img:true},
+    {id:"u4133374", cnes:4133374, lat:-19.939835, lon:-44.04412, name:"Notre Dame Intermedica Minas Gerais Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"upa", soPlano:true, region:"Eldorado", addr:"Casuarinas, 64", dist:2.5, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"1131552000", h24:true, img:true},
     {id:"u4317041", cnes:4317041, lat:-19.96931, lon:-44.042643, name:"Unidade de Pronto Atendimento Industrial Upa", type:"Público", plans:["SUS"], profile:"upa", region:"Amazonas", addr:"Maria da Glória, 206", dist:4.0, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3187897877", sus:true, h24:true, lab:true, img:true},
     {id:"u7818858", cnes:7818858, lat:-19.942406, lon:-44.036244, name:"Unidade Pronto Atendimento Contagem", type:"Público", plans:["SUS"], profile:"upa", region:"Eldorado", addr:"Avenida João César de Oliveira, 780", dist:1.7, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3131988700", sus:true, h24:true, vac:true, lab:true, img:true},
     {id:"u7350201", cnes:7350201, lat:-19.943113, lon:-44.037786, name:"Imunologica Vacinas Humanas", type:"Privado", plans:["Convênio ou particular"], profile:"basica", region:"Eldorado", addr:"Avenida João César de Oliveira, 1007", dist:1.9, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3133527000", vac:true},
@@ -1917,7 +1915,7 @@ const REGIONS = [
     {id:"u9704930", cnes:9704930, lat:-19.923837, lon:-44.066899, name:"Instituto Hermes Pardini Contagem Centro", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Centro", addr:"R Bernardo Monteiro, 65", dist:5.2, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298016", lab:true},
     {id:"u9740937", cnes:9740937, lat:-19.933501, lon:-44.045454, name:"Laboratorios Sunclair", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Glória", addr:"Manoel Teixeira Camargos, 644", dist:2.8, ab:7, fe:18, turno:"Manhã e tarde", fone:"3198365098"},
     {id:"u9931473", cnes:9931473, lat:-19.890542, lon:-44.038605, name:"Laboratório Carlos Rocha", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"exames", region:"Ressaca", addr:"Severino Ballesteros Rodrigues, 777", dist:5.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3135895000", sus:true, h24:true, lab:true},
-    {id:"u9568174", cnes:9568174, lat:-19.885557, lon:-44.032632, name:"Instituto Hermes Pardini Unidade Ressaca", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Guanabara", addr:"Avenida Antônio José da Rocha, 247", dist:6.2, ab:7, fe:18, turno:"Turnos intermitentes", fone:"3136294527"},
+    {id:"u9568174", cnes:9568174, lat:-19.885557, lon:-44.032632, name:"Instituto Hermes Pardini Unidade Ressaca", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Guanabara", addr:"Avenida Antônio José da Rocha, 247", dist:6.2, ab:7, fe:18, turno:"Turnos intermitentes", semHorario:true, fone:"3136294527"},
     {id:"u7333595", cnes:7333595, lat:-19.946258, lon:-44.035963, name:"Hermes Pardini Eldorado II", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Cidade Jardim Eldora", addr:"R Norberto Mayer, 626", dist:1.8, ab:7, fe:18, turno:"Manhã e tarde", fone:"3136298042", vac:true, img:true},
     {id:"u5943639", cnes:5943639, lat:-19.937515, lon:-44.04895, name:"Ragazzi Reabilitacao e Saúde", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Glória", addr:"Alemanha, 367", dist:3.0, ab:7, fe:22, turno:"Manhã, tarde e noite", fone:"3175250379", espec:true},
     {id:"u5979854", cnes:5979854, lat:-19.95183, lon:-44.039877, name:"Hemolaber", type:"Privado", plans:["Convênio ou particular"], profile:"exames", region:"Inconfidentes", addr:"Jair Rodrigues Vale, 401", dist:2.5, ab:7, fe:18, turno:"Manhã e tarde", lab:true},
@@ -2376,9 +2374,28 @@ function applyGPS(lat,lon){
 
 /* Aberto ou fechado vem do turno declarado no CNES. A fila vem SÓ de relatos
    de quem esteve na unidade — se ninguém relatou, o app diz que não sabe. */
+/* ===== O APP NÃO SABIA QUE DIA ERA (auditoria 09/2026) =====
+   Só a hora entrava na conta. Num domingo às 10h, 488 unidades "Manhã e tarde"
+   — centro de saúde, laboratório — apareciam "Aberta agora" e entravam na
+   recomendação: a viagem perdida da capa, em 2 de cada 7 dias. A base não tem
+   campo de dia (o CNES não traz na API); o único turno que fala de dia é o
+   do Hospital de Olhos, "de segunda a sexta", conferido por segunda fonte.
+   Regra honesta enquanto não há fonte: no fim de semana, unidade sem 24h e sem
+   `fds:true` (marca nova, para quem comprovadamente abre) NÃO é afirmada
+   aberta. O texto diz "horário de dia útil — confirme por telefone". Postos
+   da PBH não abrem no fim de semana (inferência sobre o mundo; o fato é que
+   afirmar "aberta" sem saber é o que o app existe para não fazer). */
+function fimDeSemana(){ const d = new Date().getDay(); return d===0 || d===6; }
+/* `semHorario:true`: o CNES diz "turnos intermitentes" — não é 7h-18h, não é
+   24h, é "não informado". Quatro unidades, entre elas a UPA Centro-Sul, que
+   recebiam um 7-18 inventado e apareciam "fechadas" à noite. Sem fonte, o app
+   não afirma nem aberta nem fechada em dia nenhum. */
+function horarioSemFonteHoje(h){ return !h.h24 && (h.semHorario || (!h.fds && fimDeSemana())); }
 function abertoAgora(h){
+  if(h.h24) return true;
+  if(horarioSemFonteHoje(h)) return false;
   const hora = new Date().getHours();
-  return h.h24 || (hora >= h.ab && hora < h.fe);
+  return hora >= h.ab && hora < h.fe;
 }
 /* ===== ABERTO NA CHEGADA (lição do DISCO da Uber — ESTUDO-UBER §2) =====
    A pessoa chega DEPOIS de agora. Recomendar pelo estado de agora causava a
@@ -2388,6 +2405,7 @@ function abertoAgora(h){
    viagem perdida na prática. Sem tempo de trajeto, cai no estado de agora. */
 function abertoNaChegada(h){
   if(h.h24) return true;
+  if(horarioSemFonteHoje(h)) return false;
   const t = travelMin(h);
   if(t===null) return abertoAgora(h);
   const chega = new Date(Date.now() + t*60000);
@@ -2498,6 +2516,20 @@ function fmtWaitTxt(min){ return fmtWait(min).replace(/<[^>]+>/g," ").replace(/\
 /* km em pt-BR (vírgula, uma casa). Estava copiado em 11 lugares — mudança de
    regra (ex.: metros abaixo de 1 km) agora é num lugar só. */
 function kmBR(km){ return km.toFixed(1).replace(".",",") }
+/* ===== TELEFONE: UMA FUNÇÃO SÓ (auditoria 09/2026) =====
+   Três pontos fatiavam h.fone cru com slice(0,2) como DDD. Oito registros do
+   CNES vieram com zero à frente ("03133303179") — a tela mostrava
+   "(03) 13330-3179" e o botão discava número inexistente, três deles em
+   hospital com pronto-socorro, no bloco "ligue antes". Regra: tira zeros à
+   esquerda; só aceita 10 ou 11 dígitos (11 exige o 9 de celular); o resto
+   vira null e a tela não mostra telefone nenhum — número truncado não é
+   telefone, é armadilha. Devolve {d: só dígitos, txt: formatado}. */
+function fmtFone(f){
+  if(!f) return null;
+  const d = String(f).replace(/\D/g,"").replace(/^0+/,"");
+  if(!(d.length===10 || (d.length===11 && d[2]==="9"))) return null;
+  return {d, txt:"(" + d.slice(0,2) + ") " + d.slice(2,-4) + "-" + d.slice(-4)};
+}
 
 /* ===== avisos da comunidade (modelo Waze: estruturado, agregado, expira em 4h) ===== */
 /* Campanhas oficiais de vacinação. Cada item traz início e fim: fora do período
@@ -2510,7 +2542,14 @@ const CAMPANHAS = [
 ];
 /* O app busca a lista oficial sozinho a cada abertura. Enquanto o endereço não
    estiver publicado, nada é exibido — nunca uma campanha escrita de memória. */
-const CAMPANHAS_URL = "https://ondiva.com.br/dados/campanhas.json";
+/* ENDEREÇO PÚBLICO DO APP — uma constante só (auditoria 09/2026). O código
+   apontava para ondiva.com.br em três lugares: aqui, no texto do WhatsApp e
+   na lista de domínios da nuvem. O domínio NÃO existe (RDAP do registro.br
+   devolve 404 em 11/09/2026; adiado junto com o INPI em 11/08). Quem o
+   registrasse publicaria banner "Fonte: Ministério da Saúde" para todos os
+   usuários. Quando o domínio for registrado, muda AQUI e o gerar-pages.ps1. */
+const ENDERECO_PUBLICO = "https://villaxx.github.io/ondiva-app";
+const CAMPANHAS_URL = ENDERECO_PUBLICO + "/dados/campanhas.json";
 async function carregarCampanhas(){
   try{
     const ctrl = new AbortController();
@@ -2746,6 +2785,9 @@ function nivelBadge(h){
      especializada, com porta fechada para quem chega sem encaminhamento. Usar o
      selo de "atendimento básico" seria afirmar o que a unidade não faz. */
   if(h.soEncam) return '<span class="badge" style="background:var(--crit-bg);color:var(--crit)">Só com encaminhamento</span>';
+  /* selo de rede própria no CARTÃO (auditoria 09/2026): o aviso vermelho só
+     existia na folha, abaixo do botão "Como chegar" — a pessoa ia sem ver */
+  if(h.soPlano) return '<span class="badge" style="background:var(--crit-bg);color:var(--crit)">Só beneficiário do plano</span>';
   if(h.profile==="basica") return '<span class="badge ped">Vacinas e atendimento básico</span>';
   if(h.profile==="exames") return '<span class="badge ped">Exames</span>';
   if(h.profile==="upa") return '<span class="badge ped">Casos leves e urgências</span>';
@@ -2840,6 +2882,12 @@ function passaNosFiltros(h){
        filtrar exame não pode ser mandado para lá. Mesma regra do `pesq`:
        continuam na base, só não são oferecidos como resposta. */
     if(h.apoio && (filters.cat || (filters.item && filters.item.length))) return false;
+    /* REDE PRÓPRIA DE OPERADORA some de busca com filtro (decisão de 12/08,
+       registrada em DECISOES.md L38 — e NÃO implementada aqui até a auditoria
+       de 09/2026: só pesq e apoio saíam). Hospital da PM, MedSênior e Israel
+       Pinheiro passavam em "Caso grave" com selo "Pronto-socorro 24h". Mesma
+       regra dos dois acima: continua na base e no mapa, não é RESPOSTA. */
+    if(h.soPlano && (filters.cat || (filters.item && filters.item.length) || (filters.need && filters.need!=="todos"))) return false;
     if(filters.plan==="meus"){
       if(state.plans.length && !h.plans.some(p=>state.plans.includes(p))) return false;
     } else if(filters.plan!=="Todos" && !h.plans.includes(filters.plan)) return false;
@@ -3038,10 +3086,17 @@ function recomendacao(hs){
      até a chegada (mesmo fechada agora). */
   let abertos = hs.filter(abertoNaChegada);
   if(!abertos.length) return null;
-  /* nunca recomendar hospital especializado (olhos, otorrino, psiquiatria...)
-     como opção geral — só se não houver mais nada aberto */
-  const gerais = abertos.filter(h=>!h.espec);
-  if(gerais.length) abertos = gerais;
+  /* NUNCA RECOMENDAR PORTA QUE NÃO ABRE (auditoria 09/2026, os 2 achados
+     críticos). Só `espec` era excluído aqui; o SOS e o psPerto já excluíam
+     também rede própria de operadora (soPlano), só-encaminhamento (soEncam),
+     laboratório de pesquisa (pesq) e de apoio (apoio). Com "Caso grave" na
+     Savassi, o Israel Pinheiro (IPSEMG) virava "Recomendado · Pronto-socorro
+     24h · atende o que você precisa". Regra registrada em 12/08, cumprida em
+     uma porta e esquecida na do lado. Se não sobrar ninguém, NÃO recomenda —
+     cair no candidato inadequado é pior que não ter cartão. */
+  const gerais = abertos.filter(h=>!h.espec && !h.soPlano && !h.soEncam && !h.pesq && !h.apoio);
+  if(!gerais.length) return null;
+  abertos = gerais;
   /* NÚCLEO "NÃO PERCA A VIAGEM": nunca recomendar quem acabou de avisar que
      está faltando alguma coisa. Sem isso o app mandava a pessoa justamente
      para a unidade que informou não ter pediatra — o oposto do que promete.
@@ -3103,9 +3158,18 @@ function htmlRec(rec){
      número grande; quando há relato, ele entra como uma linha secundária e
      datada, nunca como o eixo da decisão. */
   const tempo = `${kmBR(distOf(h))} km de você`;
+  /* AUDITORIA 09/2026: o cartão dizia "a mais próxima sem aviso de falta" e
+     nunca olhava os avisos — inclusive quando TODAS as candidatas tinham falta
+     confirmada e a escolhida estava em falta. Agora o aviso vem primeiro, e a
+     frase só afirma "sem aviso" quando é verdade. */
+  const alsRec = activeAlerts(h).sort((x,y)=>(y.confirmado?1:0)-(x.confirmado?1:0));
+  const avisoRec = alsRec.length
+    ? `<div style="margin:4px 0 6px"><span class="alertline" style="margin-top:0${alsRec[0].confirmado?'':';opacity:.72;font-weight:600'}">${alertLine(alsRec)}</span></div>`
+    : "";
+  const semAviso = alsRec.length ? "" : " — a mais próxima sem aviso de falta";
   const porque = rec.abreNaChegada
-    ? `Abre até você chegar (~${travelMin(h)||"?"} min de trajeto) e atende o que você precisa — a mais próxima sem aviso de falta.`
-    : "Aberta agora e atende o que você precisa — e é a mais próxima sem aviso de falta.";
+    ? `Abre até você chegar (~${travelMin(h)||"?"} min de trajeto)${semAviso}.`
+    : `Aberta agora${semAviso}.` + (alsRec.length ? " Todas as opções perto estão com aviso — veja acima e ligue antes." : "");
   const filaLinha = (rec.temRelato && w.min!=null)
     ? `<div class="rwhy" style="margin-top:6px">Fila relatada: cerca de <b>${w.min} min</b> · ${confLabel(h)}</div>`
     : "";
@@ -3139,6 +3203,7 @@ function htmlRec(rec){
   return `<div class="rec">
     <div class="rlab">Recomendado para você agora</div>
     <h3>${esc(dispName(h))}</h3>
+    ${avisoRec}
     ${oQueFaz}
     <div class="rtempo" style="color:var(--ink)">${tempo}</div>
     <div class="rwhy">${porque}</div>
@@ -3293,7 +3358,7 @@ function ligarConferir(el, i){
     store.save(state);
     toast(i.conf === "nfui" ? "Certo, obrigado."
         : i.conf === "sim" ? "+15 pontos. Confirmar o que está certo vale tanto quanto avisar."
-        : "+15 pontos. Anotado — a informação errada perde peso.");
+        : "+15 pontos. Anotado — obrigado por conferir.");
     renderList(); renderProfile();
   }));
 }
@@ -3333,16 +3398,19 @@ function renderList(){
             ? (esc2 ? (esc2.length===1 ? "a sua unidade tem hoje" : nUn + " das suas " + esc2.length + " unidades têm hoje")
                     : nUn + " unidade" + (nUn>1?"s":"") + " perto têm hoje") + ", sem aviso de falta · toque para ver"
             : (esc2 ? "nenhuma das suas unidades tem agora — avisamos quando voltar"
-                    : "nenhuma unidade perto tem agora — avisamos se alguém informar que voltou")}</span>
+                    : "todas as unidades perto estão com aviso de falta — avisamos quando o aviso sair do ar")}</span>
        </button>` })()
     : "";
   const ligarBPedido = ()=>{
     const b = el.querySelector("#bPedido");
     if(b) b.addEventListener("click",()=>{
-      filters.cat = meuPed.tipo;
-      filters.item = meuPed.item ? [meuPed.item] : null;
+      /* AUDITORIA 09/2026: pedido do tipo "upa" (Consulta rápida) virava
+         filters.cat="upa", que não existe — chip "undefined ▾" e lista sem
+         filtro. Consulta rápida é Atendimento médico · caso leve. */
+      if(meuPed.tipo==="upa"){ filters.cat="medico"; filters.need="leve"; filters.item=null; }
+      else { filters.cat = meuPed.tipo; filters.item = meuPed.item ? [meuPed.item] : null; }
       renderChips(); renderList(); renderMap();
-      toast("Mostrando quem tem " + textoPedido(meuPed).toLowerCase() + " perto de você.");
+      toast("Mostrando quem oferece " + textoPedido(meuPed).toLowerCase() + " perto de você, sem aviso de falta.");
     });
   };
   const ligarBFalta = ()=>{
@@ -3401,7 +3469,14 @@ function renderList(){
        saiu junto: a fila não é mais o eixo, então não pinta mais o card. */
     const kmTxt = kmBR(distOf(h))+"<small> km</small>";
     let cls="", pill, linha2;
-    if(w.closed){
+    if(w.closed && horarioSemFonteHoje(h)){
+      /* fim de semana sem fonte de dias (auditoria 09/2026): não afirma nem
+         aberta nem fechada — diz o que sabe */
+      cls="s-off"; pill = h.semHorario ? "horário?" : "dia útil " + h.ab + "h";
+      linha2 = h.semHorario
+        ? `O cadastro oficial não informa o horário — confirme por telefone · ${h.region}`
+        : `Horário de dia útil ${h.ab}h–${h.fe}h · fim de semana: confirme por telefone · ${h.region}`;
+    } else if(w.closed){
       cls="s-off"; pill = "abre " + h.ab + "h";
       linha2 = `Fechada agora · ${h.region}`;
     } else if(w.semDados){
@@ -3413,7 +3488,7 @@ function renderList(){
       const viram = (state.reports||[]).filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hj).length
                   + (state.alerts||[]).filter(a=>a.hid===h.id && !a.revisar && new Date(a.ts).toDateString()===hj).length;
       linha2 = (t!=null ? `~${t} min ${MODO_TXT[state.modo]||""} · ` : "")
-        + (viram>=2 ? `<span style="color:var(--good);font-weight:800">ninguém avisou falta hoje</span>`
+        + (viram>=2 && !activeAlerts(h).length ? `<span style="color:var(--good);font-weight:800">ninguém avisou falta hoje</span>`
                     : `sem informação de hoje — seja o primeiro a avisar`)
         + (w.antigo ? `<br><span style="opacity:.8">Último relato: há ${w.antigo.txt}, ${fmtWaitTxt(w.antigo.min)}</span>` : "");
     } else {
@@ -3954,7 +4029,7 @@ function textoQuaseFoi(q){
   /* quem manda a mensagem é o herói da história, não a vítima: começa pelo
      fato que ele evitou, não pela reclamação. Reclamação ninguém encaminha. */
   return `${q.oque} — ${q.nome}. O Ondiva me avisou e eu fui em outra, `
-       + `não perdi a viagem. Vale baixar: ondiva.com.br`;
+       + `não perdi a viagem. Vale baixar: ` + ENDERECO_PUBLICO.replace(/^https?:\/\//,"");
 }
 function openDetail(id){
   /* mapa contínuo: o pino pode ser de outra região da metrópole */
@@ -3987,7 +4062,11 @@ function openDetail(id){
   const fechadaAgora = !abertoAgora(h);
   const abreAteChegar = fechadaAgora && abertoNaChegada(h);
   const avisoFechada = fechadaAgora
-    ? (abreAteChegar
+    ? (horarioSemFonteHoje(h)
+        ? (h.semHorario
+            ? `<div class="walert" style="background:var(--warn-bg);color:var(--warn);font-weight:800">HORÁRIO NÃO INFORMADO — o cadastro oficial diz só "turnos intermitentes". Confirme por telefone antes de ir.</div>`
+            : `<div class="walert" style="background:var(--warn-bg);color:var(--warn);font-weight:800">FIM DE SEMANA — o cadastro oficial só informa o horário de dia útil (${h.ab}h às ${h.fe}h). Confirme por telefone antes de ir.</div>`)
+        : abreAteChegar
         ? `<div class="walert" style="background:var(--good-bg);color:var(--good);font-weight:800">FECHADA AGORA — mas abre às ${h.ab}h, e você chega depois disso (~${travelMin(h)||"?"} min de trajeto).</div>`
         : `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800">FECHADA AGORA. Abre às ${h.ab}h — ${esc(h.turno.toLowerCase())}.</div>`)
     : "";
@@ -4080,7 +4159,10 @@ function openDetail(id){
     const hojeStr2 = new Date().toDateString();
     const olharam = (state.reports||[]).filter(r=>r.hid===h.id && new Date(r.ts).toDateString()===hojeStr2).length
                   + (state.alerts||[]).filter(a=>a.hid===h.id && !a.revisar && new Date(a.ts).toDateString()===hojeStr2).length;
-    if(olharam >= 2){
+    /* AUDITORIA 09/2026: a frase verde saía mesmo com aviso de falta NÃO
+       confirmado listado logo acima — e o próprio aviso era contado em
+       `olharam`. Só vale com nenhum aviso ativo. */
+    if(olharam >= 2 && !activeAlerts(h).length){
       dSub.innerHTML = `<b style="color:var(--good)">Ninguém avisou falta aqui hoje</b> — ${olharam} pessoas informaram sobre esta unidade.`;
     } else {
       dSub.textContent = "Ninguém confirmou fila nem falta aqui hoje."
@@ -4104,10 +4186,11 @@ function openDetail(id){
         ? (filters.cat==="basica" ? "da vacina de "+filters.item.join(" e de ").toLowerCase()
                                   : "de "+filters.item.join(" e ").toLowerCase())
         : null;
+      const fn3 = fmtFone(h.fone);
       dT.innerHTML = `Ninguém confirmou esta unidade hoje — nem fila, nem falta. `
         + (oq ? `Se você vai atrás ${esc(oq)}, vale ligar antes: `
               : `Se você vai atrás de algo específico (vacina, coleta, exame), vale ligar antes: `)
-        + `<a href="tel:+55${esc(h.fone)}" style="font-weight:800;color:var(--brand)">(${esc(h.fone.slice(0,2))}) ${esc(h.fone.slice(2,-4))}-${esc(h.fone.slice(-4))}</a>`;
+        + (fn3 ? `<a href="tel:+55${esc(fn3.d)}" style="font-weight:800;color:var(--brand)">${esc(fn3.txt)}</a>` : `<i>telefone não cadastrado</i>`);
     } else dT.style.display="none";
   }
   else if(faltasConfirmadas(h).length){
@@ -4119,8 +4202,9 @@ function openDetail(id){
        telefone, que é o que resolve. */
     dT.style.display="";
     const t=travelMin(h), fal=faltaDoFiltro(h)||faltasConfirmadas(h)[0];
-    const tel = (h.fone && !state.demo)
-      ? ` Vale ligar antes: <a href="tel:+55${esc(h.fone)}" style="font-weight:800;color:var(--brand)">(${esc(h.fone.slice(0,2))}) ${esc(h.fone.slice(2,-4))}-${esc(h.fone.slice(-4))}</a>`
+    const fn2 = fmtFone(h.fone);
+    const tel = (fn2 && !state.demo)
+      ? ` Vale ligar antes: <a href="tel:+55${esc(fn2.d)}" style="font-weight:800;color:var(--brand)">${esc(fn2.txt)}</a>`
       : "";
     dT.innerHTML = (t!==null ? `São <b>~${t} min</b> ${MODO_TXT[state.modo]||"de carro"} até aqui` : `Fica a <b>${kmBR(distOf(h))} km</b>`)
       + (w.real ? `, e a fila relatada é de <b>${w.min} min</b>` : "")
@@ -4202,9 +4286,10 @@ function openDetail(id){
   const bFav = document.getElementById("dFav");
   bFav.textContent = ehFav(h) ? "★ Salva nas minhas unidades — toque para tirar" : "☆ Salvar nas minhas unidades";
   const call = document.getElementById("dCall");
-  if(h.fone && !state.demo){
-    call.style.display=""; call.href = "tel:+55" + h.fone;
-    call.textContent = "Ligar: (" + h.fone.slice(0,2) + ") " + h.fone.slice(2,-4) + "-" + h.fone.slice(-4);
+  const fn = fmtFone(h.fone);
+  if(fn && !state.demo){
+    call.style.display=""; call.href = "tel:+55" + fn.d;
+    call.textContent = "Ligar: " + fn.txt;
   } else { call.style.display="none" }
   /* O gráfico de fila por horário saiu na faxina de 05/08 (contradizia os
      Termos); em 12/08 o esqueleto dele (HTML, CSS, tooltip) saiu do arquivo. */
@@ -4544,7 +4629,10 @@ function renderRankView(){
 /* ===== painel de operação: consolidado do que foi coletado ===== */
 function nomeUnid(id){
   for(const r of REGIONS){ const h=r.hospitals.find(x=>x.id===id); if(h) return h.name }
-  return id;
+  /* AUDITORIA 09/2026: devolvia o id cru, que o Painel punha em innerHTML sem
+     esc() — XSS pelo campo hid do servidor. A porta de entrada (nuvemPuxar)
+     agora descarta hid desconhecido; isto é a segunda tranca. */
+  return "unidade desconhecida";
 }
 /* a região tem `label`, não `name` — usar `name` devolvia undefined e a região
    sumia da tela sem erro nenhum no console */
@@ -4716,7 +4804,10 @@ function renderProfile(){
     document.getElementById("btnTrocarApelido").addEventListener("click",abrirTrocaApelido);
     document.getElementById("btnEditPlans").addEventListener("click",showPlanSetup);
     document.getElementById("btnApagarTudo").addEventListener("click",()=>{
-      const quem = (state.user && state.user.nome) ? state.user.nome : "(sem apelido)";
+      /* AUDITORIA 09/2026: lia state.user.nome, campo que nunca existiu (a conta
+         é {usuario}) — todo e-mail de exclusão saía com "(sem apelido)", sem
+         como localizar as linhas. meusApelidos() inclui os apelidos antigos. */
+      const quem = meusApelidos().join(", ") || "(sem apelido)";
       const ok = confirm(
         "Apagar meus dados\n\n" +
         "Some deste aparelho, agora: apelido, convênios, pontos, medalhas, " +
@@ -4975,9 +5066,13 @@ document.getElementById("dFix").addEventListener("click",()=>{
   el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
     const hid = currentDetail.id;
     state.fixes.push({hid, cnes:currentDetail.cnes, tipo:b.dataset.f, ts:Date.now()});
-    state.pts += 10; store.save(state);
+    state.pts += 10; checkMedals(); store.save(state);
     fecharFolhas();
-    toast("Obrigado. O aviso foi registrado para revisão. +10 pontos");
+    /* AUDITORIA 09/2026: dizia "registrado para revisão" e a correção ficava só
+       no aparelho — ninguém recebia. Agora diz a verdade e abre o e-mail. */
+    toast("Anotado neste aparelho. +10 pontos — para chegar até nós, mande o e-mail que abriu.");
+    try{ window.open("mailto:ondiva01@gmail.com?subject=" + encodeURIComponent("Correção de cadastro — " + currentDetail.name)
+      + "&body=" + encodeURIComponent("Unidade: " + currentDetail.name + " (CNES " + currentDetail.cnes + ")\nO que está errado: " + b.dataset.f + "\n\n(Se souber o certo, escreva aqui.)"), "_blank"); }catch(e){}
     renderProfile(); renderRankView();
     openDetail(hid);
   }));
@@ -4995,7 +5090,10 @@ function abrirNecessidade(){
   g.innerHTML = cats.map(c=>`<button class="minbtn ${filters.cat===c[0]?'sel':''}" data-c="${c[0]}" style="font-size:12.5px">${c[1]}</button>`).join("");
   const btnAny = document.getElementById("needAny");
   btnAny.textContent = "Tanto faz — mostrar todas";
-  btnAny.onclick = ()=>{ filters.cat=""; filters.item=null; fechar(); };
+  /* AUDITORIA 09/2026: não zerava `need` — depois de "Caso grave", "Tanto faz"
+     deixava a lista só com pronto-socorro sob o chip "Todas as unidades".
+     Filtro invisível, o que o comentário abaixo diz ter evitado. */
+  btnAny.onclick = ()=>{ filters.cat=""; filters.item=null; filters.need="todos"; fechar(); };
   g.querySelectorAll(".minbtn").forEach(b=>b.addEventListener("click",()=>{
     filters.cat = b.dataset.c; filters.item = null;
     /* "QUALQUER CASO" MOROU AQUI DENTRO (14/08, decisão do Raphael): o chip
@@ -5192,6 +5290,7 @@ function submitAlert(type, vac, escrito){
   /* AVISO VALE MAIS QUE RELATO (14/08): o aviso protege o dia inteiro; o
      relato evapora em 3h. A pontuação segue o valor do dado. */
   state.pts += 50;
+  checkMedals(); /* AUDITORIA 09/2026: sem isto, "Vigilante" e "Sentinela" só destravavam no próximo RELATO — quem só avisa via "Bloqueada" com 5 avisos */
   store.save(state);
   fecharFolhas();
   let msg;
@@ -5266,9 +5365,16 @@ function fecharFolhas(){
      unidade". Genérico pela mesma razão do closeDetail. */
   document.querySelectorAll(".sheet.open").forEach(s=>{ if(s.id!=="sheet") s.classList.remove("open") });
 }
+/* AUDITORIA 09/2026: `currentDetail` nunca voltava a null, então o ✕ de QUALQUER
+   folha aberta fora da unidade (SOS, Me avise, apelido, O que você precisa,
+   Desisti) caía em voltarParaUnidade e reabria a última unidade vista — em
+   emergência, fechar o SOS abria a folha de um laboratório. Só volta para a
+   unidade a folha que foi empilhada EM CIMA dela (a #sheet ainda está aberta). */
 document.addEventListener("click", e=>{
   const b = e.target.closest("[data-back]");
   if(!b) return;
+  const unidadeAberta = document.getElementById("sheet").classList.contains("open");
+  if(!unidadeAberta){ closeDetail(); return; }
   const folha = b.closest(".sheet");
   if(folha && (folha.id==="locSheet" || folha.id==="legalSheet")){ closeDetail(); return; }
   voltarParaUnidade();
@@ -5346,9 +5452,22 @@ function renderSosList(){
      âncora diferente (Savassi vs Eldorado) — misturar seria ordenar por números
      que não se comparam, e a lista mentiria. Sem GPS, fica na região escolhida,
      que é a informação de lugar que a pessoa deu. */
+  /* ===== SOS SÓ LÊ O CADASTRO OFICIAL (decisão do Raphael, 03/09/2026) =====
+     Antes, um fechamento "confirmado" por 2 apelidos tirava o hospital daqui
+     (`!currentWait(h).closed`). Mas apelido é string livre do cliente: dois
+     `curl` com a chave pública, ou trocar o apelido no Perfil, tiravam um
+     pronto-socorro do SOS até meia-noite. É o único lugar do app onde erro
+     vira morte, não viagem perdida — e a tese do STF (2025) chama de falha
+     sistêmica exatamente o desenho que deixa estranhos controlar isso.
+     Regra: nenhum dado de comunidade entra no SOS. Nem fechamento, nem aviso,
+     nem fila. Só o CNES: hospital geral com pronto-socorro (ps), aberto a
+     qualquer pessoa (!soPlano), com porta de rua (!soEncam), não
+     especializado (!espec). O 192 continua em primeiro. Se o cadastro errar,
+     a defesa é "reproduzimos o registro oficial e mandamos ligar 192" — se
+     dois anônimos esconderem um PS aberto, não há defesa. */
   const rows = (gps ? REGIONS.filter(r=>!r.soon).reduce((a,r)=>a.concat(r.hospitals||[]),[])
                     : REG().hospitals)
-    .filter(h=>h.ps && !h.espec && !h.soPlano && !h.soEncam && !currentWait(h).closed)
+    .filter(h=>h.ps && !h.espec && !h.soPlano && !h.soEncam)
     .map(h=>({h, t:travelCarro(h)}))
     .sort((a,b)=>a.t-b.t).slice(0,3);
   const el=document.getElementById("sosList");
@@ -5492,8 +5611,22 @@ function nuvemEnviar(tabela, linha){
              "Content-Type":"application/json",
              "Prefer":"resolution=ignore-duplicates,return=minimal"},
     body: JSON.stringify(linha)
-  }).then(r=>{ if(!r.ok) throw 0; })
-    .catch(()=>{ state.nuvemFila=(state.nuvemFila||[]); state.nuvemFila.push({tabela, linha}); store.save(state); });
+  }).then(r=>{
+    /* AUDITORIA 09/2026: 4xx é o banco RECUSANDO a linha (CHECK violado,
+       relógio do aparelho adiantado > 10 min, chave/RLS). Reenfileirar isso
+       era fila infinita: a cada 60 s o app tentava de novo, para sempre, e a
+       pessoa tinha visto "+30 pontos, seu relato aparece". Só falha de rede
+       ou 5xx volta para a fila. */
+    if(r.status>=400 && r.status<500){ console.warn("nuvem recusou", tabela, r.status); return; }
+    if(!r.ok) throw 0;
+  }).catch(()=>{ state.nuvemFila=(state.nuvemFila||[]); state.nuvemFila.push({tabela, linha}); store.save(state); });
+}
+/* conjunto de todos os ids de unidade da base, montado uma vez — é o filtro da
+   porta de entrada da nuvem (ver nuvemPuxar) */
+let _hidsSet = null;
+function _hidsConhecidos(){
+  if(!_hidsSet){ _hidsSet = new Set(); REGIONS.forEach(r=>(r.hospitals||[]).forEach(h=>_hidsSet.add(h.id))); }
+  return _hidsSet;
 }
 function nuvemFlush(){
   if(!nuvemLigada()) return;
@@ -5515,6 +5648,16 @@ function nuvemPuxar(){
       {headers:{"apikey":NUVEM.anon,"Authorization":"Bearer "+NUVEM.anon}}).then(r=>r.ok?r.json():null).catch(()=>null);
   Promise.all([pega("relatos"), pega("avisos"), pega("desistencias")]).then(([rel,av,des])=>{
     let sRel=null, sAv=null, sDes=null;
+    /* AUDITORIA 09/2026 — DADO DO SERVIDOR É HOSTIL. Qualquer um insere com a
+       chave publicável, e o esquema limita tamanho, não conteúdo. Uma linha
+       com hid que não existe na base chegava a state.reports, e o Painel
+       imprimia o id cru (nomeUnid devolvia o próprio texto) dentro de
+       innerHTML — script de terceiro na origem do app. Agora linha com hid
+       desconhecido é descartada na porta, nas três tabelas. */
+    const hidsOk = _hidsConhecidos();
+    if(Array.isArray(rel)) rel = rel.filter(x=>hidsOk.has(x.hid));
+    if(Array.isArray(av))  av  = av.filter(x=>hidsOk.has(x.hid));
+    if(Array.isArray(des)) des = des.filter(x=>hidsOk.has(x.hid));
     if(Array.isArray(rel)){
       sRel = rel.map(x=>({hid:x.hid, cnes:x.cnes, min:x.min, est:null, ts:Date.parse(x.ts), cid:x.cid, uid:x.uid}));
       const cids = new Set(sRel.map(x=>x.cid));
@@ -5902,7 +6045,7 @@ function renderAviso(){
          regra que não vale mais para ela */
       if(escolhidas){
         r.innerHTML = escolhidas.length
-          ? `Vou avisar só sobre <b>${escolhidas.length} unidade${escolhidas.length>1?"s":""}</b> que você escolheu${n?` — ${n===1?"1 tem":n+" têm"} o que você precisa hoje.`:", sem aviso de falta hoje."}`
+          ? `Vou avisar só sobre <b>${escolhidas.length} unidade${escolhidas.length>1?"s":""}</b> que você escolheu${n?` — ${n} sem aviso de falta hoje.`:" — todas com aviso de falta hoje."}`
           : `Marque as unidades que te interessam — o aviso vale só para elas.`;
       } else {
         r.innerHTML = n
@@ -6214,7 +6357,7 @@ setInterval(()=>{
 const NO_ENDERECO_PROPRIO = /github\.io$|ondiva\.com\.br$/.test(location.hostname);
 let promptInstalar = null;
 if(NO_ENDERECO_PROPRIO && "serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  /* demo: sem service worker (auditoria 09/2026) */
 }
 window.addEventListener("beforeinstallprompt", e=>{
   e.preventDefault(); promptInstalar = e; oferecerInstalar();
@@ -6502,7 +6645,15 @@ function desenharPinosReais(){
 /* o app pede redesenho em vários pontos; se o mapa real está ativo, ele manda */
 const renderMapDesenhado = renderMap;
 renderMap = function(){
-  if(mapaReal){ desenharPinosReais(); renderRail(unidadesMetropolitanas().slice(0,MAP_CAP)); return }
+  /* AUDITORIA 09/2026: o reset do cache dos pinos (`_pinosChave = ""`) vivia
+     só dentro do renderMap desenhado — que este override nunca chama quando o
+     Leaflet está ativo. Resultado: trocar filtro não redesenhava os pinos por
+     até 60 s no endereço real do piloto. O comentário lá dizia "corrigido";
+     a correção estava no caminho que não roda. Agora zera aqui também.
+     E o trilho segue a mesma regra da lista: sem GPS, só a região escolhida —
+     misturar âncoras (Savassi × Eldorado) ordenava por números que não se
+     comparam e recomendava unidade de outra cidade. */
+  if(mapaReal){ _pinosChave = ""; desenharPinosReais(); renderRail(visibleHospitals().slice(0,MAP_CAP)); return }
   return renderMapDesenhado.apply(this, arguments);
 };
 /* os botões de zoom e o "minha localização" passam a falar com o mapa real */
@@ -6627,9 +6778,6 @@ setTimeout(oferecerInstalar, 8000);       /* o convite espera a pessoa usar */
 setTimeout(mostrarAvisoDePedido, 2500);
 carregarLeaflet();                        /* mapa de ruas onde houver rede externa */
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
