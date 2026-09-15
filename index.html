@@ -722,14 +722,15 @@
     <div class="grab"></div>
     <button class="closex" data-back="1" aria-label="Voltar">✕</button>
     <h2 style="padding-right:44px">Trocar meu apelido</h2>
-    <div class="walert" style="margin:0 0 12px"><b>Invente um — não use seu nome verdadeiro.</b> Ele aparece nos seus relatos, para as outras pessoas.</div>
+    <!-- 15/09/2026: o campo livre saiu daqui também (decisão do Raphael) — o
+         apelido novo é sorteado, e só. Ninguém escreve o próprio nome. -->
     <div class="field" id="f-apelido">
-      <label for="inApelido">Novo apelido</label>
-      <input id="inApelido" autocapitalize="none" autocomplete="off" maxlength="20" placeholder="ex.: canario10">
+      <label for="inApelido">Novo apelido (sorteado)</label>
+      <input id="inApelido" autocapitalize="none" autocomplete="off" maxlength="20" readonly>
       <div class="err">Use 3 a 20 letras ou números, sem espaços.</div>
     </div>
-    <button class="cta sec" id="btnSortearTroca">Sortear um apelido para mim</button>
-    <button class="cta" id="btnSalvarApelido">Salvar o novo apelido</button>
+    <button class="cta sec" id="btnSortearTroca">↻ Sortear outro</button>
+    <button class="cta" id="btnSalvarApelido">Usar este apelido</button>
     <div class="login-note" style="text-align:left">Seus pontos, medalhas e histórico continuam com você. <b>Os relatos que você já publicou seguem assinados com o apelido antigo</b> — o app não reescreve o que já saiu daqui.</div>
   </div>
 </div>
@@ -1040,7 +1041,11 @@
            apelido na hora pega o caminho mais curto — o próprio nome. Com um
            apelido pronto a um toque, o caminho mais curto passa a ser o certo. -->
       <button class="cta sec" id="btnSortear" style="margin-top:0">↻ Sortear outro</button>
-      <button class="themebtn" id="btnDigitar" style="margin-top:8px;color:var(--brand)">Prefiro escrever o meu</button>
+      <!-- "Prefiro escrever o meu" SAIU (15/09/2026, decisão do Raphael): o campo
+           livre era o único caminho para a pessoa escrever o nome verdadeiro sem
+           querer. Agora o apelido é sempre sorteado; quem não gostou sorteia
+           outro. Zero chance de nome real no relato. -->
+      <div class="hint" style="font-size:12.5px;color:var(--muted);font-weight:600;margin-top:6px">O apelido é sorteado para ninguém escrever o próprio nome sem querer. Não gostou? Sorteie outro.</div>
       <!-- IDADE (15/09/2026, simulação 7 + ECA Digital, Lei 15.211/2025). Os
            Termos dizem 16+ (ou com responsável) e o app não perguntava nada —
            "declaração sem coleta", como a auditoria completa anotou. Aqui
@@ -4768,9 +4773,12 @@ function renderProfile(){
         <b>Tudo isto fica neste celular:</b> seus pontos, medalhas, avisos ligados e histórico. Trocou de aparelho ou limpou o navegador, começa do zero.<br>
         <b>O que você relata vai para o servidor</b> e continua ajudando o bairro, aconteça o que acontecer com o seu celular.
       </div>
-      <button class="logout" id="btnTrocarApelido" style="color:var(--brand)">Trocar meu apelido</button>
+      <button class="logout" id="btnTrocarApelido" style="color:var(--brand)">Trocar meu apelido (sorteia outro)</button>
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
-      <button class="logout" id="btnLogout">Sair da conta</button>
+      <!-- 15/09/2026: "Sair da conta" era um link pequeno sublinhado e o Raphael
+           não achou. Vira botão de verdade, com o que acontece escrito. -->
+      <button class="cta sec" id="btnLogout" style="margin-top:12px">Sair da conta</button>
+      <div class="login-note" style="text-align:left;margin-top:6px">Sair tira o apelido e os convênios deste aparelho. Para consultar não precisa de conta; para avisar ou relatar, você escolhe outro apelido.</div>
       <!-- APAGAR MEUS DADOS (02/09/2026). Os Termos, seção 13, prometiam
            "encerrar sua conta a qualquer momento pelo aplicativo" e o app só
            tinha "Sair da conta" — que esconde, não apaga. Promessa que o
@@ -4831,8 +4839,8 @@ function renderProfile(){
   } else {
     /* visitante não tinha botão NENHUM aqui — nem para criar conta nem para
        voltar à tela de entrada (pergunta do Raphael, 06/08) */
-    ap.innerHTML = `<div class="meta">Nenhuma conta neste aparelho.</div>
-      <button class="logout" id="btnCriarConta" style="color:var(--brand)">Escolher um apelido para relatar</button>`;
+    ap.innerHTML = `<div class="meta">Você está sem conta neste aparelho — para consultar, não precisa. Conta é só um apelido sorteado, para avisar e relatar.</div>
+      <button class="cta sec" id="btnCriarConta" style="margin-top:10px">Sortear um apelido para relatar</button>`;
     document.getElementById("btnCriarConta").addEventListener("click",()=>{
       document.getElementById("login").classList.add("show");
     });
@@ -6191,12 +6199,7 @@ document.getElementById("btnSortear").addEventListener("click",()=>{
 });
 /* já abre com um pronto: o caminho mais curto passa a ser o seguro */
 (function(){ const el=document.getElementById("inUser"); if(el && !el.value) el.value = sortearApelido() })();
-document.getElementById("btnDigitar").addEventListener("click",()=>{
-  const el = document.getElementById("inUser");
-  el.readOnly = false; el.value = ""; el.focus();
-  document.getElementById("btnDigitar").style.display = "none";
-  toast("Escreva um apelido inventado — ele aparece nos seus avisos, para as outras pessoas.");
-});
+/* o botão "Prefiro escrever o meu" saiu em 15/09: apelido é só sorteado */
 document.getElementById("btnSignup").addEventListener("click",()=>{
   /* ZERO DADO PESSOAL (11/08): a conta do piloto é só um apelido inventado */
   const usuario=document.getElementById("inUser").value.trim();
@@ -6229,11 +6232,10 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
 function abrirTrocaApelido(){
   if(!state.user) return;
   const el = document.getElementById("inApelido");
-  el.value = state.user.usuario;
+  el.value = sortearApelido();            /* já abre com um novo, sorteado */
   setBad("f-apelido", false);
   document.getElementById("backdrop").classList.add("open");
   document.getElementById("apelidoSheet").classList.add("open");
-  el.focus();
 }
 document.getElementById("btnSortearTroca").addEventListener("click",()=>{
   const el = document.getElementById("inApelido");
@@ -6401,7 +6403,11 @@ function podeOferecerInstalar(){
 function atualizarChipInstalar(){
   const c = document.getElementById("instalarFaixa"), c2 = document.getElementById("instalarFaixaLista");
   const calada = state.faixaInstDepois && Date.now()-state.faixaInstDepois < 7*24*3600e3;
-  const popupSemPrompt = (state.visitas||0) >= 2 && !promptInstalar && !APARELHO_IOS && !document.getElementById("instalarBar") && !state.instalarPediu;
+  /* 15/09, segunda rodada: no demo (e em qualquer Android em que o navegador
+     não oferece a instalação) a pessoa abria, não via popup nem faixa, e
+     concluía que "não tem a opção". Sem prompt, a faixa aparece desde a
+     primeira visita — ela não interrompe ninguém. */
+  const popupSemPrompt = !promptInstalar && !APARELHO_IOS && !document.getElementById("instalarBar") && !state.instalarPediu;
   const dá = NO_ENDERECO_PROPRIO && !instalado() && !calada && (!!state.instalarDepois || popupSemPrompt);
   if(c)  c.style.display  = dá ? "flex" : "none";
   if(c2) c2.style.display = dá ? "flex" : "none";     /* a lista é a tela inicial desde 15/09 */
