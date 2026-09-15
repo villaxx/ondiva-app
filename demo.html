@@ -2161,6 +2161,14 @@ const store = {
 };
 /* v: versão do formato guardado — o ponto único para migração futura (hoje só
    carimba; quando o formato mudar, o "if(s.v<2){...}" mora aqui, não espalhado) */
+/* ?zero=1 — ABRE COMO NA PRIMEIRA VEZ (15/09/2026, para o Raphael testar o
+   fluxo de entrada sem passar pelo Perfil). Apaga o armazenamento do app
+   neste aparelho e tira o parâmetro do endereço, para um F5 não apagar de
+   novo. Só o aparelho: nada no servidor. */
+if(/[?&]zero=1\b/.test(location.search)){
+  try{ localStorage.removeItem("pronto-v1"); sessionStorage.clear(); }catch(e){}
+  try{ history.replaceState(null, "", location.pathname); }catch(e){}
+}
 let state = Object.assign({v:1, pts:0, reports:[], giveups:[], alerts:[], fixes:[], pendentes:[], medals:[], waitlist:[], plans:[], idas:[], procuras:[], favs:[], onb:0, region:"bh", demo:true, big:false, modo:"carro", avisos:null, visitante:false}, store.load());
 state.v = state.v || 1;
 /* ===================== DEMONSTRAÇÃO =====================
