@@ -4777,8 +4777,8 @@ function renderProfile(){
       <button class="logout" id="btnEditPlans" style="color:var(--brand)">Alterar meus convênios</button>
       <!-- 15/09/2026: "Sair da conta" era um link pequeno sublinhado e o Raphael
            não achou. Vira botão de verdade, com o que acontece escrito. -->
-      <button class="cta sec" id="btnLogout" style="margin-top:12px">Sair da conta</button>
-      <div class="login-note" style="text-align:left;margin-top:6px">Sair tira o apelido e os convênios deste aparelho. Para consultar não precisa de conta; para avisar ou relatar, você escolhe outro apelido.</div>
+      <button class="cta sec" id="btnLogout" style="margin-top:12px">Sair e começar do zero</button>
+      <div class="login-note" style="text-align:left;margin-top:6px">Apaga o que está neste aparelho (apelido, convênios, pontos, histórico) e volta à tela de entrada, como na primeira vez. O que você já publicou continua no servidor.</div>
       <!-- APAGAR MEUS DADOS (02/09/2026). Os Termos, seção 13, prometiam
            "encerrar sua conta a qualquer momento pelo aplicativo" e o app só
            tinha "Sair da conta" — que esconde, não apaga. Promessa que o
@@ -4821,30 +4821,31 @@ function renderProfile(){
       try{ sessionStorage.clear(); }catch(e){}
       location.reload();
     });
-    document.getElementById("btnLogout").addEventListener("click",()=>{
-      /* Sair da conta tem que limpar os convênios também. Sem isto a tela de
-         entrada reaparecia com as opções já marcadas e o botão já liberado —
-         parecia que o app tinha decidido pela pessoa. Os convênios são dado da
-         conta, saem junto com ela. */
-      delete state.user;
-      state.plans = [];
-      /* os avisos carregam o nome de outras pessoas — "Vacina da Sofia". Isso é
-         dado da conta e não pode ficar no aparelho para quem entrar depois. */
-      state.avisos = null;
-      filters.plan = "meus";
-      store.save(state);
-      document.getElementById("login").classList.add("show");
-      renderRankView(); renderProfile(); renderChips();
-    });
+    document.getElementById("btnLogout").addEventListener("click", comecarDoZero);
   } else {
     /* visitante não tinha botão NENHUM aqui — nem para criar conta nem para
        voltar à tela de entrada (pergunta do Raphael, 06/08) */
     ap.innerHTML = `<div class="meta">Você está sem conta neste aparelho — para consultar, não precisa. Conta é só um apelido sorteado, para avisar e relatar.</div>
-      <button class="cta sec" id="btnCriarConta" style="margin-top:10px">Sortear um apelido para relatar</button>`;
+      <button class="cta sec" id="btnCriarConta" style="margin-top:10px">Sortear um apelido para relatar</button>
+      <button class="cta sec" id="btnZero" style="margin-top:8px">Começar do zero</button>`;
     document.getElementById("btnCriarConta").addEventListener("click",()=>{
       document.getElementById("login").classList.add("show");
     });
+    document.getElementById("btnZero").addEventListener("click", comecarDoZero);
   }
+}
+/* ===== SAIR E COMEÇAR DO ZERO (15/09/2026, pedido do Raphael) =====
+   "Sair da conta" só escondia o apelido e deixava pontos, visitas e escolhas;
+   ele queria ver o app como na primeira vez. Isto apaga o armazenamento do app
+   neste aparelho (a chave inteira, não campo a campo) e recarrega: tela de
+   entrada, pergunta do modo, popup de instalar, tudo de novo. Não toca no
+   servidor — o que foi publicado fica, como diz o "Apagar meus dados". */
+function comecarDoZero(){
+  if(!confirm("Sair e começar do zero?\n\nApaga deste aparelho: apelido, convênios, pontos, medalhas, favoritos, pedidos de aviso e histórico. O app volta à tela de entrada.")) return;
+  try{ localStorage.removeItem(store.key || "pronto-v1"); }catch(e){}
+  try{ localStorage.removeItem("pronto-v1"); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  location.reload();
 }
 /* "Ler os termos" é um botão FIXO da tela de perfil, então o ouvinte é ligado
    UMA vez, aqui fora — antes ele era ligado dentro do renderProfile e só no
@@ -6180,6 +6181,7 @@ document.getElementById("btnVisitante").addEventListener("click",()=>{
   renderChips(); renderList(); renderMap(); renderProfile(); renderRankView();
   toast("Sem problema — para avisar ou relatar, aí sim precisa de um apelido.");
   setTimeout(oferecerModo, 700);
+  setTimeout(()=>oferecerInstalar(), 2500);   /* se o modo já foi escolhido antes, o popup de instalar vem direto */
 });
 /* ===== SORTEAR APELIDO =====
    Bichos brasileiros + número: some do nome civil, é fácil de lembrar e de
@@ -6323,6 +6325,7 @@ document.getElementById("btnPlansOk").addEventListener("click",()=>{
   renderChips(); renderList(); renderMap(); renderProfile();
   toast("Pronto! Mostrando o que está aberto e atende "+state.plans.join(", ")+".");
   setTimeout(oferecerModo, 900);
+  setTimeout(()=>oferecerInstalar(), 2500);
   requestGPS(true); /* pedido vem de um toque do usuário — iOS aceita melhor */
 });
 function showLoginIfNeeded(){
@@ -6335,10 +6338,16 @@ function showLoginIfNeeded(){
      vira visitante sozinho, vê o mapa, e só encontra a tela de apelido quando
      for avisar uma falta ou relatar uma espera — com o motivo escrito.
      (Spool: tirar o cadastro do caminho subiu as compras em 45%.) */
+  /* ===== A TELA DE ENTRADA VOLTA (15/09/2026, decisão do Raphael) =====
+     Reverte o trecho acima: na PRIMEIRA abertura a pessoa vê a tela de
+     entrada (promessa, apelido sorteado, idade, Termos) antes do app. Quem não
+     quer conta toca "Agora não" e entra como visitante — o caminho sem pedágio
+     continua a um toque. Nas aberturas seguintes não aparece mais. */
   if(!state.user && !state.visitante){
-    state.visitante = true;
     if(!state.plans.length) state.plans = PLANS.slice();  /* sem plano declarado, mostra tudo */
     store.save(state);
+    document.getElementById("login").classList.add("show");
+    return;
   }
   if(state.user && !state.plans.length) showPlanSetup();
 }
@@ -6389,7 +6398,9 @@ window.addEventListener("appinstalled", ()=>{
 });
 function podeOferecerInstalar(){
   if(!NO_ENDERECO_PROPRIO || instalado()) return false;
-  if((state.visitas||0) < 2) return false;                 /* valor primeiro */
+  /* 15/09/2026 (Raphael): o popup aparece já na PRIMEIRA abertura — depois da
+     tela de entrada e da pergunta do modo, nunca em cima delas. A regra
+     "valor primeiro" (2ª visita) saiu. */
   if(state.instalarDepois && Date.now()-state.instalarDepois < 14*24*3600e3) return false;
   return !!promptInstalar || APARELHO_IOS;
 }
@@ -6420,6 +6431,10 @@ function oferecerInstalar(forcar){
   if(!forcar && !podeOferecerInstalar()) return;
   if(!NO_ENDERECO_PROPRIO || instalado()) return;
   if(document.getElementById("instalarBar")) return;
+  /* nunca por cima da tela de entrada nem da pergunta do modo: espera elas
+     fecharem (os botões delas chamam oferecerInstalar de novo) */
+  if(!forcar && (document.getElementById("login").classList.contains("show")
+      || document.getElementById("bemSheet").classList.contains("open"))) return;
   const bar = document.createElement("div");
   bar.id = "instalarBar";
   /* POPUP DE VERDADE (11/08, pedido do Raphael): a barrinha discreta no rodapé
@@ -6734,11 +6749,13 @@ document.querySelectorAll("#bemSheet [data-bem]").forEach(b=>b.addEventListener(
   document.getElementById("backdrop").classList.remove("open");
   renderChips(); renderList(); renderMap();
   toast("Anotado — as previsões de chegada agora são "+(MODO_TXT[state.modo]||"")+". Dá para trocar no botão da lista.");
+  setTimeout(()=>oferecerInstalar(), 1500);   /* o popup de instalar vem depois do modo */
 }));
 document.getElementById("bemPular").addEventListener("click",()=>{
   state.onb=1; store.save(state);
   document.getElementById("bemSheet").classList.remove("open");
   document.getElementById("backdrop").classList.remove("open");
+  setTimeout(()=>oferecerInstalar(), 1500);
 });
 
 /* ===== PRESENÇA: 1 ping anônimo por dia por aparelho =====
