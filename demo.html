@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#007A43">
-<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#C25A0C">
+<link rel="manifest" href="demo.webmanifest">
+<link rel="icon" href="icon-demo-192.png">
+<link rel="apple-touch-icon" href="icon-demo-192.png">
+<meta name="apple-mobile-web-app-title" content="Ondiva demo">
 <title>Ondiva — demonstração</title>
 </head>
 <body>
@@ -357,7 +360,7 @@
   .acct .v{font-weight:700;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* tinham 18px de altura: menos da metade do alvo mínimo de toque */
   .logout{margin-top:11px;padding:13px 0;font-size:12.5px;font-weight:800;color:var(--crit);text-decoration:underline;align-self:flex-start}
-</style>
+/* DEMO EM LARANJA (15/09/2026): so cor de marca e fundos; semaforos iguais ao app */ :root{--bg:#FBF1E8;--surface2:#F6E3D2;--line:#EBD3BE;--brand:#C25A0C;--brand-vivid:#F08A2A;--brand-soft:#FBE3CE;--map-ground:#F3E4D6;--map-park:#E8D3BE;--map-roadedge:#E2CBB4} @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--bg:#171009;--surface:#221811;--surface2:#2E2016;--line:#4A3322;--brand:#F0913A;--brand-vivid:#F7A755;--brand-ink:#1A0E03;--brand-soft:#3B2410;--map-ground:#1C130B;--map-park:#26190E;--map-road:#3A2818;--map-roadedge:#150E07} } :root[data-theme="dark"]{--bg:#171009;--surface:#221811;--surface2:#2E2016;--line:#4A3322;--brand:#F0913A;--brand-vivid:#F7A755;--brand-ink:#1A0E03;--brand-soft:#3B2410;--map-ground:#1C130B;--map-park:#26190E;--map-road:#3A2818;--map-roadedge:#150E07} </style>
 
 <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Ondiva — não perca a viagem</h1>
 
@@ -471,12 +474,24 @@
       </button>
     </div>
     <div class="filters" id="chipsList"></div>
+    <!-- BAIXAR NA LISTA (15/09/2026, pedido do Raphael): a faixa de instalar
+         morava só no mapa, e a tela inicial agora é a lista — a pessoa podia
+         nunca ver o convite. Mesma regra e mesmos botões da faixa do mapa
+         ("Agora não" cala por 7 dias nas duas); some sozinha quando instalado. -->
+    <div id="instalarFaixaLista" style="display:none;margin-top:12px;background:var(--surface);border:1.5px solid var(--brand);border-radius:16px;padding:10px 10px 10px 12px;align-items:center;gap:10px;box-shadow:var(--shadow-sm)">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--brand);flex:none;display:flex;align-items:center;justify-content:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 3h14v2H5v-2z"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;font-size:13px;font-weight:800;color:var(--ink);line-height:1.3">Deixe o Ondiva na tela do celular — abre com um toque</div>
+      <button id="instFxSim2" class="cta" style="margin:0;width:auto;padding:9px 13px;font-size:13px;flex:none;border-radius:999px">Baixar</button>
+      <button id="instFxNao2" aria-label="Agora não" style="flex:none;width:32px;height:32px;border-radius:50%;border:none;background:var(--surface2);color:var(--ink2);font:800 13px system-ui;cursor:pointer">✕</button>
+    </div>
     <div id="list" style="margin-top:12px"></div>
   </section>
 
   <!-- ============ INFORMAR ============ -->
   <section class="view page" id="v-report">
-    <div class="pagehead"><h2>Avisar</h2><button class="closex" id="repBack" aria-label="Voltar ao mapa" style="position:static;flex:none">✕</button></div>
+    <div class="pagehead"><h2>Avisar</h2><button class="closex" id="repBack" aria-label="Voltar" style="position:static;flex:none">✕</button></div>
     <div class="panel">
       <label for="repHosp">Em qual unidade você está?</label>
       <select id="repHosp"></select>
@@ -1011,6 +1026,19 @@
            apelido pronto a um toque, o caminho mais curto passa a ser o certo. -->
       <button class="cta sec" id="btnSortear" style="margin-top:0">↻ Sortear outro</button>
       <button class="themebtn" id="btnDigitar" style="margin-top:8px;color:var(--brand)">Prefiro escrever o meu</button>
+      <!-- IDADE (15/09/2026, simulação 7 + ECA Digital, Lei 15.211/2025). Os
+           Termos dizem 16+ (ou com responsável) e o app não perguntava nada —
+           "declaração sem coleta", como a auditoria completa anotou. Aqui
+           entra no único ponto em que a pessoa CONTRIBUI (publicar), não na
+           entrada: olhar o cadastro público não exige idade. Guarda só um
+           sim/não no aparelho, nunca data de nascimento. -->
+      <div class="field" id="f-idade" style="margin-top:10px">
+        <label for="inMaior16" style="display:flex;align-items:flex-start;gap:10px;text-transform:none;letter-spacing:0;font-size:13.5px;font-weight:700;cursor:pointer;min-height:44px">
+          <input id="inMaior16" type="checkbox" style="width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:var(--brand)">
+          <span>Tenho 16 anos ou mais — ou estou usando com um responsável.</span>
+        </label>
+        <div class="err">Para publicar, é preciso ter 16 anos ou estar com um responsável. Para consultar, não precisa de conta.</div>
+      </div>
       <button class="cta" id="btnSignup">Continuar</button>
       <!-- a cor era um verde-escuro fixo (#143D28): no tema escuro o texto sumia
            e sobrava só o link, torto — pego pelo Raphael no celular. A classe
@@ -1444,7 +1472,7 @@ const REGIONS = [
     {id:"u26999", cnes:26999, lat:-19.92209, lon:-43.9192, name:"Instituto Raul Soares", type:"Público", plans:["SUS"], profile:"hospital", region:"Santa Efigênia", addr:"Avenida do Contorno, 3017", dist:2.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132399901", sus:true, h24:true, espec:true, lab:true},
     {id:"u26719", cnes:26719, lat:-19.921834, lon:-43.943623, name:"Centro Oftalmológico de Minas Gerais", type:"Privado", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Lourdes", addr:"Rua Santa Catarina, 941", dist:1.9, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132324100", sus:true, h24:true, cir:true, intern:true, espec:true, img:true},
     {id:"u26794", cnes:26794, lat:-19.836147, lon:-43.914946, name:"Hospital Sofia Feldman", type:"Filantrópico", plans:["SUS","Convênio ou particular"], profile:"hospital", region:"Tupi", addr:"Rua Antônio Bandeira, 1060", dist:11.4, ab:0, fe:24, turno:"24 horas, todos os dias", sus:true, h24:true, cir:true, obst:true, intern:true, espec:true, vac:true, lab:true, img:true},
-    {id:"u26948", cnes:26948, lat:-19.924594, lon:-43.931772, name:"Hospital Infantil João Paulo II", type:"Público", plans:["SUS"], profile:"hospital", region:"Santa Efigênia", addr:"Alameda Ezequiel Dias, 345", dist:1.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132399000", sus:true, h24:true, intern:true, espec:true, inf:true, lab:true, img:true},
+    {id:"u26948", cnes:26948, lat:-19.924594, lon:-43.931772, name:"Hospital Infantil João Paulo II", type:"Público", plans:["SUS"], profile:"hospital", region:"Santa Efigênia", addr:"Alameda Ezequiel Dias, 345", dist:1.4, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132399000", sus:true, h24:true, intern:true, espec:true, inf:true, lab:true, img:true, psPed:true /* FHEMIG, Complexo de Urgência e Emergência: "Pronto atendimento 24h" pediátrico (fhemig.mg.gov.br, lido em 15/09/2026). Continua espec (fora do SOS geral); entra só no cartão de criança do SOS */},
     {id:"u27820", cnes:27820, lat:-19.878845, lon:-43.957919, name:"Hospital Infantil Padre Anchieta", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"São Francisco", addr:"Av Major Delfino de Paula Ricardo, 2356", dist:6.9, ab:0, fe:24, turno:"24 horas, todos os dias", h24:true, cir:true, intern:true, espec:true, inf:true, lab:true, img:true},
     {id:"u27871", cnes:27871, lat:-19.922613, lon:-43.926008, name:"Maternidade Octaviano Neves", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Rua Ceara, 186", dist:1.8, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3132321000", h24:true, cir:true, obst:true, intern:true, espec:true, img:true},
     {id:"u27901", cnes:27901, lat:-19.927529, lon:-43.92666, name:"Instituto de Olhos de Belo Horizonte", type:"Privado", plans:["Convênio ou particular"], profile:"hospital", region:"Santa Efigênia", addr:"Rua Padre Rolim, 541", dist:1.3, ab:0, fe:24, turno:"24 horas, todos os dias", fone:"3133729943", h24:true, cir:true, intern:true, espec:true, lab:true},
@@ -2249,7 +2277,13 @@ function semearDemo(){
 }
 /* regiões "Em breve" não podem ficar ativas (migra quem estava em SP/RJ antes do foco em BH) */
 if((REGIONS.find(r=>r.id===state.region)||{}).soon){ state.region="bh" }
-let filters = {plan:"meus", ped:false, open:false, need:"todos", cat:"", falta:false, item:null};
+/* "ABERTO AGORA" JÁ VEM MARCADO (decisão do Raphael, 15/09/2026): o app abre
+   mostrando só o que está aberto; um toque no chip passa a "Todas: abertas e
+   fechadas", outro toque volta. `filters` não é guardado, então toda abertura
+   recomeça marcado. Consequência honesta: em fim de semana ou feriado, unidade
+   sem fonte de horário não é afirmada aberta e some deste modo — a faixa do
+   mapa e o texto vazio da lista oferecem "mostrar todas". */
+let filters = {plan:"meus", ped:false, open:true, need:"todos", cat:"", falta:false, item:null};
 /* O QUE VOCÊ PRECISA — a pessoa diz o que veio buscar e o app tira da lista
    quem acabou de avisar que está faltando exatamente isso. Sem isso, o app
    sabia que a Unidade X estava sem a vacina da gripe e mostrava ela mesmo
@@ -2386,11 +2420,42 @@ function applyGPS(lat,lon){
    da PBH não abrem no fim de semana (inferência sobre o mundo; o fato é que
    afirmar "aberta" sem saber é o que o app existe para não fazer). */
 function fimDeSemana(){ const d = new Date().getDay(); return d===0 || d===6; }
+/* ===== FERIADO (15/09/2026, achado da simulação 7) =====
+   O app tratava fim de semana e ignorava feriado: numa segunda 12/10 afirmava
+   "aberta" para toda UBS — e era o erro com maior exposição jurídica da
+   simulação, o único em que o app afirma algo falso por conta própria (2, 14 e
+   60 idas perdidas em 90 dias nos três cenários). Feriado recebe o MESMO
+   tratamento do fim de semana: unidade sem 24h e sem `fds:true` não é afirmada
+   aberta; o texto manda confirmar por telefone.
+   Datas: nacionais fixas + as duas municipais de BH (15/08 Assunção, 08/12
+   Imaculada Conceição) + as móveis a partir da Páscoa (Meeus): segunda e terça
+   de Carnaval, Sexta-feira Santa e Corpus Christi. Carnaval e Corpus Christi
+   são ponto facultativo por lei, mas os postos da PBH fecham — o app prefere
+   não afirmar a afirmar errado. Quarta-feira de Cinzas (meio expediente) e
+   emenda de feriado ficam de fora: sem fonte, não se afirma nem fechado. */
+function pascoa(ano){
+  const a=ano%19, b=Math.floor(ano/100), c=ano%100, d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25),
+        g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30, i=Math.floor(c/4), k=c%4,
+        l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451),
+        mes=Math.floor((h+l-7*m+114)/31), dia=((h+l-7*m+114)%31)+1;
+  return new Date(ano, mes-1, dia);
+}
+function ehFeriado(d){
+  const fixos = ["1/1","21/4","1/5","7/9","12/10","2/11","15/11","20/11","25/12", /* nacionais */
+                 "15/8","8/12"];                                                 /* BH */
+  if(fixos.includes(d.getDate()+"/"+(d.getMonth()+1))) return true;
+  const p = pascoa(d.getFullYear()), dia = 864e5;
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return [-48,-47,-2,60].some(off => new Date(p.getTime()+off*dia).setHours(0,0,0,0) === t);
+}
+function feriadoHoje(){ return ehFeriado(new Date()); }
+/* o rótulo que explica POR QUE o app não afirma o horário hoje */
+function diaSemFonteTxt(){ return feriadoHoje() ? "feriado" : "fim de semana"; }
 /* `semHorario:true`: o CNES diz "turnos intermitentes" — não é 7h-18h, não é
    24h, é "não informado". Quatro unidades, entre elas a UPA Centro-Sul, que
    recebiam um 7-18 inventado e apareciam "fechadas" à noite. Sem fonte, o app
    não afirma nem aberta nem fechada em dia nenhum. */
-function horarioSemFonteHoje(h){ return !h.h24 && (h.semHorario || (!h.fds && fimDeSemana())); }
+function horarioSemFonteHoje(h){ return !h.h24 && (h.semHorario || (!h.fds && (fimDeSemana() || feriadoHoje()))); }
 function abertoAgora(h){
   if(h.h24) return true;
   if(horarioSemFonteHoje(h)) return false;
@@ -3007,7 +3072,9 @@ function renderChips(){
        e confirma o toque junto com a troca do rótulo. */
     + `<button class="chip" data-modo="1" aria-pressed="true">${MODOS[state.modo]}</button>`
     + `<button class="chip" data-plano="1" aria-pressed="${filters.plan!=='meus'}">${rotuloPlano()} ▾</button>`
-    + `<button class="chip" data-x="open" aria-pressed="${filters.open}">Aberto agora</button>`;
+    /* o rótulo diz o ESTADO atual, não a ação: marcado = "Aberto agora";
+       desmarcado = "Todas: abertas e fechadas" (pedido do Raphael, 15/09) */
+    + `<button class="chip" data-x="open" aria-pressed="${filters.open}">${filters.open ? "Aberto agora ✓" : "Todas: abertas e fechadas"}</button>`;
   ["chipsMap","chipsList"].forEach(id=>{
     const el=document.getElementById(id);
     el.innerHTML=html;
@@ -3134,10 +3201,14 @@ function recomendacao(hs){
      mostramos o FATO de que a unidade recomendada não faz o que um
      pronto-socorro faz, e onde está o mais perto. Dado do CNES, não conselho. */
   /* mesmo critério do SOS (14/08): com GPS, o PS mais perto é o da metrópole,
-     não o da região selecionada — divisa não pode custar minutos */
+     não o da região selecionada — divisa não pode custar minutos.
+     15/09 (simulação 7): esta dica seguia `!currentWait(h).closed`, ou seja,
+     dois avisos de "fechado" tiravam daqui o pronto-socorro mais perto — a
+     mesma brecha que a decisão de 03/09 fechou no SOS. Agora é a regra do SOS:
+     só cadastro oficial, nenhum dado de comunidade. */
   const psPerto = nivelOf(escolhido)==="leve"
     ? (gps ? REGIONS.filter(r=>!r.soon).reduce((a,r)=>a.concat(r.hospitals||[]),[]) : REG().hospitals)
-        .filter(h=>h.ps && !h.espec && !h.soPlano && !h.soEncam && !currentWait(h).closed)
+        .filter(h=>h.ps && !h.espec && !h.soPlano && !h.soEncam)
         .sort((a,b)=>distOf(a)-distOf(b))[0]
     : null;
   return {h:escolhido, temRelato, abreNaChegada, outras, pulados, conjunto, psPerto};
@@ -3438,6 +3509,8 @@ function renderList(){
     /* lista vazia tem que dizer POR QUE está vazia — senão parece app quebrado */
     const motivo = filters.falta
       ? "Nenhuma unidade com aviso ativo agora."
+      : filters.open
+      ? `Nada aberto agora com esses filtros${horarioSemFonteHoje({ab:7,fe:18}) ? " — em " + diaSemFonteTxt() + " o app só afirma aberta quem tem 24h ou fonte de horário" : ""}.<br>Toque em <b>Aberto agora ✓</b> para ver também as fechadas.`
       : "Nenhuma unidade com esses filtros.<br>Tente tirar um deles.";
     el.innerHTML = bConf + bPedido + bFalta + bNov + `<div class="empty">${motivo}</div>`;
     ligarBFalta(); ligarBPedido(); if(conf) ligarConferir(el, conf); if(pRel) ligarPromptRelato(el, pRel); return;
@@ -3475,7 +3548,7 @@ function renderList(){
       cls="s-off"; pill = h.semHorario ? "horário?" : "dia útil " + h.ab + "h";
       linha2 = h.semHorario
         ? `O cadastro oficial não informa o horário — confirme por telefone · ${h.region}`
-        : `Horário de dia útil ${h.ab}h–${h.fe}h · fim de semana: confirme por telefone · ${h.region}`;
+        : `Horário de dia útil ${h.ab}h–${h.fe}h · ${diaSemFonteTxt()}: confirme por telefone · ${h.region}`;
     } else if(w.closed){
       cls="s-off"; pill = "abre " + h.ab + "h";
       linha2 = `Fechada agora · ${h.region}`;
@@ -4065,7 +4138,7 @@ function openDetail(id){
     ? (horarioSemFonteHoje(h)
         ? (h.semHorario
             ? `<div class="walert" style="background:var(--warn-bg);color:var(--warn);font-weight:800">HORÁRIO NÃO INFORMADO — o cadastro oficial diz só "turnos intermitentes". Confirme por telefone antes de ir.</div>`
-            : `<div class="walert" style="background:var(--warn-bg);color:var(--warn);font-weight:800">FIM DE SEMANA — o cadastro oficial só informa o horário de dia útil (${h.ab}h às ${h.fe}h). Confirme por telefone antes de ir.</div>`)
+            : `<div class="walert" style="background:var(--warn-bg);color:var(--warn);font-weight:800">${diaSemFonteTxt().toUpperCase()} — o cadastro oficial só informa o horário de dia útil (${h.ab}h às ${h.fe}h). Confirme por telefone antes de ir.</div>`)
         : abreAteChegar
         ? `<div class="walert" style="background:var(--good-bg);color:var(--good);font-weight:800">FECHADA AGORA — mas abre às ${h.ab}h, e você chega depois disso (~${travelMin(h)||"?"} min de trajeto).</div>`
         : `<div class="walert" style="background:var(--crit-bg);color:var(--crit);font-weight:800">FECHADA AGORA. Abre às ${h.ab}h — ${esc(h.turno.toLowerCase())}.</div>`)
@@ -5261,6 +5334,17 @@ function limparTextoAviso(bruto){
   if(/\d{8,}/.test(t.replace(/\D/g,""))) return null;          /* telefone */
   const baixo = t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
   if(/\b(caralh|porra|merda|bucet|fdp|viad|puta|arrombad|desgraç|desgrac)/.test(baixo)) return null;
+  /* PESSOA NÃO ENTRA NO AVISO (15/09/2026, simulação 7). O aviso é sobre o
+     que FALTA na unidade, nunca sobre quem trabalha nela: "Dr. Fulano não
+     veio" passava pelo crivo e identificava um profissional em público — cada
+     um é um pedido de retirada (Marco Civil, art. 19) e os Termos proíbem. Sem
+     fila de revisão (decisão de 11/08: o aviso escrito aparece na hora), a
+     defesa é recusar antes: título ou cargo de pessoa, ou "o/a fulano(a)". A
+     pessoa reescreve o que falta ("sem pediatra hoje"), que é o que serve. */
+  if(/\b(dr|dra|doutor|doutora|sr|sra|senhor|senhora|dona|seu)\b\.?\s+\S/.test(baixo)) return null;     /* "Dr. Fulano", "dona Maria" */
+  const semAcento = t.normalize("NFD").replace(/[̀-ͯ]/g,"");   /* mantém maiúsculas: é assim que se acha o nome */
+  if(/\b(medic[oa]|enfermeir[oa]|atendente|recepcionista|tecnic[oa]|dentista|farmaceutic[oa]|gerente|diretor[a]?|funcionari[oa]|moc[oa]|guarda|seguranca)\s+(d[aoe]s?\s+)?[A-Z][a-z]{2,}/.test(semAcento)) return null; /* "médico Carlos" — cargo + nome */
+  if(/\b(grosseir|mal ?educad|incompetent|bebad|beb[ea]d|preguiç|preguic|ladr[aã]o|ladra|racist|ignorant)/.test(baixo)) return null;  /* ofensa a pessoa */
   return t;
 }
 function submitAlert(type, vac, escrito){
@@ -5346,12 +5430,13 @@ document.getElementById("guSend").addEventListener("click",()=>{
   closeDetail();
   toast("+20 pontos! Sua desistência avisa quem está indo que a fila está pesada.");
   renderList(); renderRankView(); renderProfile();
-  showView("map");
+  showView("list");
 });
 let voltarPara = null; /* de qual unidade a pessoa veio */
+/* "voltar" cai na tela inicial, que desde 15/09 é a lista */
 function voltarOuMapa(){
-  if(voltarPara){ const id=voltarPara; voltarPara=null; showView("map"); openDetail(id); }
-  else showView("map");
+  if(voltarPara){ const id=voltarPara; voltarPara=null; showView("list"); openDetail(id); }
+  else showView("list");
 }
 /* fecha a folha atual e reabre a unidade — a pessoa pode querer ver mais coisas dela */
 function voltarParaUnidade(){
@@ -5470,14 +5555,29 @@ function renderSosList(){
     .filter(h=>h.ps && !h.espec && !h.soPlano && !h.soEncam)
     .map(h=>({h, t:travelCarro(h)}))
     .sort((a,b)=>a.t-b.t).slice(0,3);
+  /* ===== CRIANÇA (15/09/2026, simulação 7) =====
+     A regra `!espec` tirava daqui o Hospital Infantil João Paulo II — a
+     referência pediátrica de urgência de BH —, e criança grave recebia só
+     pronto-socorro de adulto (3, 12 e 50 vezes em 90 dias nos cenários). Entra
+     como cartão SEPARADO, rotulado, só para hospital com `psPed` e fonte
+     oficial escrita no registro (FHEMIG). Continua a regra de 03/09: nenhum
+     dado de comunidade, e o 192 vem primeiro. Não pergunta idade: mostrar a
+     opção custa uma linha; perguntar custa tempo de quem está em emergência. */
+  const ped = (gps ? REGIONS.filter(r=>!r.soon).reduce((a,r)=>a.concat(r.hospitals||[]),[]) : REG().hospitals)
+    .filter(h=>h.psPed && !h.soPlano && !h.soEncam)
+    .map(h=>({h, t:travelCarro(h)}))
+    .sort((a,b)=>a.t-b.t).slice(0,1);
   const el=document.getElementById("sosList");
-  el.innerHTML = rows.map(({h,t})=>`<button class="card" data-id="${h.id}" style="margin-bottom:8px">
+  const cartao = ({h,t}, rotulo) => `<button class="card" data-id="${h.id}" style="margin-bottom:8px">
     <div class="info">
+      ${rotulo ? `<div class="badges"><span class="badge" style="background:var(--crit-bg);color:var(--crit)">${rotulo}</span></div>` : ""}
       <h3>${dispName(h)}</h3>
       <div class="meta">${h.region} · ${kmBR(distOf(h))} km</div>
     </div>
     <div class="waitbox"><div class="wait" style="color:var(--crit);font-size:22px">${t}<small> min</small></div><span class="statuspill" style="background:var(--crit-bg);color:var(--crit)">de carro</span></div>
-  </button>`).join("");
+  </button>`;
+  el.innerHTML = rows.map(r=>cartao(r)).join("")
+    + (ped.length ? `<div class="herosub" style="margin:10px 0 6px">É criança? Pronto atendimento pediátrico 24 h, pelo cadastro da FHEMIG:</div>` + ped.map(r=>cartao(r, "Criança · urgência pediátrica")).join("") : "");
   el.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>{ closeDetail(); openDetail(c.dataset.id) }));
 }
 document.getElementById("sosBtn").addEventListener("click",()=>{
@@ -6192,6 +6292,8 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
   let bad=false;
   bad = setBad("f-user", usuario.length<3 || usuario.length>20 || !/^[A-Za-z0-9._-]+$/.test(usuario)) || bad;
   if(bad){ toast("Escolha um apelido de 3 a 20 letras ou números, sem espaços."); return }
+  const maior16 = document.getElementById("inMaior16").checked;
+  if(setBad("f-idade", !maior16)){ toast("Marque a caixa da idade para continuar."); return }
   /* rede de segurança do desenho: se mesmo assim a pessoa escrever algo com
      cara de nome e sobrenome (com ponto, hífen ou underline separando duas
      palavras longas), avisa uma vez — mas não impede, para não travar quem
@@ -6200,7 +6302,7 @@ document.getElementById("btnSignup").addEventListener("click",()=>{
     state.avisouApelido = true; store.save(state);
     toast("Dica: o apelido aparece para outras pessoas — se esse for seu nome verdadeiro, dá para trocar no Perfil.");
   }
-  state.user = {usuario};
+  state.user = {usuario, maior16:true};   /* só o sim; nenhuma data */
   state.visitante = false;
   const nm = document.getElementById("loginMotivo"); if(nm) nm.style.display = "none";
   store.save(state);
@@ -6364,30 +6466,42 @@ window.addEventListener("beforeinstallprompt", e=>{
 });
 const APARELHO_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const JA_INSTALADO = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+/* instalado de verdade: abriu como app, ou o navegador avisou que instalou
+   nesta mesma sessão (o `appinstalled` do Android) */
+function instalado(){ return JA_INSTALADO || !!state.instalado; }
+window.addEventListener("appinstalled", ()=>{
+  state.instalado = true; store.save(state);
+  const bar = document.getElementById("instalarBar"); if(bar) bar.remove();
+  atualizarChipInstalar();
+});
 function podeOferecerInstalar(){
-  if(!NO_ENDERECO_PROPRIO || JA_INSTALADO) return false;
+  if(!NO_ENDERECO_PROPRIO || instalado()) return false;
   if((state.visitas||0) < 2) return false;                 /* valor primeiro */
   if(state.instalarDepois && Date.now()-state.instalarDepois < 14*24*3600e3) return false;
   return !!promptInstalar || APARELHO_IOS;
 }
-/* O CHIP DO MAPA. Aparece sempre que dá para instalar — sem esperar a 2ª
-   visita e sem o silêncio de 14 dias do popup, porque ele não interrompe
-   ninguém: fica quieto num canto até alguém querer. É o que garante que o
-   iPhone (onde o popup automático nunca dispara) tenha um caminho visível. */
+/* A FAIXA "BAIXAR" (mapa e lista) — regra do Raphael, 15/09/2026:
+   · quem viu o popup e tocou "Botar na tela" NÃO vê a faixa;
+   · quem tocou "Agora não" passa a ver a faixa (até "✕", que cala por 7 dias);
+   · quem nunca viu o popup porque o navegador não ofereceu a instalação
+     (Android sem `beforeinstallprompt`) vê a faixa a partir da 2ª visita — é
+     o caminho de reserva, senão essa pessoa nunca saberia que dá para instalar.
+   Primeira visita: nada. Valor primeiro. */
 function atualizarChipInstalar(){
-  /* A FAIXA NA BASE DO MAPA (14/08) substituiu o chip pequeno. Mesma regra do
-     Android igual ao iPhone (12/08): não espera o `beforeinstallprompt` —
-     aparece sempre que dá para instalar; com prompt automático usa, sem ele
-     mostra o passo a passo. "Agora não" cala por 7 dias. */
-  const c = document.getElementById("instalarFaixa");
-  if(!c) return;
-  const dá = NO_ENDERECO_PROPRIO && !JA_INSTALADO
-    && !(state.faixaInstDepois && Date.now()-state.faixaInstDepois < 7*24*3600e3);
-  c.style.display = dá ? "flex" : "none";
+  const c = document.getElementById("instalarFaixa"), c2 = document.getElementById("instalarFaixaLista");
+  const calada = state.faixaInstDepois && Date.now()-state.faixaInstDepois < 7*24*3600e3;
+  const popupSemPrompt = (state.visitas||0) >= 2 && !promptInstalar && !APARELHO_IOS && !document.getElementById("instalarBar") && !state.instalarPediu;
+  const dá = NO_ENDERECO_PROPRIO && !instalado() && !calada && (!!state.instalarDepois || popupSemPrompt);
+  if(c)  c.style.display  = dá ? "flex" : "none";
+  if(c2) c2.style.display = dá ? "flex" : "none";     /* a lista é a tela inicial desde 15/09 */
 }
-function oferecerInstalar(){
+/* `forcar`: a faixa e o botão do Perfil abrem o popup mesmo fora da regra
+   automática (foi o bug do "Baixar não funciona": com o pedido do Android já
+   consumido, o popup se recusava a abrir e o toque morria em silêncio) */
+function oferecerInstalar(forcar){
   atualizarChipInstalar();
-  if(!podeOferecerInstalar()) return;
+  if(!forcar && !podeOferecerInstalar()) return;
+  if(!NO_ENDERECO_PROPRIO || instalado()) return;
   if(document.getElementById("instalarBar")) return;
   const bar = document.createElement("div");
   bar.id = "instalarBar";
@@ -6407,9 +6521,10 @@ function oferecerInstalar(){
       <button id="instNao" class="themebtn" style="margin-top:10px">Agora não</button>
     </div>`;
   document.body.appendChild(bar);
-  document.getElementById("instNao").onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); };
+  document.getElementById("instNao").onclick = ()=>{ state.instalarDepois = Date.now(); store.save(state); bar.remove(); atualizarChipInstalar(); };
   document.getElementById("instSim").onclick = ()=>{
-    if(promptInstalar){ bar.remove(); promptInstalar.prompt(); promptInstalar = null; return }
+    state.instalarPediu = Date.now(); store.save(state);   /* pediu: a faixa não insiste */
+    if(promptInstalar){ bar.remove(); promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
     document.getElementById("instTxt").innerHTML = APARELHO_IOS
       ? 'No iPhone: toque em <b>Compartilhar</b> — o quadrado com a seta para cima, na barra de baixo do Safari — e depois em <b>"Adicionar à Tela de Início"</b>.'
       : 'No menu do navegador (os três pontinhos), toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar aplicativo"</b>.';
@@ -6419,39 +6534,47 @@ function oferecerInstalar(){
 }
 
 /* a faixa do mapa também ignora o silêncio do popup: quem TOCA quer agora */
+/* um toque em qualquer faixa (mapa ou lista) faz a mesma coisa */
+function tocarInstalar(){
+  state.instalarPediu = Date.now(); store.save(state);
+  if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
+  /* sem instalação automática (iPhone sempre; Android quando o navegador não
+     ofereceu ou o pedido já foi usado): abre o popup À FORÇA já no passo a
+     passo do aparelho. Antes dependia da regra automática e morria calado. */
+  const bar = document.getElementById("instalarBar"); if(bar) bar.remove();
+  oferecerInstalar(true);
+  const b2 = document.getElementById("instSim"); if(b2) b2.click();
+  atualizarChipInstalar();
+}
+function calarFaixaInstalar(){ state.faixaInstDepois = Date.now(); store.save(state); atualizarChipInstalar(); }
 (function(){
-  const c = document.getElementById("instFxSim");
-  if(!c) return;
-  document.getElementById("instFxNao").addEventListener("click", ()=>{
-    state.faixaInstDepois = Date.now(); store.save(state);
-    atualizarChipInstalar();
-  });
-  c.addEventListener("click", ()=>{
-    if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; atualizarChipInstalar(); return }
-    /* sem instalação automática (iPhone sempre; Android quando o navegador não
-       ofereceu): mostra o caminho do próprio aparelho, que o popup já sabe
-       escrever para os dois sistemas */
-    const antes = state.instalarDepois; delete state.instalarDepois;   /* o toque vence o silêncio */
-    const bar = document.getElementById("instalarBar"); if(bar) bar.remove();
-    const visitas = state.visitas; state.visitas = Math.max(2, visitas||0);
-    oferecerInstalar();
-    state.visitas = visitas; if(antes) state.instalarDepois = antes;
-    const b2 = document.getElementById("instSim"); if(b2) b2.click();
+  [["instFxSim","instFxNao"],["instFxSim2","instFxNao2"]].forEach(([sim,nao])=>{
+    const s = document.getElementById(sim), n = document.getElementById(nao);
+    if(s) s.addEventListener("click", tocarInstalar);
+    if(n) n.addEventListener("click", calarFaixaInstalar);
   });
   atualizarChipInstalar();
 })();
-/* o botão do Perfil ignora o silêncio de 14 dias: quem foi até lá QUER instalar */
+/* O BOTÃO DO PERFIL (15/09/2026, pedido do Raphael): é o lugar permanente de
+   quem dispensou a faixa ou o popup e mudou de ideia. Antes ficava escondido
+   sem dizer nada quando já instalado ou fora do endereço próprio — e parecia
+   "não funciona". Agora sempre diz em que pé está: instalado, ou onde
+   instalar, ou o caminho do aparelho. Ignora o silêncio de 7/14 dias: quem
+   foi até lá QUER. */
 (function(){
-  const b = document.getElementById("btnInstalar");
-  if(!b) return;
-  if(!NO_ENDERECO_PROPRIO || JA_INSTALADO) return;   /* segue escondido */
+  const b = document.getElementById("btnInstalar"), cx = document.getElementById("instComoBox");
+  if(!b || !cx) return;
+  if(instalado()){ cx.innerHTML = "O Ondiva já está na sua tela inicial."; cx.style.display = ""; return }
+  if(!NO_ENDERECO_PROPRIO){
+    cx.innerHTML = 'Para botar na tela do celular, abra o app pelo endereço oficial: <b>villaxx.github.io/ondiva-app</b>.';
+    cx.style.display = ""; return;
+  }
   b.style.display = "";
   b.addEventListener("click", ()=>{
     if(promptInstalar){ promptInstalar.prompt(); promptInstalar = null; return }
-    const cx = document.getElementById("instComoBox");
     cx.innerHTML = APARELHO_IOS
       ? 'No iPhone: toque em <b>Compartilhar</b> (o quadrado com a seta, na barra de baixo do Safari) e depois em <b>"Adicionar à Tela de Início"</b>. O ícone verde do Ondiva aparece na sua tela.'
-      : 'No menu do navegador (⋮, no canto), toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar aplicativo"</b>.';
+      : 'No menu do navegador (⋮, no canto de cima), toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar aplicativo"</b>. Se aparecer só "Adicionar", é o mesmo caminho.';
     cx.style.display = "";
   });
 })();
@@ -6777,6 +6900,13 @@ setTimeout(oferecerInstalar, 8000);       /* o convite espera a pessoa usar */
    notificação de verdade, é aqui que a promessa é cumprida */
 setTimeout(mostrarAvisoDePedido, 2500);
 carregarLeaflet();                        /* mapa de ruas onde houver rede externa */
+/* ===== A TELA INICIAL É A LISTA "ONDE IR AGORA" (decisão do Raphael, 15/09/2026) =====
+   Reverte a escolha de 11/08 (o mapa como herói da tela). O que mudou desde
+   então: a simulação 7 mostrou que, nesta fase, o valor do app é "aberto, perto
+   e com o serviço" — e é a lista que diz isso na primeira dobra, com a
+   recomendação no topo. O mapa continua a um toque na navegação; tudo o que
+   ele desenha segue igual. */
+showView("list");
 </script>
 
 </body>
